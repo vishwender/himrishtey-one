@@ -64,52 +64,64 @@ class Admin extends Authenticatable
 
     public function hasRole(string $role): bool
     {
-        return $this->roles()
-            ->where('slug', $role)
-            ->exists();
+        $this->loadMissing('roles');
+
+        return $this->roles->contains('slug', $role);
     }
 
     public function hasAnyRole(array $roles): bool
     {
-        return $this->roles()
-            ->whereIn('slug', $roles)
-            ->exists();
+        $this->loadMissing('roles');
+
+        return $this->roles->contains(
+            fn (Role $role) => in_array($role->slug, $roles, true)
+        );
     }
 
     public function hasPermission(string $permission): bool
     {
+        $this->loadMissing('roles.permissions');
+
         // Super Admin has every permission.
-        if ($this->hasRole('super-admin')) {
+        if ($this->roles->contains('slug', 'super-admin')) {
             return true;
         }
 
-        return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permission) {
-                $query->where('slug', $permission);
-            })
-            ->exists();
+        return $this->roles->contains(
+            fn (Role $role) => $role->permissions->contains('slug', $permission)
+        );
     }
 
     public function hasPermissions(array $permissions): bool
     {
-        foreach ($permissions as $permission) {
-            if (! $this->hasPermission($permission)) {
-                return false;
-            }
+        $this->loadMissing('roles.permissions');
+
+        if ($this->roles->contains('slug', 'super-admin')) {
+            return true;
         }
 
-        return true;
+        $assignedPermissions = $this->roles
+            ->flatMap->permissions
+            ->pluck('slug');
+
+        return collect($permissions)->every(
+            fn (string $permission) => $assignedPermissions->contains($permission)
+        );
     }
 
     public function hasAnyPermission(array $permissions): bool
     {
-        foreach ($permissions as $permission) {
-            if ($this->hasPermission($permission)) {
-                return true;
-            }
+        $this->loadMissing('roles.permissions');
+
+        if ($this->roles->contains('slug', 'super-admin')) {
+            return true;
         }
 
-        return false;
+        return $this->roles
+            ->flatMap->permissions
+            ->contains(
+                fn (Permission $permission) => in_array($permission->slug, $permissions, true)
+            );
     }
 
     public function hasSiteAccess(int $siteId): bool
