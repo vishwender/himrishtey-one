@@ -1,0 +1,87 @@
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+
+.dashboard-site-card {
+    background: linear-gradient(110deg,
+            #fff 0%,
+            #f5f2ff 100%);
+}
+
+
+/* Dashboard statistics */
+
+.dashboard-stat {
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stat .stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 14px;
+
+    font-size: 1.25rem;
+}
+
+.dashboard-stat .stat-icon.members {
+    background: #eeeaff;
+    color: #6d4aff;
+}
+
+.dashboard-stat .stat-icon.active {
+    background: #e3f9ed;
+    color: #18864b;
+}
+
+.dashboard-stat .stat-icon.inactive {
+    background: #fff2df;
+    color: #ca7515;
+}
+
+.dashboard-stat .stat-icon.payments {
+    background: #e4f4ff;
+    color: #1672bd;
+}
+
+.dashboard-stat h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -.04em;
+}
+
+
+/* =========================================================
+   DASHBOARD DARK MODE
+   ========================================================= */
+
+[data-theme="dark"] .dashboard-site-card {
+    background: linear-gradient(110deg,
+            #1e2235 0%,
+            #25203d 100%);
+}
+
+[data-theme="dark"] .dashboard-stat .stat-icon.members {
+    background: rgba(109, 74, 255, .18);
+    color: #a996ff;
+}
+
+[data-theme="dark"] .dashboard-stat .stat-icon.active {
+    background: rgba(24, 134, 75, .18);
+    color: #63d99a;
+}
+
+[data-theme="dark"] .dashboard-stat .stat-icon.inactive {
+    background: rgba(202, 117, 21, .18);
+    color: #ffb866;
+}
+
+[data-theme="dark"] .dashboard-stat .stat-icon.payments {
+    background: rgba(22, 114, 189, .18);
+    color: #70bdff;
+}
