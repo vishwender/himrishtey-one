@@ -3439,7 +3439,7 @@
             </div>
 
         </div>
-        <div class="d-flex flex-wrap gap-2 mt-3">
+        <div class="d-flex flex-wrap align-items-start gap-2 mt-3">
 
             {{-- Activate / Deactivate --}}
             @if($member->is_active)

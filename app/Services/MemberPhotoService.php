@@ -296,6 +296,12 @@ class MemberPhotoService
             return Storage::disk('public')->url($photo);
         }
 
+        $legacyProfilePhotoPath = 'profile_photos/'.ltrim($photo, '/');
+
+        if (Storage::disk('public')->exists($legacyProfilePhotoPath)) {
+            return Storage::disk('public')->url($legacyProfilePhotoPath);
+        }
+
         /*
     |--------------------------------------------------------------------------
     | Existing photo structure

@@ -1593,7 +1593,8 @@
                             <option
                                 value="{{ $membershipPlan->id }}"
                                 @selected(
-                                request('plan_id')==$membershipPlan->id
+                                request()->filled('plan_id') &&
+                                (string) request('plan_id') === (string) $membershipPlan->id
                                 )
                                 >
                                 {{ $membershipPlan->name }}

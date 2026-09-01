@@ -14,6 +14,54 @@ document.addEventListener('DOMContentLoaded', function () {
     const partnerState = document.getElementById('partner_state');
     const partnerCity = document.getElementById('partner_city');
 
+    const passwordInput = document.getElementById('password');
+    const togglePasswordButton = document.getElementById('togglePassword');
+    const copyPasswordButton = document.getElementById('copyPassword');
+    const passwordCopyStatus = document.getElementById('passwordCopyStatus');
+
+    togglePasswordButton?.addEventListener('click', function () {
+        const passwordIsVisible = passwordInput.type === 'text';
+
+        passwordInput.type = passwordIsVisible ? 'password' : 'text';
+        this.setAttribute('aria-pressed', String(!passwordIsVisible));
+        this.setAttribute(
+            'aria-label',
+            passwordIsVisible ? 'Show password' : 'Hide password'
+        );
+        this.title = passwordIsVisible ? 'Show password' : 'Hide password';
+        this.querySelector('i')?.classList.toggle('bi-eye', passwordIsVisible);
+        this.querySelector('i')?.classList.toggle('bi-eye-slash', !passwordIsVisible);
+    });
+
+    copyPasswordButton?.addEventListener('click', async function () {
+        if (!passwordInput.value) {
+            passwordCopyStatus.textContent = 'Enter a password before copying.';
+            passwordCopyStatus.className = 'small mt-1 text-danger';
+
+            return;
+        }
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(passwordInput.value);
+            } else {
+                const originalType = passwordInput.type;
+
+                passwordInput.type = 'text';
+                passwordInput.select();
+                document.execCommand('copy');
+                passwordInput.setSelectionRange(0, 0);
+                passwordInput.type = originalType;
+            }
+
+            passwordCopyStatus.textContent = 'Password copied.';
+            passwordCopyStatus.className = 'small mt-1 text-success';
+        } catch (error) {
+            passwordCopyStatus.textContent = 'Unable to copy the password.';
+            passwordCopyStatus.className = 'small mt-1 text-danger';
+        }
+    });
+
 
     /*
     |--------------------------------------------------------------------------

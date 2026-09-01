@@ -83,7 +83,7 @@ class MemberController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (! $newMembersOnly && $request->filled('status')) {
+        if ($request->filled('status')) {
 
             if ($request->status === 'active') {
 
@@ -206,6 +206,26 @@ class MemberController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Relationship Manager
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('relationship_manager')) {
+            if ($request->relationship_manager === '__unassigned') {
+                $query->where(function ($query) {
+                    $query->whereNull('relationship_manager')
+                        ->orWhere('relationship_manager', '');
+                });
+            } else {
+                $query->where(
+                    'relationship_manager',
+                    trim((string) $request->relationship_manager)
+                );
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Sorting
         |--------------------------------------------------------------------------
         */
@@ -276,9 +296,25 @@ class MemberController extends Controller
             ->orderBy('plan_name')
             ->get();
 
+        $relationshipManagerAccess = app(RelationshipManagerAccess::class);
+
+        $relationshipManagers = Admin::query()
+            ->when(
+                $relationshipManagerAccess->isRestricted(),
+                fn ($query) => $query->whereKey(
+                    $relationshipManagerAccess->admin()?->getKey()
+                )
+            )
+            ->select(['id', 'name', 'profile_id'])
+            ->whereNotNull('name')
+            ->where('name', '<>', '')
+            ->orderBy('name')
+            ->get();
+
         return view('admin.members.index', compact(
             'members',
             'plans',
+            'relationshipManagers',
             'newMembersOnly'
         ));
     }
@@ -857,6 +893,24 @@ class MemberController extends Controller
             ->orderBy('annual_income')
             ->get();
 
+        $relationshipManagerAccess = app(RelationshipManagerAccess::class);
+        $defaultRelationshipManager = $relationshipManagerAccess->isRestricted()
+            ? (string) $relationshipManagerAccess->admin()?->name
+            : '';
+
+        $relationshipManagers = Admin::query()
+            ->when(
+                $relationshipManagerAccess->isRestricted(),
+                fn ($query) => $query->whereKey(
+                    $relationshipManagerAccess->admin()?->getKey()
+                )
+            )
+            ->select(['id', 'name', 'profile_id'])
+            ->whereNotNull('name')
+            ->where('name', '<>', '')
+            ->orderBy('name')
+            ->get();
+
         return view('admin.members.create', compact(
             'occupations',
             'religions',
@@ -867,12 +921,16 @@ class MemberController extends Controller
             'countries',
             'maritalStatuses',
             'familyStatuses',
-            'annualIncomes'
+            'annualIncomes',
+            'relationshipManagers',
+            'defaultRelationshipManager'
         ));
     }
 
-    public function store(Request $request)
-    {
+    public function store(
+        MemberPhotoService $photoService,
+        Request $request
+    ) {
         $validated = $request->validate([
 
             'profile_created_for' => [
@@ -913,8 +971,8 @@ class MemberController extends Controller
 
             'birth_date_time' => [
                 'required',
-                'string',
-                'max:255',
+                'date',
+                'before_or_equal:'.today()->subYears(18)->toDateString(),
             ],
 
             'gender' => [
@@ -989,6 +1047,13 @@ class MemberController extends Controller
                 'min:8',
             ],
 
+            'relationship_manager' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::exists('admins', 'name'),
+            ],
+
             'photo' => [
                 'nullable',
                 'image',
@@ -1002,6 +1067,8 @@ class MemberController extends Controller
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+        ], [
+            'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
         ]);
 
         /*
@@ -1010,9 +1077,10 @@ class MemberController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $relationshipManager = app(RelationshipManagerAccess::class)->isRestricted()
-            ? app(RelationshipManagerAccess::class)->admin()?->name
-            : '';
+        $relationshipManagerAccess = app(RelationshipManagerAccess::class);
+        $relationshipManager = $relationshipManagerAccess->isRestricted()
+            ? $relationshipManagerAccess->admin()?->name
+            : ($validated['relationship_manager'] ?? '');
 
         DB::connection('site')->transaction(function () use (
 
@@ -1267,24 +1335,11 @@ class MemberController extends Controller
         */
 
         if ($request->hasFile('photo')) {
-
-            $file = $request->file('photo');
-
-            $filename =
-                'member-photo-'.
-                $member->id.
-                '.'.
-                $file->getClientOriginalExtension();
-
-            $file->storeAs(
-                'profile_photos',
-                $filename,
-                'public'
+            $photoService->upload(
+                (int) $member->id,
+                $request->file('photo'),
+                true
             );
-
-            $member->update([
-                'photo' => $filename,
-            ]);
         }
 
         /*

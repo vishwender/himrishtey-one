@@ -67,10 +67,43 @@
 
                     </div>
 
+                    {{-- Relationship Manager --}}
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Relationship Manager
+                        </label>
+
+                        <select
+                            name="relationship_manager"
+                            class="form-select">
+
+                            <option value="">All Relationship Managers</option>
+                            <option
+                                value="__unassigned"
+                                {{ request('relationship_manager') === '__unassigned' ? 'selected' : '' }}>
+                                Unassigned
+                            </option>
+
+                            @foreach($relationshipManagers as $manager)
+                            <option
+                                value="{{ $manager->name }}"
+                                {{ request('relationship_manager') === $manager->name ? 'selected' : '' }}>
+                                {{ $manager->name }}
+                                @if($manager->profile_id)
+                                    ({{ $manager->profile_id }})
+                                @endif
+                            </option>
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
 
                     {{-- Status --}}
 
-                    @unless($newMembersOnly)
                     <div class="col-lg-2 col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -104,8 +137,6 @@
                         </select>
 
                     </div>
-
-                    @endunless
 
 
                     {{-- Trusted --}}
@@ -274,7 +305,10 @@
 
                             <option
                                 value="{{ $plan->id }}"
-                                {{ request('plan_id') == $plan->id ? 'selected' : '' }}>
+                                {{ request()->filled('plan_id') &&
+                                    (string) request('plan_id') === (string) $plan->id
+                                    ? 'selected'
+                                    : '' }}>
 
                                 {{ $plan->plan_name }}
 
@@ -388,6 +422,7 @@
     request()->filled('visibility') ||
     request()->filled('banned') ||
     request()->filled('plan_id') ||
+    request()->filled('relationship_manager') ||
     request()->filled('sort');
     @endphp
 
@@ -422,6 +457,33 @@
                             ]) }}"
                         class="text-white text-decoration-none ms-1"
                         title="Remove search">
+
+                        &times;
+
+                    </a>
+
+                </span>
+
+                @endif
+
+                {{-- Relationship Manager --}}
+
+                @if(request()->filled('relationship_manager'))
+
+                <span class="badge bg-primary d-flex align-items-center gap-1">
+
+                    Relationship Manager:
+                    {{ request('relationship_manager') === '__unassigned'
+                        ? 'Unassigned'
+                        : request('relationship_manager') }}
+
+                    <a
+                        href="{{ request()->fullUrlWithQuery([
+                                'relationship_manager' => null,
+                                'page' => null
+                            ]) }}"
+                        class="text-white text-decoration-none ms-1"
+                        title="Remove relationship manager filter">
 
                         &times;
 
@@ -698,6 +760,8 @@
 
                             <th>Membership</th>
 
+                            <th>Relationship Manager</th>
+
                             <th>Status</th>
 
                             <th class="text-end">
@@ -793,6 +857,18 @@
                                     No Plan
                                 </span>
 
+                                @endif
+                            </td>
+
+                            {{-- Relationship Manager --}}
+                            <td>
+                                @if(!empty($member->relationship_manager))
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-person-badge me-1"></i>
+                                    {{ $member->relationship_manager }}
+                                </span>
+                                @else
+                                <span class="text-muted">Unassigned</span>
                                 @endif
                             </td>
 
@@ -1056,7 +1132,7 @@
                         <tr>
 
                             <td
-                                colspan="7"
+                                colspan="9"
                                 class="text-center py-5 text-muted">
                                 No members found.
                             </td>

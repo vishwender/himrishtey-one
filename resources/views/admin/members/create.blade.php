@@ -532,7 +532,18 @@
                             id="birth_date_time"
                             class="form-control"
                             value="{{ old('birth_date_time') }}"
+                            max="{{ today()->subYears(18)->toDateString() }}"
                             required>
+
+                        <div class="form-text">
+                            The member must be at least 18 years old.
+                        </div>
+
+                        @error('birth_date_time')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
 
                     </div>
 
@@ -3004,13 +3015,52 @@
                         </label>
 
 
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            class="form-control"
-                            minlength="8"
-                            required>
+                        <div class="input-group">
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                class="form-control @error('password') is-invalid @enderror"
+                                minlength="8"
+                                autocomplete="new-password"
+                                aria-describedby="passwordHelp passwordCopyStatus"
+                                required>
+
+                            <button
+                                type="button"
+                                id="togglePassword"
+                                class="btn btn-outline-secondary"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                                title="Show password">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="copyPassword"
+                                class="btn btn-outline-secondary"
+                                aria-label="Copy password"
+                                title="Copy password">
+                                <i class="bi bi-clipboard" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div id="passwordHelp" class="form-text">
+                            Password must contain at least 8 characters.
+                        </div>
+
+                        <div
+                            id="passwordCopyStatus"
+                            class="small mt-1"
+                            role="status"
+                            aria-live="polite"></div>
+
+                        @error('password')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
 
                     </div>
 
@@ -3223,12 +3273,33 @@
                         </label>
 
 
-                        <input
-                            type="text"
+                        <select
                             name="relationship_manager"
                             id="relationship_manager"
-                            class="form-control"
-                            value="{{ old('relationship_manager') }}">
+                            class="form-select @error('relationship_manager') is-invalid @enderror">
+
+                            <option value="">Unassigned</option>
+
+                            @foreach($relationshipManagers as $manager)
+                            <option
+                                value="{{ $manager->name }}"
+                                @selected(
+                                    old('relationship_manager', $defaultRelationshipManager) === $manager->name
+                                )>
+                                {{ $manager->name }}
+                                @if($manager->profile_id)
+                                    ({{ $manager->profile_id }})
+                                @endif
+                            </option>
+                            @endforeach
+
+                        </select>
+
+                        @error('relationship_manager')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
 
                     </div>
 
