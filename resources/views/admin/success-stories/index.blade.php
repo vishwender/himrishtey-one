@@ -10,11 +10,15 @@
         </p>
     </div>
 
+    @if(auth('admin')->user()?->hasPermission('add-success-stories'))
+
     <a href="{{ route('admin.success-stories.create') }}"
         class="btn btn-primary">
         <i class="bi bi-plus-lg me-1"></i>
         Add Success Story
     </a>
+
+    @endif
 </div>
 
 @if(session('success'))
@@ -120,6 +124,8 @@
 
                             <div class="d-inline-flex gap-1">
 
+                                @if(auth('admin')->user()?->hasPermission('edit-success-stories'))
+
                                 <a
                                     href="{{ route('admin.success-stories.edit', $story->id) }}"
                                     class="btn btn-sm btn-outline-primary"
@@ -142,6 +148,10 @@
 
                                 </form>
 
+                                @endif
+
+                                @if(auth('admin')->user()?->hasPermission('delete-success-stories'))
+
                                 <form
                                     action="{{ route('admin.success-stories.destroy', $story->id) }}"
                                     method="POST"
@@ -157,6 +167,8 @@
                                     </button>
 
                                 </form>
+
+                                @endif
 
                             </div>
 

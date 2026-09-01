@@ -71,8 +71,12 @@ class SiteController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $destination = $admin->hasRole('content-manager') && ! $admin->hasRole('super-admin')
+            ? 'admin.blog-posts.index'
+            : 'admin.dashboard';
+
         return redirect()
-            ->route('admin.dashboard')
+            ->route($destination)
             ->with(
                 'success',
                 "Switched to {$site->name}."

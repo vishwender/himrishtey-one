@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Member;
 use App\Models\MemberRotation;
+use App\Services\AdminActivityLogger;
+use App\Services\RelationshipManagerAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,7 +32,11 @@ class MemberRotationController extends Controller
 
         $canViewAll = $admin->hasPermission('view-all-rotations');
 
-        $canViewOwn = $admin->hasPermission('view-own-rotations');
+        $canViewOwn = $admin->hasAnyPermission([
+            'view-own-rotations',
+            'add-rotations',
+            'edit-rotations',
+        ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -47,6 +53,10 @@ class MemberRotationController extends Controller
                 ELSE 4
             END')
             ->orderBy('next_rotation_at', 'asc');
+
+        if (app(RelationshipManagerAccess::class)->isRestricted()) {
+            $query->whereHas('member');
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -100,6 +110,10 @@ class MemberRotationController extends Controller
         */
 
         $summaryQuery = MemberRotation::query();
+
+        if (app(RelationshipManagerAccess::class)->isRestricted()) {
+            $summaryQuery->whereHas('member');
+        }
 
         if ($canViewAll) {
 
@@ -202,7 +216,7 @@ class MemberRotationController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if (! $admin->hasPermission('create-rotations')) {
+        if (! $admin->hasPermission('add-rotations')) {
             abort(403, 'You do not have permission to create rotations.');
         }
 
@@ -276,5 +290,71 @@ class MemberRotationController extends Controller
                 'success',
                 'Rotation created successfully.'
             );
+    }
+
+    public function complete(MemberRotation $rotation)
+    {
+        if (! $rotation->member) {
+            abort(403, 'You can only complete rotations for members assigned to you.');
+        }
+
+        if ($rotation->status === 'cancelled') {
+            return back()->with(
+                'error',
+                'A cancelled rotation cannot be completed.'
+            );
+        }
+
+        if ($rotation->status === 'completed' || $rotation->completed_at) {
+            return back()->with(
+                'error',
+                'This rotation has already been completed.'
+            );
+        }
+
+        $rotation->update([
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        return back()->with(
+            'success',
+            'Rotation marked as complete successfully.'
+        );
+    }
+
+    public function destroy(
+        MemberRotation $rotation,
+        AdminActivityLogger $activityLogger
+    ) {
+        $member = $rotation->member;
+
+        if (app(RelationshipManagerAccess::class)->isRestricted() && ! $member) {
+            abort(403, 'You can only delete rotations for members assigned to you.');
+        }
+
+        $rotationId = (int) $rotation->id;
+        $memberId = (int) $rotation->member_id;
+        $rotation->delete();
+
+        $activityLogger->log(
+            action: 'rotation_deleted',
+            description: $member
+                ? "Deleted rotation #{$rotationId} for {$member->profile_id}."
+                : "Deleted rotation #{$rotationId}.",
+            module: 'members',
+            memberId: $memberId,
+            subjectType: 'member_rotation',
+            subjectId: $rotationId,
+            metadata: [
+                'profile_id' => $member?->profile_id,
+                'full_name' => $member?->full_name,
+            ]
+        );
+
+        return back()->with(
+            'success',
+            'Rotation deleted successfully.'
+        );
     }
 }

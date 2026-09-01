@@ -44,6 +44,10 @@ class AuthController extends Controller
                 ]);
             }
 
+            if ($admin->hasRole('content-manager') && ! $admin->hasRole('super-admin')) {
+                return redirect()->route('admin.blog-posts.index');
+            }
+
             return redirect()->intended(
                 route('admin.dashboard')
             );

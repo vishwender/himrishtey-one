@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\AnnualIncome;
 use App\Models\Cast;
 use App\Models\City;
@@ -22,6 +23,7 @@ use App\Models\SiteMember;
 use App\Models\State;
 use App\Services\AdminActivityLogger;
 use App\Services\MemberPhotoService;
+use App\Services\RelationshipManagerAccess;
 use App\Services\SiteManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -29,6 +31,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class MemberController extends Controller
 {
@@ -37,7 +40,16 @@ class MemberController extends Controller
      */
     public function index(Request $request)
     {
+        $newMembersOnly = $request->routeIs('admin.members.new');
         $query = SiteMember::query();
+
+        if ($newMembersOnly) {
+            $query->where(function ($query) {
+                $query->whereNull('active')
+                    ->orWhere('active', '')
+                    ->orWhereRaw('LOWER(TRIM(active)) = ?', ['no']);
+            });
+        }
 
         $query->addSelect([
             'membership_plan_name' => DB::connection('site')
@@ -71,7 +83,7 @@ class MemberController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        if ($request->filled('status')) {
+        if (! $newMembersOnly && $request->filled('status')) {
 
             if ($request->status === 'active') {
 
@@ -266,7 +278,8 @@ class MemberController extends Controller
 
         return view('admin.members.index', compact(
             'members',
-            'plans'
+            'plans',
+            'newMembersOnly'
         ));
     }
 
@@ -568,15 +581,14 @@ class MemberController extends Controller
             |--------------------------------------------------------------------------
             */
 
-        $relationshipManagers = DB::connection('site')
-            ->table('users')
+        $relationshipManagers = Admin::query()
             ->select([
                 'id',
-                'display_name',
+                'name',
+                'email',
+                'profile_id',
             ])
-            ->whereNotNull('display_name')
-            ->where('display_name', '!=', '')
-            ->orderBy('display_name')
+            ->orderBy('name')
             ->get();
 
         /*
@@ -998,9 +1010,14 @@ class MemberController extends Controller
     |--------------------------------------------------------------------------
     */
 
+        $relationshipManager = app(RelationshipManagerAccess::class)->isRestricted()
+            ? app(RelationshipManagerAccess::class)->admin()?->name
+            : '';
+
         DB::connection('site')->transaction(function () use (
 
             $validated,
+            $relationshipManager,
             &$member
         ) {
 
@@ -1205,7 +1222,7 @@ class MemberController extends Controller
 
                 'remarks' => '',
 
-                'relationship_manager' => '',
+                'relationship_manager' => $relationshipManager,
 
                 'profile_hide' => 'No',
 
@@ -1238,7 +1255,7 @@ class MemberController extends Controller
             |
             */
 
-            $member->profile_id = $this->generateProfileId($member->id);
+            $member->profile_id = $member->generateProfileId($member->id);
 
             $member->save();
         });
@@ -2123,9 +2140,20 @@ class MemberController extends Controller
             ->orderBy('plan_name')
             ->get();
 
+        $relationshipManagers = Admin::query()
+            ->select([
+                'id',
+                'name',
+                'email',
+                'profile_id',
+            ])
+            ->orderBy('name')
+            ->get();
+
         return view('admin.members.edit', [
             'member' => $member,
             'plans' => $plans,
+            'relationshipManagers' => $relationshipManagers,
         ]);
     }
 
@@ -2435,6 +2463,7 @@ class MemberController extends Controller
                 'nullable',
                 'string',
                 'max:255',
+                Rule::exists('admins', 'name'),
             ],
 
             'looking_for' => [
@@ -2591,6 +2620,10 @@ class MemberController extends Controller
             $validated['partner_height_to_feet'],
             $validated['partner_height_to_inches']
         );
+
+        if (app(RelationshipManagerAccess::class)->isRestricted()) {
+            unset($validated['relationship_manager']);
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -2877,6 +2910,7 @@ class MemberController extends Controller
                 'nullable',
                 'string',
                 'max:255',
+                Rule::exists('admins', 'name'),
             ],
         ]);
 

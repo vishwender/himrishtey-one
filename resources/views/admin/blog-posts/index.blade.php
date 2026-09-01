@@ -22,6 +22,8 @@
                     </div>
                 </div>
 
+                @if(auth('admin')->user()?->hasPermission('add-blogs'))
+
                 <a
                     href="{{ route('admin.blog-posts.create') }}"
                     class="btn btn-primary">
@@ -30,6 +32,8 @@
                     Create Blog Post
 
                 </a>
+
+                @endif
 
             </div>
 
@@ -317,6 +321,9 @@
                                 <div class="d-flex gap-2 flex-wrap">
 
                                     {{-- Edit --}}
+
+                                    @if(auth('admin')->user()?->hasPermission('edit-blogs'))
+
                                     <a
                                         href="{{ route(
                                                 'admin.blog-posts.edit',
@@ -367,8 +374,13 @@
 
                                     </form>
 
+                                    @endif
+
 
                                     {{-- Delete --}}
+
+                                    @if(auth('admin')->user()?->hasPermission('delete-blogs'))
+
                                     <form
                                         method="POST"
                                         action="{{ route(
@@ -390,6 +402,8 @@
                                         </button>
 
                                     </form>
+
+                                    @endif
 
                                 </div>
 

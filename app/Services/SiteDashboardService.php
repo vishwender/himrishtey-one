@@ -66,6 +66,10 @@ class SiteDashboardService
      */
     protected function payments(): int
     {
+        if (app(RelationshipManagerAccess::class)->isRestricted()) {
+            return 0;
+        }
+
         return DB::connection('site')
             ->table('payments')
             ->count();

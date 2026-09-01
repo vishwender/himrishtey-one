@@ -2,8 +2,11 @@
 
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\AdminGuest;
+use App\Http\Middleware\CheckAnyPermission;
 use App\Http\Middleware\CheckPermission;
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\EnsureContentManagerAccess;
+use App\Http\Middleware\EnsureRelationshipManagerMemberAccess;
 use App\Http\Middleware\ResolveApplication;
 use App\Http\Middleware\SetAdminSiteConnection;
 use App\Http\Middleware\SetCurrentSite;
@@ -25,7 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => AdminAuthenticate::class,
             'admin.guest' => AdminGuest::class,
             'permission' => CheckPermission::class,
+            'permission.any' => CheckAnyPermission::class,
             'role' => CheckRole::class,
+            'content.manager' => EnsureContentManagerAccess::class,
+            'relationship.manager.member' => EnsureRelationshipManagerMemberAccess::class,
             'site.current' => SetCurrentSite::class,
             'admin.site' => SetAdminSiteConnection::class,
             'application' => ResolveApplication::class,

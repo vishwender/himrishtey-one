@@ -19,23 +19,27 @@ $canViewAllRotations = $currentAdmin
 : false;
 
 $canViewOwnRotations = $currentAdmin
-? $currentAdmin->hasPermission('view-own-rotations')
+? $currentAdmin->hasAnyPermission([
+    'view-own-rotations',
+    'add-rotations',
+    'edit-rotations',
+])
 : false;
 
 $canCreateRotations = $currentAdmin
-? $currentAdmin->hasPermission('create-rotations')
-: false;
-
-$canEditRotations = $currentAdmin
-? $currentAdmin->hasPermission('edit-rotations')
+? $currentAdmin->hasPermission('add-rotations')
 : false;
 
 $canCompleteRotations = $currentAdmin
-? $currentAdmin->hasPermission('complete-rotations')
+? $currentAdmin->hasPermission('edit-rotations')
 : false;
 
 $canCancelRotations = $currentAdmin
 ? $currentAdmin->hasPermission('cancel-rotations')
+: false;
+
+$canDeleteRotations = $currentAdmin
+? $currentAdmin->hasPermission('delete-rotations')
 : false;
 
 @endphp
@@ -759,7 +763,11 @@ $canCancelRotations = $currentAdmin
                                              View Member
                                         ====================================== --}}
 
-                                        @if($rotation->member)
+                                        @if(
+                                        $rotation->member &&
+                                        $currentAdmin &&
+                                        $currentAdmin->hasPermission('edit-member')
+                                        )
 
                                         <li>
 
@@ -796,49 +804,27 @@ $canCancelRotations = $currentAdmin
 
                                         <li>
 
-                                            <button
-                                                type="button"
-                                                class="dropdown-item"
-                                                data-rotation-id="{{ $rotation->id }}">
+                                            <form
+                                                method="POST"
+                                                action="{{ route('admin.rotations.complete', $rotation->id) }}">
 
-                                                <i
-                                                    class="bi bi-check-circle me-2 text-success">
-                                                </i>
+                                                @csrf
+                                                @method('PATCH')
 
-                                                Complete Rotation
+                                                <button
+                                                    type="submit"
+                                                    class="dropdown-item"
+                                                    onclick="return confirm('Mark this rotation as complete?')">
 
-                                            </button>
+                                                    <i
+                                                        class="bi bi-check-circle me-2 text-success">
+                                                    </i>
 
-                                        </li>
+                                                    Complete Rotation
 
-                                        @endif
+                                                </button>
 
-
-                                        {{-- =====================================
-                                             Reschedule / Edit
-                                        ====================================== --}}
-
-                                        @if(
-                                        $canEditRotations &&
-                                        !$rotation->completed_at &&
-                                        $status !== 'completed' &&
-                                        $status !== 'cancelled'
-                                        )
-
-                                        <li>
-
-                                            <button
-                                                type="button"
-                                                class="dropdown-item"
-                                                data-rotation-id="{{ $rotation->id }}">
-
-                                                <i
-                                                    class="bi bi-calendar-event me-2 text-warning">
-                                                </i>
-
-                                                Reschedule
-
-                                            </button>
+                                            </form>
 
                                         </li>
 
@@ -898,7 +884,7 @@ $canCancelRotations = $currentAdmin
                                         @if(
                                         $rotation->member &&
                                         $currentAdmin &&
-                                        $currentAdmin->hasPermission('edit-members')
+                                        $currentAdmin->hasPermission('edit-member')
                                         )
 
                                         <li>
@@ -917,6 +903,38 @@ $canCancelRotations = $currentAdmin
                                                 Edit Member
 
                                             </a>
+
+                                        </li>
+
+                                        @endif
+
+
+                                        {{-- =====================================
+                                             Delete Rotation
+                                        ====================================== --}}
+
+                                        @if($canDeleteRotations)
+
+                                        <li>
+
+                                            <form
+                                                method="POST"
+                                                action="{{ route('admin.rotations.destroy', $rotation->id) }}">
+
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button
+                                                    type="submit"
+                                                    class="dropdown-item text-danger"
+                                                    onclick="return confirm('Permanently delete this rotation?')">
+
+                                                    <i class="bi bi-trash3 me-2"></i>
+                                                    Delete Rotation
+
+                                                </button>
+
+                                            </form>
 
                                         </li>
 

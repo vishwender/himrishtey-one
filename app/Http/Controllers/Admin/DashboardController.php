@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MemberRotation;
+use App\Services\RelationshipManagerAccess;
 use App\Services\SiteDashboardService;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,6 +45,10 @@ class DashboardController extends Controller
                             'cancelled',
                         ]);
                 });
+
+            if (app(RelationshipManagerAccess::class)->isRestricted()) {
+                $rotationQuery->whereHas('member');
+            }
 
             /*
     |--------------------------------------------------------------------------

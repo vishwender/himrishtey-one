@@ -138,4 +138,9 @@ class Admin extends Authenticatable
             ->where('sites.status', true)
             ->exists();
     }
+
+    public function canRaiseProfileDeleteRequest(): bool
+    {
+        return $this->hasPermission('raise-delete-request');
+    }
 }

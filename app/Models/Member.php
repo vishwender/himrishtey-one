@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Services\RelationshipManagerAccess;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,6 +27,14 @@ class Member extends Authenticatable
         'google_token',
         'photo_password',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(
+            'relationship_manager_access',
+            fn (Builder $query) => app(RelationshipManagerAccess::class)->scope($query)
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -259,7 +269,7 @@ class Member extends Authenticatable
         )->latestOfMany();
     }
 
-    protected function generateProfileId(int $memberId): string
+    public function generateProfileId(int $memberId): string
     {
         $database = DB::connection('site')
             ->getDatabaseName();

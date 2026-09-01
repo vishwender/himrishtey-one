@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Members')
+@section('title', $newMembersOnly ? 'New Members' : 'Members')
 
 @section('content')
 
@@ -10,10 +10,14 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
-            <h1 class="h3 mb-1">Members</h1>
+            <h1 class="h3 mb-1">
+                {{ $newMembersOnly ? 'New Members' : 'Members' }}
+            </h1>
 
             <p class="text-muted mb-0">
-                Manage members of the selected site.
+                {{ $newMembersOnly
+                    ? 'Review profiles waiting to be activated.'
+                    : 'Manage members of the selected site.' }}
             </p>
         </div>
         <a
@@ -35,7 +39,7 @@
 
             <form
                 method="GET"
-                action="{{ route('admin.members.index') }}">
+                action="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}">
 
                 <div class="row g-3">
 
@@ -65,6 +69,8 @@
 
 
                     {{-- Status --}}
+
+                    @unless($newMembersOnly)
                     <div class="col-lg-2 col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -98,6 +104,8 @@
                         </select>
 
                     </div>
+
+                    @endunless
 
 
                     {{-- Trusted --}}
@@ -347,7 +355,7 @@
 
 
                             <a
-                                href="{{ route('admin.members.index') }}"
+                                href="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}"
                                 class="btn btn-outline-secondary">
 
                                 <i class="bi bi-arrow-counterclockwise me-1"></i>
@@ -648,7 +656,7 @@
                 {{-- Clear All --}}
 
                 <a
-                    href="{{ route('admin.members.index') }}"
+                    href="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}"
                     class="btn btn-sm btn-outline-danger ms-1">
 
                     <i class="bi bi-x-circle me-1"></i>
@@ -839,6 +847,9 @@
 
 
                                         {{-- Edit Profile --}}
+
+                                        @if(auth('admin')->user()?->hasPermission('edit-member'))
+
                                         <li>
                                             <a
                                                 class="dropdown-item"
@@ -850,7 +861,9 @@
                                             </a>
                                         </li>
 
-                                        @if(auth('admin')->user()?->hasPermission('raise-profile-delete-request'))
+                                        @endif
+
+                                        @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
                                         <button
                                             type="button"
@@ -1011,6 +1024,8 @@
 
                                         </li>
 
+                                        @if(auth('admin')->user()?->hasPermission('add-rotations'))
+
                                         <li>
                                             <button
                                                 type="button"
@@ -1025,6 +1040,8 @@
 
                                             </button>
                                         </li>
+
+                                        @endif
 
                                     </ul>
 

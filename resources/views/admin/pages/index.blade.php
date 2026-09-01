@@ -111,6 +111,8 @@
 
                 <div class="pages-tabs">
 
+                    @if(auth('admin')->user()?->hasPermission('edit-pages'))
+
                     <button
                         type="button"
                         class="page-tab active"
@@ -121,6 +123,8 @@
                         Refund Policy
 
                     </button>
+
+                    @endif
 
 
                     <button

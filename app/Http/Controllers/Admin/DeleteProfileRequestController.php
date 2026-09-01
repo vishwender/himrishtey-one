@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\DeleteProfileRequest;
+use App\Models\SiteMember;
 use App\Services\AdminActivityLogger;
+use App\Services\RelationshipManagerAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -35,6 +37,10 @@ class DeleteProfileRequestController extends Controller
 
         $query = DeleteProfileRequest::query()
             ->with('member')
+            ->when(
+                app(RelationshipManagerAccess::class)->isRestricted(),
+                fn ($query) => $query->whereHas('member')
+            )
             ->whereIn('id', function ($subQuery) {
 
                 $subQuery
@@ -160,6 +166,14 @@ class DeleteProfileRequestController extends Controller
             ->table('delete_profile_request')
             ->whereIn('id', $latestIds);
 
+        if (app(RelationshipManagerAccess::class)->isRestricted()) {
+            $assignedMemberIds = app(RelationshipManagerAccess::class)->scope(
+                DB::connection('site')->table('members')->select('id')
+            );
+
+            $summaryQuery->whereIn('user_id', $assignedMemberIds);
+        }
+
         $totalCount = (clone $summaryQuery)->count();
 
         $pendingCount = (clone $summaryQuery)
@@ -187,6 +201,67 @@ class DeleteProfileRequestController extends Controller
                 'acceptedCount',
                 'rejectedCount'
             )
+        );
+    }
+
+    public function store(
+        Request $request,
+        int $member,
+        AdminActivityLogger $activityLogger
+    ) {
+        $admin = auth('admin')->user();
+
+        if (! $admin?->canRaiseProfileDeleteRequest()) {
+            abort(403, 'You do not have permission to raise profile delete requests.');
+        }
+
+        $validated = $request->validate([
+            'reason' => [
+                'required',
+                'string',
+                'max:1000',
+            ],
+        ]);
+
+        $siteMember = SiteMember::query()->findOrFail($member);
+
+        $pendingRequestExists = DeleteProfileRequest::query()
+            ->where('user_id', $siteMember->id)
+            ->where('status', 0)
+            ->exists();
+
+        if ($pendingRequestExists) {
+            return back()->with(
+                'error',
+                'A pending delete request already exists for this member.'
+            );
+        }
+
+        $deleteRequest = DeleteProfileRequest::query()->create([
+            'user_id' => $siteMember->id,
+            'reason' => $validated['reason'],
+            'request_by' => $admin->id,
+            'date' => now()->format('d-m-Y'),
+            'status' => 0,
+        ]);
+
+        $activityLogger->log(
+            action: 'profile_delete_requested',
+            description: "Raised delete request for {$siteMember->profile_id}.",
+            module: 'members',
+            memberId: (int) $siteMember->id,
+            subjectType: 'delete_profile_request',
+            subjectId: (int) $deleteRequest->id,
+            metadata: [
+                'profile_id' => $siteMember->profile_id,
+                'full_name' => $siteMember->full_name,
+                'reason' => $validated['reason'],
+            ]
+        );
+
+        return back()->with(
+            'success',
+            'Profile delete request raised successfully.'
         );
     }
 
@@ -354,6 +429,10 @@ class DeleteProfileRequestController extends Controller
 
         $deleteRequests = DeleteProfileRequest::query()
             ->with('member')
+            ->when(
+                app(RelationshipManagerAccess::class)->isRestricted(),
+                fn ($query) => $query->whereHas('member')
+            )
             ->whereIn('id', $requestIds)
             ->where('status', 0)
             ->get();

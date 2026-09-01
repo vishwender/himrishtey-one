@@ -1005,11 +1005,45 @@
                             Relationship Manager
                         </label>
 
+                        @if(app(\App\Services\RelationshipManagerAccess::class)->isRestricted())
+
                         <input
                             type="text"
-                            name="relationship_manager"
                             class="form-control"
-                            value="{{ old('relationship_manager', $member->relationship_manager) }}">
+                            value="{{ $member->relationship_manager }}"
+                            disabled>
+
+                        @else
+
+                        <select
+                            name="relationship_manager"
+                            class="form-select @error('relationship_manager') is-invalid @enderror">
+
+                            <option value="">
+                                — No Relationship Manager —
+                            </option>
+
+                            @foreach($relationshipManagers as $manager)
+
+                            <option
+                                value="{{ $manager->name }}"
+                                {{ old('relationship_manager', $member->relationship_manager) === $manager->name ? 'selected' : '' }}>
+                                {{ $manager->name }} ({{ $manager->profile_id }} · {{ $manager->email }})
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                        @error('relationship_manager')
+
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+
+                        @enderror
+
+                        @endif
 
                     </div>
 

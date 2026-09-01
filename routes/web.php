@@ -111,7 +111,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         |
         */
 
-        Route::middleware('admin.site')->group(function () {
+        Route::middleware([
+            'admin.site',
+            'relationship.manager.member',
+            'content.manager',
+        ])->group(function () {
 
             /*
             |--------------------------------------------------------------------------
@@ -135,6 +139,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             */
 
             Route::get('/members', [MemberController::class, 'index'])->name('members.index');
+
+            Route::get('/members/new', [MemberController::class, 'index'])->name('members.new');
 
             /*
             |--------------------------------------------------------------------------
@@ -180,15 +186,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('/members/{id}/toggle-promoted', [MemberController::class, 'togglePromoted'])->name('members.toggle-promoted');
 
-            Route::post('/members/{memberId}/rotation', [MemberController::class, 'storeRotation'])->name('members.rotation.store');
+            Route::post('/members/{memberId}/rotation', [MemberController::class, 'storeRotation'])
+                ->middleware('permission:add-rotations')
+                ->name('members.rotation.store');
 
             // member delete request
 
             Route::post('/members/{member}/delete-request', [DeleteProfileRequestController::class, 'store'])
-                ->middleware('permission:raise-profile-delete-request')
+                ->middleware('permission:raise-delete-request')
                 ->name('members.delete-request');
             Route::get('/members/delete-requests', [DeleteProfileRequestController::class, 'index'])
-                ->middleware('permission:view-profile-delete-requests')
+                ->middleware('permission:view-delete-profile-request')
                 ->name('delete-profile-requests.index');
 
             Route::post('/members/delete-requests/{id}/accept', [DeleteProfileRequestController::class, 'accept'])
@@ -209,6 +217,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Rotation listing
             Route::get('/rotations', [MemberRotationController::class, 'index'])->name('rotations.index');
+
+            Route::patch('/rotations/{rotation}/complete', [MemberRotationController::class, 'complete'])
+                ->middleware('permission:edit-rotations')
+                ->name('rotations.complete');
+
+            Route::delete('/rotations/{rotation}', [MemberRotationController::class, 'destroy'])
+                ->middleware('permission:delete-rotations')
+                ->name('rotations.destroy');
 
             /*
             |--------------------------------------------------------------------------
@@ -240,9 +256,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::delete('/members/{memberId}/photos/{photoId}', [MemberController::class, 'deletePhoto'])->name('members.photos.delete');
 
-            Route::get('/members/{id}/edit', [MemberController::class, 'edit'])->name('members.edit');
+            Route::get('/members/{id}/edit', [MemberController::class, 'edit'])
+                ->middleware('permission:edit-member')
+                ->name('members.edit');
 
-            Route::put('/members/{id}', [MemberController::class, 'update'])->name('members.update');
+            Route::put('/members/{id}', [MemberController::class, 'update'])
+                ->middleware('permission:edit-member')
+                ->name('members.update');
 
             /*
             |--------------------------------------------------------------------------
@@ -396,9 +416,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::delete('/membership-plans/{id}', [MembershipPlanController::class, 'destroy'])->name('membership-plans.destroy');
 
-            Route::get('/pages', [PageController::class, 'index'])->name('pages.index');
+            Route::get('/pages', [PageController::class, 'index'])
+                ->middleware('permission.any:view-content-management,add-pages,edit-pages,delete-pages')
+                ->name('pages.index');
 
-            Route::put('/pages', [PageController::class, 'update'])->name('pages.update');
+            Route::put('/pages', [PageController::class, 'update'])
+                ->middleware('permission:edit-pages')
+                ->name('pages.update');
 
             Route::get('/user-ratings', [UserRatingController::class, 'index'])
                 ->name('user-ratings.index');
@@ -411,19 +435,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::prefix('success-stories')->name('success-stories.')->group(function () {
 
-                Route::get('/', [SuccessStoryController::class, 'index'])->name('index');
+                Route::get('/', [SuccessStoryController::class, 'index'])
+                    ->middleware('permission.any:view-content-management,add-success-stories,edit-success-stories,delete-success-stories')
+                    ->name('index');
 
-                Route::get('/create', [SuccessStoryController::class, 'create'])->name('create');
+                Route::get('/create', [SuccessStoryController::class, 'create'])->middleware('permission:add-success-stories')->name('create');
 
-                Route::post('/', [SuccessStoryController::class, 'store'])->name('store');
+                Route::post('/', [SuccessStoryController::class, 'store'])->middleware('permission:add-success-stories')->name('store');
 
-                Route::get('/{id}/edit', [SuccessStoryController::class, 'edit'])->name('edit');
+                Route::get('/{id}/edit', [SuccessStoryController::class, 'edit'])->middleware('permission:edit-success-stories')->name('edit');
 
-                Route::put('/{id}', [SuccessStoryController::class, 'update'])->name('update');
+                Route::put('/{id}', [SuccessStoryController::class, 'update'])->middleware('permission:edit-success-stories')->name('update');
 
-                Route::delete('/{id}', [SuccessStoryController::class, 'destroy'])->name('destroy');
+                Route::delete('/{id}', [SuccessStoryController::class, 'destroy'])->middleware('permission:delete-success-stories')->name('destroy');
 
-                Route::patch('/{id}/status', [SuccessStoryController::class, 'status'])->name('status');
+                Route::patch('/{id}/status', [SuccessStoryController::class, 'status'])->middleware('permission:edit-success-stories')->name('status');
             }); // success stories end here
 
             // Payments
@@ -462,25 +488,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->group(function () {
 
                     // Blog post listing
-                    Route::get('/', [BlogPostController::class, 'index'])->name('index');
+                    Route::get('/', [BlogPostController::class, 'index'])
+                        ->middleware('permission.any:view-content-management,add-blogs,edit-blogs,delete-blogs')
+                        ->name('index');
 
                     // Create form
-                    Route::get('/create', [BlogPostController::class, 'create'])->name('create');
+                    Route::get('/create', [BlogPostController::class, 'create'])->middleware('permission:add-blogs')->name('create');
 
                     // Store new blog post
-                    Route::post('/', [BlogPostController::class, 'store'])->name('store');
+                    Route::post('/', [BlogPostController::class, 'store'])->middleware('permission:add-blogs')->name('store');
 
                     // Edit form
-                    Route::get('/{post}/edit', [BlogPostController::class, 'edit'])->name('edit');
+                    Route::get('/{post}/edit', [BlogPostController::class, 'edit'])->middleware('permission:edit-blogs')->name('edit');
 
                     // Update blog post
-                    Route::put('/{post}', [BlogPostController::class, 'update'])->name('update');
+                    Route::put('/{post}', [BlogPostController::class, 'update'])->middleware('permission:edit-blogs')->name('update');
 
                     // Publish / Unpublish
-                    Route::patch('/{post}/toggle-publish', [BlogPostController::class, 'togglePublish'])->name('toggle-publish');
+                    Route::patch('/{post}/toggle-publish', [BlogPostController::class, 'togglePublish'])->middleware('permission:edit-blogs')->name('toggle-publish');
 
                     // Delete
-                    Route::delete('/{post}', [BlogPostController::class, 'destroy'])->name('destroy');
+                    Route::delete('/{post}', [BlogPostController::class, 'destroy'])->middleware('permission:delete-blogs')->name('destroy');
                 });
 
             Route::prefix('staff-users')

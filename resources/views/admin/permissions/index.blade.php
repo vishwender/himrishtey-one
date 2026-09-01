@@ -423,7 +423,7 @@
 
 
             {{-- Pagination --}}
-            <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-3">
 
                 <div class="text-muted small">
 
@@ -438,7 +438,7 @@
                 </div>
 
                 <div>
-                    {{ $permissions->links() }}
+                    {{ $permissions->links('pagination::bootstrap-5') }}
                 </div>
 
             </div>

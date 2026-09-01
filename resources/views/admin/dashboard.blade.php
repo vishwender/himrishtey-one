@@ -17,6 +17,7 @@ $rotationDayAfterTomorrowCount = $rotationDayAfterTomorrowCount ?? 0;
 
 $rotationNotifications = $rotationNotifications ?? collect();
 $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
+$relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::class)->isRestricted();
 @endphp
 
 
@@ -35,7 +36,9 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
             </h1>
 
             <p class="text-muted mb-0">
-                Overview of the selected matrimonial site.
+                {{ $relationshipManagerRestricted
+                    ? 'Overview of members assigned to you.'
+                    : 'Overview of the selected matrimonial site.' }}
             </p>
 
         </div>
@@ -59,6 +62,8 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
     {{-- ================================================================
         CURRENT SITE
     ================================================================= --}}
+
+    @unless($relationshipManagerRestricted)
 
     @if($currentSite)
 
@@ -140,6 +145,8 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
 
     @endif
 
+    @endunless
+
 
     {{-- ================================================================
         DASHBOARD STATISTICS
@@ -150,7 +157,7 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
 
         {{-- Members --}}
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-md-6 {{ $relationshipManagerRestricted ? 'col-xl-4' : 'col-xl-3' }}">
 
             <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
@@ -185,7 +192,7 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
 
         {{-- Active Members --}}
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-md-6 {{ $relationshipManagerRestricted ? 'col-xl-4' : 'col-xl-3' }}">
 
             <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
@@ -220,7 +227,7 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
 
         {{-- Inactive Profiles --}}
 
-        <div class="col-md-6 col-xl-3">
+        <div class="col-md-6 {{ $relationshipManagerRestricted ? 'col-xl-4' : 'col-xl-3' }}">
 
             <div class="card border-0 shadow-sm h-100 dashboard-stat">
 
@@ -255,6 +262,8 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
 
         {{-- Payments --}}
 
+        @unless($relationshipManagerRestricted)
+
         <div class="col-md-6 col-xl-3">
 
             <div class="card border-0 shadow-sm h-100 dashboard-stat">
@@ -286,6 +295,8 @@ $dashboardRotationAdmins = $dashboardRotationAdmins ?? collect();
             </div>
 
         </div>
+
+        @endunless
 
 
     </div>

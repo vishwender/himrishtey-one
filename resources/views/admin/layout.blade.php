@@ -40,6 +40,9 @@
 </head>
 @php
 $currentSite = app(\App\Services\SiteManager::class)->current();
+$relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::class)->isRestricted();
+$contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
+    && ! auth('admin')->user()?->hasRole('super-admin');
 @endphp
 
 <body>
@@ -55,6 +58,142 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
 
             <nav class="mt-3">
+
+                @if($relationshipManagerRestricted)
+
+                <a
+                    href="{{ route('admin.dashboard') }}"
+                    class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Dashboard
+                </a>
+
+                <div class="nav-group {{ request()->routeIs('admin.members.*', 'admin.activities.*', 'admin.rotations.*') ? 'is-open' : '' }}">
+
+                    <button
+                        type="button"
+                        class="nav-group-toggle {{ request()->routeIs('admin.members.*', 'admin.activities.*', 'admin.rotations.*') ? 'active' : '' }}"
+                        aria-expanded="{{ request()->routeIs('admin.members.*', 'admin.activities.*', 'admin.rotations.*') ? 'true' : 'false' }}">
+                        <i class="bi bi-people me-2"></i>
+                        Manage Members
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </button>
+
+                    <div class="nav-submenu">
+                        <a
+                            href="{{ route('admin.members.index') }}"
+                            class="{{ request()->routeIs('admin.members.index', 'admin.members.show', 'admin.members.edit') ? 'active' : '' }}">
+                            <i class="bi bi-person-lines-fill me-2"></i>
+                            Assigned Members
+                        </a>
+
+                        <a
+                            href="{{ route('admin.members.new') }}"
+                            class="{{ request()->routeIs('admin.members.new') ? 'active' : '' }}">
+                            <i class="bi bi-person-exclamation me-2"></i>
+                            New Members
+                        </a>
+
+                        <a
+                            href="{{ route('admin.members.create') }}"
+                            class="{{ request()->routeIs('admin.members.create') ? 'active' : '' }}">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Add Member
+                        </a>
+
+                        <a
+                            href="{{ route('admin.members.advanced-search') }}"
+                            class="{{ request()->routeIs('admin.members.advanced-search', 'admin.members.advanced-search.results') ? 'active' : '' }}">
+                            <i class="bi bi-search me-2"></i>
+                            Advanced Search
+                        </a>
+
+                        <a
+                            href="{{ route('admin.activities.index') }}"
+                            class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Member Activity
+                        </a>
+
+                        @if(auth('admin')->user()?->hasAnyPermission(['add-rotations', 'edit-rotations']))
+
+                        <a
+                            href="{{ route('admin.rotations.index') }}"
+                            class="{{ request()->routeIs('admin.rotations.*') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-repeat me-2"></i>
+                            Rotations
+                        </a>
+
+                        @endif
+
+                        @if(auth('admin')->user()?->hasPermission('view-delete-profile-request'))
+
+                        <a
+                            href="{{ route('admin.delete-profile-requests.index') }}"
+                            class="{{ request()->routeIs('admin.delete-profile-requests.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-x me-2"></i>
+                            Delete Requests
+                        </a>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+                @elseif($contentManagerRestricted)
+
+                <div class="nav-group is-open">
+
+                    <button
+                        type="button"
+                        class="nav-group-toggle active"
+                        aria-expanded="true">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Content Management
+                        <i class="bi bi-chevron-down ms-auto"></i>
+                    </button>
+
+                    <div class="nav-submenu">
+
+                        @if(auth('admin')->user()?->hasAnyPermission(['view-content-management', 'add-blogs', 'edit-blogs', 'delete-blogs']))
+
+                        <a
+                            href="{{ route('admin.blog-posts.index') }}"
+                            class="{{ request()->routeIs('admin.blog-posts.*') ? 'active' : '' }}">
+                            <i class="bi bi-journal-text me-2"></i>
+                            Blogs
+                        </a>
+
+                        @endif
+
+                        @if(auth('admin')->user()?->hasAnyPermission(['view-content-management', 'add-success-stories', 'edit-success-stories', 'delete-success-stories']))
+
+                        <a
+                            href="{{ route('admin.success-stories.index') }}"
+                            class="{{ request()->routeIs('admin.success-stories.*') ? 'active' : '' }}">
+                            <i class="bi bi-heart-fill me-2"></i>
+                            Success Stories
+                        </a>
+
+                        @endif
+
+                        @if(auth('admin')->user()?->hasAnyPermission(['view-content-management', 'add-pages', 'edit-pages', 'delete-pages']))
+
+                        <a
+                            href="{{ route('admin.pages.index') }}"
+                            class="{{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            Pages
+                        </a>
+
+                        @endif
+
+                    </div>
+
+                </div>
+
+                @else
 
                 <a
                     href="{{ route('admin.dashboard') }}"
@@ -273,6 +412,16 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                         </a>
 
+                        <a
+                            href="{{ route('admin.members.new') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.new') ? 'active' : '' }}">
+
+                            <i class="bi bi-person-exclamation me-2"></i>
+
+                            New Members
+
+                        </a>
+
                         {{-- Add Member --}}
                         <a
                             href="{{ route('admin.members.create') }}"
@@ -307,7 +456,7 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
 
                         </a>
 
-                        @if(auth('admin')->user()?->hasPermission('view-profile-delete-requests'))
+                        @if(auth('admin')->user()?->hasPermission('view-delete-profile-request'))
 
                         <a
                             href="{{ route('admin.delete-profile-requests.index') }}"
@@ -551,6 +700,8 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                     Settings
                 </a>
 
+                @endif
+
             </nav>
 
 
@@ -616,9 +767,13 @@ $currentSite = app(\App\Services\SiteManager::class)->current();
                                 {{ $currentSite->name }}
                             </div>
 
+                            @unless($relationshipManagerRestricted)
+
                             <small class="text-muted">
                                 {{ $currentSite->database_name }}
                             </small>
+
+                            @endunless
 
                         </div>
 

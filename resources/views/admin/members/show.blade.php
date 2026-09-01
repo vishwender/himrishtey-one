@@ -2846,6 +2846,8 @@
             @endif
 
         </div>
+        @unless(app(\App\Services\RelationshipManagerAccess::class)->isRestricted())
+
         <form
             action="{{ route('admin.members.relationship-manager.update', [
                 'memberId' => $member->id
@@ -2883,13 +2885,13 @@
                         @foreach($relationshipManagers as $manager)
 
                         <option
-                            value="{{ $manager->display_name }}"
+                            value="{{ $manager->name }}"
                             {{ old(
                 'relationship_manager',
                 $member->relationship_manager
-            ) === $manager->display_name ? 'selected' : '' }}>
+            ) === $manager->name ? 'selected' : '' }}>
 
-                            {{ $manager->display_name }}
+                            {{ $manager->name }} ({{ $manager->profile_id }} · {{ $manager->email }})
 
                         </option>
 
@@ -2929,6 +2931,8 @@
             </div>
 
         </form>
+
+        @endunless
 
     </div>
 
@@ -3518,7 +3522,7 @@
                 </button>
             </form>
 
-            @if(auth('admin')->user()?->hasPermission('raise-profile-delete-request'))
+            @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
             <button
                 type="button"
