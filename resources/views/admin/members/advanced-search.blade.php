@@ -1558,12 +1558,13 @@
                             @foreach($membershipTypes as $membershipType)
 
                             <option
-                                value="{{ $membershipType->name }}"
+                                value="{{ $membershipType->plan_name }}"
                                 @selected(
-                                request('member_type')==$membershipType->name
+                                request()->filled('member_type') &&
+                                (string) request('member_type') === (string) $membershipType->plan_name
                                 )
                                 >
-                                {{ $membershipType->name }}
+                                {{ $membershipType->plan_name }}
                             </option>
 
                             @endforeach
@@ -1597,7 +1598,7 @@
                                 (string) request('plan_id') === (string) $membershipPlan->id
                                 )
                                 >
-                                {{ $membershipPlan->name }}
+                                {{ $membershipPlan->plan_name }}
                             </option>
 
                             @endforeach
@@ -1730,16 +1731,36 @@
                     {{-- Relationship Manager --}}
                     <div class="col-md-4">
 
-                        <label class="form-label">
+                        <label
+                            for="relationship_manager"
+                            class="form-label">
                             Relationship Manager
                         </label>
 
-                        <input
-                            type="text"
+                        <select
                             name="relationship_manager"
-                            class="form-control"
-                            value="{{ request('relationship_manager') }}"
-                            placeholder="Relationship manager">
+                            id="relationship_manager"
+                            class="form-select">
+
+                            <option value="">All Relationship Managers</option>
+                            <option
+                                value="__unassigned"
+                                @selected(request('relationship_manager') === '__unassigned')>
+                                Unassigned
+                            </option>
+
+                            @foreach($relationshipManagers as $manager)
+                            <option
+                                value="{{ $manager->name }}"
+                                @selected(request('relationship_manager') === $manager->name)>
+                                {{ $manager->name }}
+                                @if($manager->profile_id)
+                                    ({{ $manager->profile_id }})
+                                @endif
+                            </option>
+                            @endforeach
+
+                        </select>
 
                     </div>
 

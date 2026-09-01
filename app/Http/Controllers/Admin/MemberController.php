@@ -1475,6 +1475,21 @@ class MemberController extends Controller
             ->orderBy('plan_name')
             ->get();
 
+        $relationshipManagerAccess = app(RelationshipManagerAccess::class);
+
+        $relationshipManagers = Admin::query()
+            ->when(
+                $relationshipManagerAccess->isRestricted(),
+                fn ($query) => $query->whereKey(
+                    $relationshipManagerAccess->admin()?->getKey()
+                )
+            )
+            ->select(['id', 'name', 'profile_id'])
+            ->whereNotNull('name')
+            ->where('name', '<>', '')
+            ->orderBy('name')
+            ->get();
+
         return view('admin.members.advanced-search', compact(
             'countries',
             'religions',
@@ -1484,7 +1499,8 @@ class MemberController extends Controller
             'motherTongues',
             'maritalStatuses',
             'membershipTypes',
-            'membershipPlans'
+            'membershipPlans',
+            'relationshipManagers'
         ));
     }
 
@@ -1579,12 +1595,25 @@ class MemberController extends Controller
                 'promoted',
                 'profile_hide',
                 'register_through',
-                'relationship_manager',
             ] as $field
         ) {
 
             if ($request->filled($field)) {
                 $query->where($field, $request->input($field));
+            }
+        }
+
+        if ($request->filled('relationship_manager')) {
+            if ($request->relationship_manager === '__unassigned') {
+                $query->where(function ($query) {
+                    $query->whereNull('relationship_manager')
+                        ->orWhere('relationship_manager', '');
+                });
+            } else {
+                $query->where(
+                    'relationship_manager',
+                    trim((string) $request->relationship_manager)
+                );
             }
         }
 
@@ -1726,6 +1755,21 @@ class MemberController extends Controller
             ->orderBy('plan_name')
             ->get();
 
+        $relationshipManagerAccess = app(RelationshipManagerAccess::class);
+
+        $relationshipManagers = Admin::query()
+            ->when(
+                $relationshipManagerAccess->isRestricted(),
+                fn ($query) => $query->whereKey(
+                    $relationshipManagerAccess->admin()?->getKey()
+                )
+            )
+            ->select(['id', 'name', 'profile_id'])
+            ->whereNotNull('name')
+            ->where('name', '<>', '')
+            ->orderBy('name')
+            ->get();
+
         return view(
             'admin.members.advanced-search',
             compact(
@@ -1738,7 +1782,8 @@ class MemberController extends Controller
                 'motherTongues',
                 'maritalStatuses',
                 'membershipTypes',
-                'membershipPlans'
+                'membershipPlans',
+                'relationshipManagers'
             )
         );
     }
