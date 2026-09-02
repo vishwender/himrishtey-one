@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Auth\AuthController;
+use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\DeleteProfileRequestController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\LegalController;
 use App\Http\Controllers\Api\V1\MembershipController;
+use App\Http\Controllers\Api\V1\MobileVerificationController;
 use App\Http\Controllers\Api\V1\ProfileContactController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ProfileLikeController;
@@ -67,6 +69,31 @@ Route::prefix('v1')
                 AuthController::class,
                 'login',
             ]);
+
+            Route::post('/login/otp/request', [
+                AuthController::class,
+                'requestLoginOtp',
+            ])->middleware('throttle:5,1');
+
+            Route::post('/login/otp/verify', [
+                AuthController::class,
+                'verifyLoginOtp',
+            ])->middleware('throttle:10,1');
+
+            Route::post('/forgot-password/otp/request', [
+                ForgotPasswordController::class,
+                'requestOtp',
+            ])->middleware('throttle:5,1');
+
+            Route::post('/forgot-password/otp/verify', [
+                ForgotPasswordController::class,
+                'verifyOtp',
+            ])->middleware('throttle:10,1');
+
+            Route::post('/forgot-password/reset', [
+                ForgotPasswordController::class,
+                'reset',
+            ])->middleware('throttle:5,1');
         });
 
         Route::middleware('auth:sanctum')
@@ -122,6 +149,16 @@ Route::prefix('v1')
                     'updateLocation',
                 ]);
 
+                Route::post('/profile/mobile-verification/otp/request', [
+                    MobileVerificationController::class,
+                    'requestOtp',
+                ])->middleware('throttle:5,1');
+
+                Route::post('/profile/mobile-verification/otp/verify', [
+                    MobileVerificationController::class,
+                    'verifyOtp',
+                ])->middleware('throttle:10,1');
+
                 Route::post(
                     '/profile/photos/gallery',
                     [ProfilePhotoController::class, 'uploadGalleryPhoto']
@@ -164,6 +201,11 @@ Route::prefix('v1')
                     MembershipController::class,
                     'plans',
                 ]);
+
+                Route::post('/memberships/callback-request', [
+                    MembershipController::class,
+                    'requestCallback',
+                ])->middleware('throttle:5,1');
 
                 // Rate us
                 Route::post('/rate-us', [

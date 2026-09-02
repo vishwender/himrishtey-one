@@ -9,6 +9,7 @@
     .api-method { min-width: 4.5rem; letter-spacing: .04em; }
     .api-uri { overflow-wrap: anywhere; }
     .api-code { background: var(--bs-tertiary-bg); border: 1px solid var(--bs-border-color); }
+    .api-code pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 </style>
 @endpush
 
@@ -30,7 +31,23 @@
                     <div class="api-code rounded p-3 font-monospace small mb-3">{{ url('/api/v1') }}</div>
                     <p class="mb-2"><strong>Required on every request</strong></p>
                     <div class="api-code rounded p-3 font-monospace small">Accept: application/json<br>X-App-Code: himrishtey</div>
-                    <p class="text-muted small mt-2 mb-0">Available app codes: himrishtey, gallpakki, devbhoomi, dogririshtey.</p>
+                    <p class="mb-2 mt-3"><strong>X-App-Code by application</strong></p>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Application</th>
+                                    <th scope="col">Header value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Himrishtey</td><td><code>X-App-Code: himrishtey</code></td></tr>
+                                <tr><td>Gallpakki</td><td><code>X-App-Code: gallpakki</code></td></tr>
+                                <tr><td>Dogririshtey</td><td><code>X-App-Code: dogririshtey</code></td></tr>
+                                <tr><td>Devbhoomi</td><td><code>X-App-Code: devbhoomi</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,7 +80,7 @@
 
             <div class="d-grid gap-3">
                 @foreach($endpoints as $endpoint)
-                <article class="api-endpoint card border-0 shadow-sm" data-search="{{ Str::lower($group.' '.$endpoint['methods']->join(' ').' '.$endpoint['uri'].' '.$endpoint['action']) }}">
+                <article class="api-endpoint card border-0 shadow-sm" data-search="{{ Str::lower($group.' '.$endpoint['methods']->join(' ').' '.$endpoint['uri'].' '.$endpoint['action'].' '.($endpoint['details']['description'] ?? '')) }}">
                     <div class="card-body">
                         <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
                             @foreach($endpoint['methods'] as $method)
@@ -80,6 +97,34 @@
                         <div class="text-muted small">Handler: <code>{{ $endpoint['action'] }}</code></div>
                         @if($endpoint['parameters']->isNotEmpty())
                         <div class="text-muted small mt-1">Path parameters: {{ $endpoint['parameters']->join(', ') }}</div>
+                        @endif
+
+                        @if($endpoint['details'])
+                        <div class="mt-3 pt-3 border-top">
+                            <p>{{ $endpoint['details']['description'] }}</p>
+
+                            <div class="row g-3">
+                                <div class="col-xl-6">
+                                    <h3 class="h6">{{ $endpoint['details']['request_label'] ?? 'JSON request' }}</h3>
+                                    <div class="api-code rounded p-3 small">
+                                        <pre><code>{{ json_encode($endpoint['details']['request'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <h3 class="h6">Successful response</h3>
+                                    <div class="api-code rounded p-3 small">
+                                        <pre><code>{{ json_encode($endpoint['details']['response'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="h6 mt-3">Important behavior</h3>
+                            <ul class="small text-muted mb-0">
+                                @foreach($endpoint['details']['notes'] as $note)
+                                <li>{{ $note }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                         @endif
                     </div>
                 </article>

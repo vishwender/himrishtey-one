@@ -4,16 +4,27 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Requests\Api\V1\Auth\RequestLoginOtpRequest;
+use App\Http\Requests\Api\V1\Auth\VerifyLoginOtpRequest;
+use App\Models\Application;
 use App\Models\Member;
 use App\Models\PersonalAccessToken;
+use App\Services\NimbusSmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\NewAccessToken;
+use Throwable;
 
 class AuthController extends Controller
 {
+    private const int OTP_EXPIRY_MINUTES = 5;
+
+    private const int OTP_MAX_ATTEMPTS = 5;
+
     /**
      * Login member.
      *
@@ -111,12 +122,22 @@ class AuthController extends Controller
         |
         */
 
-        if ($member->password !== $password) {
+        $passwordIsHashed = Hash::isHashed((string) $member->password);
+        $passwordMatches = $passwordIsHashed
+            ? Hash::check($password, (string) $member->password)
+            : hash_equals((string) $member->password, $password);
+
+        if (! $passwordMatches) {
 
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid login credentials.',
             ], 401);
+        }
+
+        if (! $passwordIsHashed) {
+            $member->password = Hash::make($password);
+            $member->save();
         }
 
         /*
@@ -135,53 +156,193 @@ class AuthController extends Controller
             ], 500);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Create Sanctum token
-        |--------------------------------------------------------------------------
-        */
+        return $this->respondWithAccessToken($member, $application);
+    }
 
+    public function requestLoginOtp(
+        RequestLoginOtpRequest $request,
+        NimbusSmsService $smsService
+    ): JsonResponse {
+        $login = trim($request->string('login')->toString());
+        $field = $this->loginField($login);
+        $members = Member::query()->where($field, $login)->get();
+
+        if ($members->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No account was found for the supplied login.',
+            ], 404);
+        }
+
+        if ($members->count() > 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Multiple accounts found. Please use your profile ID.',
+                'login_type' => $field,
+            ], 409);
+        }
+
+        $member = $members->first();
+
+        if (blank($member->mobile_number)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No mobile number is registered with this account.',
+            ], 422);
+        }
+
+        $application = $request->attributes->get('application');
+
+        if (! $application) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Application context is missing.',
+            ], 500);
+        }
+
+        $otp = (string) random_int(1000, 9999);
+
+        try {
+            $sent = $smsService->sendLoginOtp((string) $member->mobile_number, $otp);
+        } catch (Throwable $exception) {
+            report($exception);
+            $sent = false;
+        }
+
+        if (! $sent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to send the OTP. Please try again.',
+            ], 503);
+        }
+
+        $challengeId = Str::random(64);
+        $expiresAt = now()->addMinutes(self::OTP_EXPIRY_MINUTES);
+
+        Cache::put($this->otpCacheKey($challengeId), [
+            'application_id' => (string) $application->id,
+            'member_id' => $member->id,
+            'otp_hash' => Hash::make($otp),
+            'attempts_remaining' => self::OTP_MAX_ATTEMPTS,
+            'expires_at' => $expiresAt->timestamp,
+        ], $expiresAt);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent successfully.',
+            'data' => [
+                'challenge_id' => $challengeId,
+                'expires_in' => self::OTP_EXPIRY_MINUTES * 60,
+                'mobile_number' => $this->maskMobileNumber((string) $member->mobile_number),
+            ],
+        ]);
+    }
+
+    public function verifyLoginOtp(VerifyLoginOtpRequest $request): JsonResponse
+    {
+        $challengeId = $request->string('challenge_id')->toString();
+        $cacheKey = $this->otpCacheKey($challengeId);
+        $challenge = Cache::pull($cacheKey);
+
+        if (! is_array($challenge) || ($challenge['expires_at'] ?? 0) < now()->timestamp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The OTP challenge is invalid or has expired.',
+            ], 422);
+        }
+
+        $application = $request->attributes->get('application');
+
+        if (! $application || ! hash_equals((string) $challenge['application_id'], (string) $application->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The OTP challenge is invalid or has expired.',
+            ], 422);
+        }
+
+        if (! Hash::check($request->string('otp')->toString(), $challenge['otp_hash'])) {
+            $attemptsRemaining = (int) $challenge['attempts_remaining'] - 1;
+
+            if ($attemptsRemaining > 0) {
+                $challenge['attempts_remaining'] = $attemptsRemaining;
+                Cache::put(
+                    $cacheKey,
+                    $challenge,
+                    max(1, (int) $challenge['expires_at'] - now()->timestamp)
+                );
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => $attemptsRemaining > 0
+                    ? 'The OTP is invalid.'
+                    : 'Too many invalid attempts. Request a new OTP.',
+                'attempts_remaining' => max(0, $attemptsRemaining),
+            ], 422);
+        }
+
+        $member = Member::query()->find($challenge['member_id']);
+
+        if (! $member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The OTP challenge is invalid or has expired.',
+            ], 422);
+        }
+
+        return $this->respondWithAccessToken($member, $application);
+    }
+
+    private function loginField(string $login): string
+    {
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            return 'email';
+        }
+
+        if (preg_match('/^[0-9+\-\s()]+$/', $login)) {
+            return 'mobile_number';
+        }
+
+        return 'profile_id';
+    }
+
+    private function otpCacheKey(string $challengeId): string
+    {
+        return 'api:login-otp:'.hash('sha256', $challengeId);
+    }
+
+    private function maskMobileNumber(string $mobileNumber): string
+    {
+        $visibleDigits = substr($mobileNumber, -4);
+
+        return str_repeat('*', max(0, strlen($mobileNumber) - 4)).$visibleDigits;
+    }
+
+    private function respondWithAccessToken(Member $member, Application $application): JsonResponse
+    {
         $plainTextToken = Str::random(40);
-
-        $hashedToken = hash('sha256', $plainTextToken);
-
         $personalAccessToken = new PersonalAccessToken;
 
         $personalAccessToken->setConnection('mariadb');
-
         $personalAccessToken->name = 'mobile-app';
-        $personalAccessToken->token = $hashedToken;
+        $personalAccessToken->token = hash('sha256', $plainTextToken);
         $personalAccessToken->abilities = ['*'];
         $personalAccessToken->tokenable_id = $member->id;
         $personalAccessToken->tokenable_type = $member->getMorphClass();
         $personalAccessToken->application_id = $application->id;
-
         $personalAccessToken->save();
-
-        $accessToken = $plainTextToken;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Response
-        |--------------------------------------------------------------------------
-        */
 
         return response()->json([
             'success' => true,
             'message' => 'Login successful.',
-
             'data' => [
-
-                'token' => $accessToken,
-
+                'token' => $plainTextToken,
                 'token_type' => 'Bearer',
-
                 'application' => [
                     'id' => $application->id,
                     'name' => $application->name,
                     'code' => $application->code,
                 ],
-
                 'member' => [
                     'id' => $member->id,
                     'profile_id' => $member->profile_id,
@@ -409,8 +570,7 @@ class AuthController extends Controller
         |--------------------------------------------------------------------------
         */
 
-                $member->password =
-                    $validated['password'];
+                $member->password = Hash::make($validated['password']);
 
                 /*
         |--------------------------------------------------------------------------
@@ -1643,7 +1803,11 @@ class AuthController extends Controller
     |
     */
 
-        if ($member->password !== $validated['current_password']) {
+        $currentPasswordMatches = Hash::isHashed((string) $member->password)
+            ? Hash::check($validated['current_password'], (string) $member->password)
+            : hash_equals((string) $member->password, $validated['current_password']);
+
+        if (! $currentPasswordMatches) {
 
             return response()->json([
                 'success' => false,
@@ -1671,7 +1835,7 @@ class AuthController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $member->password = $validated['new_password'];
+        $member->password = Hash::make($validated['new_password']);
 
         $member->save();
 

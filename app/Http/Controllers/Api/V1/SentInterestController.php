@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Member;
 use App\Models\SentInterest;
+use App\Services\NimbusSmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SentInterestController extends Controller
 {
@@ -14,7 +18,8 @@ class SentInterestController extends Controller
      */
     public function store(
         Request $request,
-        int $profileId
+        int $profileId,
+        NimbusSmsService $smsService
     ): JsonResponse {
 
         $member = $request->user();
@@ -37,6 +42,15 @@ class SentInterestController extends Controller
                 'success' => false,
                 'message' => 'You cannot send interest to your own profile.',
             ], 422);
+        }
+
+        $recipient = Member::query()->find($profileId);
+
+        if (! $recipient) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile not found.',
+            ], 404);
         }
 
         /*
@@ -83,6 +97,26 @@ class SentInterestController extends Controller
             'created_at' => now(),
         ]);
 
+        $smsSent = false;
+
+        if (filled($recipient->mobile_number)) {
+            try {
+                $smsSent = $smsService->sendInterestNotification(
+                    (string) $recipient->mobile_number,
+                    (string) $member->profile_id
+                );
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+        }
+
+        if (! $smsSent) {
+            Log::warning('Interest was created without an SMS notification.', [
+                'interest_id' => $interest->id,
+                'recipient_member_id' => $recipient->id,
+            ]);
+        }
+
         /*
         |--------------------------------------------------------------------------
         | Response
@@ -97,6 +131,7 @@ class SentInterestController extends Controller
                 'profile_id' => $interest->profile_id,
                 'status' => $interest->status,
                 'sent' => true,
+                'sms_notification_sent' => $smsSent,
                 'created_at' => $interest->created_at
                     ? $interest->created_at->format('Y-m-d H:i:s')
                     : null,

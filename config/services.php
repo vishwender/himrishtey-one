@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'nimbus' => [
+        'endpoint' => env('NIMBUS_SMS_ENDPOINT', 'https://nimbusit.biz/api/SmsApi/SendMultipleApi'),
+        'username' => env('NIMBUS_SMS_USERNAME'),
+        'password' => env('NIMBUS_SMS_PASSWORD'),
+        'sender_id' => env('NIMBUS_SMS_SENDER_ID'),
+        'entity_id' => env('NIMBUS_SMS_ENTITY_ID'),
+        'login_otp_template_id' => env('NIMBUS_SMS_LOGIN_OTP_TEMPLATE_ID'),
+        'callback_request_template_id' => env('NIMBUS_SMS_CALLBACK_REQUEST_TEMPLATE_ID'),
+        'callback_recipient' => env('NIMBUS_SMS_CALLBACK_RECIPIENT'),
+        'mobile_verification_template_id' => env('NIMBUS_SMS_MOBILE_VERIFICATION_TEMPLATE_ID'),
+        'interest_received_template_id' => env('NIMBUS_SMS_INTEREST_RECEIVED_TEMPLATE_ID'),
+        'password_reset_otp_template_id' => env('NIMBUS_SMS_PASSWORD_RESET_OTP_TEMPLATE_ID'),
+    ],
+
 ];

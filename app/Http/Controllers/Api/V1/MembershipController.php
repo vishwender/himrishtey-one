@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Member;
 use App\Services\Api\V1\ApplicationDatabaseService;
+use App\Services\NimbusSmsService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Throwable;
 
 class MembershipController extends Controller
 {
+    private const int CALLBACK_COOLDOWN_MINUTES = 10;
+
     public function __construct(
         private ApplicationDatabaseService $databaseService
     ) {}
@@ -142,6 +149,71 @@ class MembershipController extends Controller
                 ],
 
                 'plans' => $plans,
+            ],
+        ]);
+    }
+
+    public function requestCallback(
+        Request $request,
+        NimbusSmsService $smsService
+    ): JsonResponse {
+        /** @var Member|null $member */
+        $member = $request->user();
+
+        if (! $member) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.',
+            ], 401);
+        }
+
+        $application = $request->attributes->get('application');
+        $cacheKey = "api:callback-request:{$application->id}:{$member->id}";
+        $cooldownExpiresAt = Cache::get($cacheKey);
+
+        if (is_int($cooldownExpiresAt) && $cooldownExpiresAt > now()->timestamp) {
+            return response()->json([
+                'success' => false,
+                'message' => 'A callback request was already sent recently.',
+                'retry_after' => $cooldownExpiresAt - now()->timestamp,
+            ], 429);
+        }
+
+        $recipient = (string) config('services.nimbus.callback_recipient');
+
+        if (blank($recipient)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Callback service is not configured.',
+            ], 503);
+        }
+
+        try {
+            $sent = $smsService->sendCallbackRequest(
+                $recipient,
+                (string) $member->profile_id,
+                (string) $member->full_name
+            );
+        } catch (Throwable $exception) {
+            report($exception);
+            $sent = false;
+        }
+
+        if (! $sent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to send the callback request. Please try again.',
+            ], 503);
+        }
+
+        $cooldownExpiresAt = now()->addMinutes(self::CALLBACK_COOLDOWN_MINUTES);
+        Cache::put($cacheKey, $cooldownExpiresAt->timestamp, $cooldownExpiresAt);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your callback request has been sent successfully.',
+            'data' => [
+                'cooldown_seconds' => self::CALLBACK_COOLDOWN_MINUTES * 60,
             ],
         ]);
     }
