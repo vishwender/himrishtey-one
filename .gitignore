@@ -1,27 +1,40 @@
-*.log
-.DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/fonts-manifest.dev.json
+# -------------------------------------------------
+# Local development / AI tooling
+# -------------------------------------------------
+/.ddev/
+/.claude/
+/.mcp.json
+/CLAUDE.md
+/AGENTS.md
+
+# Optional: Laravel Boost local configuration
+/boost.json
+
+# -------------------------------------------------
+# Local / server-generated files
+# -------------------------------------------------
+/.env
+/.env.production
+/.env.backup
+
+/vendor/
+/node_modules/
+/public/build/
 /public/hot
 /public/storage
-/storage/*.key
-/storage/pail
-/vendor
-_ide_helper.php
-Homestead.json
-Homestead.yaml
+
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# cPanel / backup files
+*.zip
+*.tar
+*.tar.gz
+*.sql
+error_log
+
+# OS files
+.DS_Store
 Thumbs.db
