@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\EmployerController;
 use App\Http\Controllers\Admin\FamilyStatusController;
 use App\Http\Controllers\Admin\HeightController;
 use App\Http\Controllers\Admin\MaritalStatusController;
+use App\Http\Controllers\Admin\MemberActivationController;
 use App\Http\Controllers\Admin\MemberActivityController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\MemberPhotoController;
@@ -82,6 +83,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         */
 
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+        Route::get('/settings/change-password', [AuthController::class, 'editPassword'])->name('settings.password.edit');
+        Route::put('/settings/change-password', [AuthController::class, 'updatePassword'])
+            ->middleware('throttle:6,1')->name('settings.password.update');
 
         /*
         |--------------------------------------------------------------------------
@@ -187,9 +192,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('/members/{id}/toggle-status', [MemberController::class, 'toggleStatus'])->name('members.toggle-status');
 
-            Route::get('/members/{id}/activate', [\App\Http\Controllers\Admin\MemberActivationController::class, 'create'])
+            Route::get('/members/{id}/activate', [MemberActivationController::class, 'create'])
                 ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.create');
-            Route::post('/members/{id}/activate', [\App\Http\Controllers\Admin\MemberActivationController::class, 'store'])
+            Route::post('/members/{id}/activate', [MemberActivationController::class, 'store'])
                 ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.store');
 
             Route::post('/members/{id}/toggle-trusted', [MemberController::class, 'toggleTrusted'])->name('members.toggle-trusted');

@@ -53,7 +53,7 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
         <aside class="sidebar" id="adminSidebar">
 
             <div class="brand">
-                {{$currentSite->name}} Admin
+                {{ $currentSite?->name ?? 'HimRishtey' }} Admin
             </div>
 
 
@@ -705,12 +705,20 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                 </a>
 
-                <a href="#">
-                    <i class="bi bi-gear me-2"></i>
-                    Settings
-                </a>
-
                 @endif
+
+                <div class="nav-group {{ request()->routeIs('admin.settings.*') ? 'is-open' : '' }}">
+                    <button type="button" class="nav-group-toggle {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                        <i class="bi bi-gear me-2"></i>
+                        <span class="flex-grow-1">Settings</span>
+                        <i class="bi bi-chevron-down nav-group-chevron"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="{{ route('admin.settings.password.edit') }}" class="{{ request()->routeIs('admin.settings.password.*') ? 'active' : '' }}">
+                            <i class="bi bi-key"></i> Change Password
+                        </a>
+                    </div>
+                </div>
 
             </nav>
 

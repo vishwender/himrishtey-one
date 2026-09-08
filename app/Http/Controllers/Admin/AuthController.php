@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -58,6 +59,29 @@ class AuthController extends Controller
                 'email' => 'Invalid email or password.',
             ])
             ->onlyInput('email');
+    }
+
+    public function editPassword()
+    {
+        return view('admin.settings.change-password');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password:admin'],
+            'password' => ['required', 'string', 'min:8', 'confirmed', 'different:current_password'],
+        ]);
+
+        $admin = $request->user('admin');
+        $admin->password = $validated['password'];
+        $admin->setRememberToken(Str::random(60));
+        $admin->save();
+
+        $request->session()->regenerate();
+
+        return redirect()->route('admin.settings.password.edit')
+            ->with('success', 'Your password has been changed successfully.');
     }
 
     public function logout(Request $request)
