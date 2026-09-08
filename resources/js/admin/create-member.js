@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     |--------------------------------------------------------------------------
     */
 
+    const form = document.getElementById('create-member-form');
     const countrySelect = document.getElementById('country_living_in');
     const stateSelect = document.getElementById('state_living_in');
     const citySelect = document.getElementById('city_living_in');
@@ -141,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function () {
         */
 
         fetch(
-            `/admin/members/location/states/${countryId}`,
+            form.dataset.statesUrl.replace('__ID__', encodeURIComponent(countryId)),
             {
                 method: 'GET',
 
@@ -319,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
         */
 
         fetch(
-            `/admin/members/location/cities/${stateId}`,
+            form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(stateId)),
             {
                 method: 'GET',
 

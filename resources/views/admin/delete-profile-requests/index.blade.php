@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', 'Profile Delete Requests')
+@section('title', $source === 'staff' ? 'Staff Delete Requests' : 'Member Delete Profile Requests')
 
 @section('content')
 
@@ -14,11 +14,11 @@
 
         <div>
             <h4 class="mb-1">
-                Profile Delete Requests
+                {{ $source === 'staff' ? 'Staff Delete Requests' : 'Member Delete Profile Requests' }}
             </h4>
 
             <div class="text-muted">
-                Review and process member profile deletion requests.
+                {{ $source === 'staff' ? 'Review deletion requests raised by staff for members.' : 'Review deletion requests submitted by members themselves.' }}
             </div>
         </div>
 
@@ -193,7 +193,7 @@
 
             <form
                 method="GET"
-                action="{{ route('admin.delete-profile-requests.index') }}">
+                action="{{ route($indexRoute) }}">
 
                 <div class="row g-3 align-items-end">
 
@@ -481,7 +481,10 @@
 
                             <td>
 
-                                @if($requestedBy)
+                                @if($source === 'member')
+                                <div class="fw-semibold">{{ $member?->full_name ?? 'Member unavailable' }}</div>
+                                <div class="small text-muted">Self-submitted</div>
+                                @elseif($requestedBy)
 
                                 <div class="fw-semibold">
                                     {{ $requestedBy->name }}

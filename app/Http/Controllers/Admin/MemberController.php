@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\AdminActivityLog;
 use App\Models\AnnualIncome;
 use App\Models\Cast;
 use App\Models\City;
@@ -26,29 +27,78 @@ use App\Services\MemberPhotoService;
 use App\Services\RelationshipManagerAccess;
 use App\Services\SiteManager;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MemberController extends Controller
 {
     /**
      * Display member listing.
      */
+    public function printProfile(int $id): View
+    {
+        abort_unless(auth('admin')->user()?->hasRole('super-admin'), 403);
+
+        return view('admin.members.print', ['member' => SiteMember::findOrFail($id)]);
+    }
+
+    public function assignNewMembers(Request $request): RedirectResponse
+    {
+        abort_unless(auth('admin')->user()?->hasPermission('edit-member')
+            && ! app(RelationshipManagerAccess::class)->isRestricted(), 403);
+
+        $validated = $request->validate([
+            'member_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'member_ids.*' => ['required', 'integer', 'distinct'],
+            'staff_id' => ['required', 'integer'],
+        ]);
+
+        $staff = Admin::query()->where('status', true)->whereNotNull('name')->where('name', '<>', '')->find($validated['staff_id']);
+        abort_unless($staff, 422, 'Select an active staff user.');
+
+        DB::connection('site')->transaction(function () use ($validated, $staff) {
+            $members = SiteMember::query()->whereIn('id', $validated['member_ids'])
+                ->where(fn ($query) => $query->whereNull('active')->orWhere('active', ''))
+                ->lockForUpdate()->get();
+            abort_unless($members->count() === count($validated['member_ids']), 422, 'Some selected members are no longer new. Refresh the list and try again.');
+
+            foreach ($members as $member) {
+                $member->update(['assigned_to' => $staff->name, 'relationship_manager' => $staff->name]);
+            }
+        });
+
+        return back()->with('success', 'Selected members assigned successfully.');
+    }
+
     public function index(Request $request)
     {
         $newMembersOnly = $request->routeIs('admin.members.new');
+        $bannedMembersOnly = $request->routeIs('admin.members.banned');
         $query = SiteMember::query();
+
+        if ($bannedMembersOnly) {
+            $query->where('active', 'Banned');
+        }
 
         if ($newMembersOnly) {
             $query->where(function ($query) {
                 $query->whereNull('active')
-                    ->orWhere('active', '')
-                    ->orWhereRaw('LOWER(TRIM(active)) = ?', ['no']);
+                    ->orWhere('active', '');
             });
+        }
+
+        if ($request->filled('gender')) {
+            $query->where('gender', $request->string('gender')->toString());
+        }
+
+        if ($newMembersOnly && $request->filled('assigned_to')) {
+            $query->where('assigned_to', $request->string('assigned_to')->toString());
         }
 
         $query->addSelect([
@@ -134,9 +184,8 @@ class MemberController extends Controller
 
                 $query->where(function ($q) {
 
-                    $q->where('active', 'Banned')
-                        ->orWhereNull('banned')
-                        ->orWhere('banned', '');
+                    $q->where('active', '<>', 'Banned')
+                        ->orWhereNull('active');
                 });
             }
         }
@@ -278,7 +327,7 @@ class MemberController extends Controller
 
         $members = $query
             ->orderByDesc('id')
-            ->paginate(20)
+            ->paginate(($newMembersOnly || $bannedMembersOnly) && in_array($request->integer('per_page', 25), [10, 25, 50, 100], true) ? $request->integer('per_page', 25) : (($newMembersOnly || $bannedMembersOnly) ? 25 : 20))
             ->withQueryString();
 
         /*
@@ -311,11 +360,19 @@ class MemberController extends Controller
             ->orderBy('name')
             ->get();
 
+        $assignmentStaff = collect();
+        if ($newMembersOnly && auth('admin')->user()?->hasPermission('edit-member') && ! $relationshipManagerAccess->isRestricted()) {
+            $assignmentStaff = Admin::query()->where('status', true)->whereNotNull('name')->where('name', '<>', '')
+                ->orderBy('name')->get();
+        }
+
         return view('admin.members.index', compact(
             'members',
             'plans',
             'relationshipManagers',
-            'newMembersOnly'
+            'newMembersOnly',
+            'bannedMembersOnly',
+            'assignmentStaff'
         ));
     }
 
@@ -810,6 +867,14 @@ class MemberController extends Controller
             "View {$member->full_name}'s profile: {$shareUrl}"
         );
 
+        $remarkHistory = AdminActivityLog::query()
+            ->with('admin:id,name,profile_id')
+            ->where('site_id', app(SiteManager::class)->id())
+            ->where('member_id', $member->id)
+            ->where('action', 'remarks_updated')
+            ->latest()
+            ->get();
+
         /*
         |--------------------------------------------------------------------------
         | Return View
@@ -838,6 +903,7 @@ class MemberController extends Controller
             'returnUrl' => $returnUrl,
             'shareUrl' => $shareUrl,
             'whatsappShareUrl' => $whatsappShareUrl,
+            'remarkHistory' => $remarkHistory,
         ]);
     }
 
@@ -1791,6 +1857,32 @@ class MemberController extends Controller
     /**
      * Activate / deactivate member.
      */
+    public function updateBan(Request $request, int $id): RedirectResponse
+    {
+        abort_unless(auth('admin')->user()?->hasRole('super-admin'), 403);
+        $validated = $request->validate(['banned' => ['required', 'boolean']]);
+        $member = SiteMember::query()->findOrFail($id);
+        $oldValue = $member->active;
+        if ($validated['banned']) {
+            $member->active = 'Banned';
+        } elseif ($member->active === 'Banned') {
+            $member->active = 'Yes';
+        }
+        $member->save();
+
+        app(AdminActivityLogger::class)->log(
+            action: 'member_ban_updated',
+            description: "Changed status of {$member->profile_id} from {$oldValue} to {$member->active}.",
+            module: 'members',
+            memberId: (int) $member->id,
+            subjectType: 'member',
+            subjectId: (int) $member->id,
+            metadata: ['old_value' => $oldValue, 'new_value' => $member->active],
+        );
+
+        return back()->with('success', $validated['banned'] ? 'Member banned successfully.' : 'Member unbanned successfully.');
+    }
+
     public function toggleStatus($id)
     {
         $member = SiteMember::query()
@@ -1803,6 +1895,11 @@ class MemberController extends Controller
     |--------------------------------------------------------------------------
     */
 
+        abort_if($member->active === 'Banned', 403, 'Use the administrator unban action for banned members.');
+        abort_if($member->active === 'deleted', 403, 'Deleted profiles cannot be activated here.');
+        if ($member->active !== 'Yes') {
+            return redirect()->route('admin.members.activation.create', $id);
+        }
         $oldValue = $member->active;
 
         /*
@@ -1811,7 +1908,7 @@ class MemberController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $member->active = $member->is_active
+        $member->active = $member->active === 'Yes'
             ? 'No'
             : 'Yes';
 
@@ -3066,7 +3163,7 @@ class MemberController extends Controller
 
         $validated = $request->validate([
             'remarks' => [
-                'nullable',
+                'required',
                 'string',
                 'max:10000',
             ],
@@ -3129,6 +3226,9 @@ class MemberController extends Controller
                     'full_name' => $member->full_name,
                     'old_remarks' => $oldRemarks,
                     'new_remarks' => $newRemarks,
+                    'remark_type' => $member->active === 'Yes'
+                        ? 'RM Remarks'
+                        : 'Assigned Remarks',
                 ]
             );
 

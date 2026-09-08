@@ -1,6 +1,6 @@
 @extends('admin.layout')
 
-@section('title', $newMembersOnly ? 'New Members' : 'Members')
+@section('title', $newMembersOnly ? 'New Members' : ($bannedMembersOnly ? 'Banned Members' : 'Members'))
 
 @section('content')
 
@@ -11,13 +11,13 @@
 
         <div>
             <h1 class="h3 mb-1">
-                {{ $newMembersOnly ? 'New Members' : 'Members' }}
+                {{ $newMembersOnly ? 'New Members' : ($bannedMembersOnly ? 'Banned Members' : 'Members') }}
             </h1>
 
             <p class="text-muted mb-0">
                 {{ $newMembersOnly
                     ? 'Review profiles waiting to be activated.'
-                    : 'Manage members of the selected site.' }}
+                    : ($bannedMembersOnly ? 'Review and manage banned profiles of the selected site.' : 'Manage members of the selected site.') }}
             </p>
         </div>
         <a
@@ -39,10 +39,29 @@
 
             <form
                 method="GET"
-                action="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}">
+                action="{{ route($newMembersOnly ? 'admin.members.new' : ($bannedMembersOnly ? 'admin.members.banned' : 'admin.members.index')) }}">
 
                 <div class="row g-3">
 
+                    <div class="col-lg-2 col-md-6">
+                        <label for="new-member-gender" class="form-label">Gender</label>
+                        <select id="new-member-gender" name="gender" class="form-select">
+                            <option value="">All genders</option>
+                            @foreach(['Male', 'Female'] as $gender)
+                            <option value="{{ $gender }}" @selected(request('gender')===$gender)>{{ $gender }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @if($newMembersOnly || $bannedMembersOnly)
+                    <div class="col-lg-2 col-md-6">
+                        <label for="new-member-page-size" class="form-label">Per page</label>
+                        <select id="new-member-page-size" name="per_page" class="form-select" onchange="this.form.submit()">
+                            @foreach([10, 25, 50, 100] as $size)
+                            <option value="{{ $size }}" @selected($members->perPage() === $size)>{{ $size }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @endif
                     {{-- Search --}}
                     <div class="col-lg-4 col-md-6">
 
@@ -92,7 +111,7 @@
                                 {{ request('relationship_manager') === $manager->name ? 'selected' : '' }}>
                                 {{ $manager->name }}
                                 @if($manager->profile_id)
-                                    ({{ $manager->profile_id }})
+                                ({{ $manager->profile_id }})
                                 @endif
                             </option>
                             @endforeach
@@ -139,7 +158,7 @@
                     </div>
 
 
-                    {{-- Trusted --}}
+                    {{-- Trusted 
                     <div class="col-lg-2 col-md-6">
 
                         <label class="form-label fw-semibold">
@@ -158,789 +177,1065 @@
                                 value="yes"
                                 {{ request('trusted') === 'yes' ? 'selected' : '' }}>
 
-                                Trusted
+                    Trusted
 
-                            </option>
+                    </option>
 
-                            <option
-                                value="no"
-                                {{ request('trusted') === 'no' ? 'selected' : '' }}>
+                    <option
+                        value="no"
+                        {{ request('trusted') === 'no' ? 'selected' : '' }}>
 
-                                Not Trusted
+                        Not Trusted
 
-                            </option>
+                    </option>
 
-                        </select>
+                    </select>
 
-                    </div>
+                </div> --}}
 
-                    {{-- Banned Status --}}
-                    <div class="col-lg-2 col-md-6">
+                {{-- Banned Status 
+                <div class="col-lg-2 col-md-6">
 
-                        <label class="form-label fw-semibold">
-                            Banned
-                        </label>
+                    <label class="form-label fw-semibold">
+                        Banned
+                    </label>
 
-                        <select
-                            name="banned"
-                            class="form-select">
+                    <select
+                        name="banned"
+                        class="form-select">
 
-                            <option value="">
-                                All
-                            </option>
+                        <option value="">
+                            All
+                        </option>
 
-                            <option
-                                value="yes"
-                                {{ request('banned') === 'yes' ? 'selected' : '' }}>
-                                Banned
-                            </option>
+                        <option
+                            value="yes"
+                            {{ request('banned') === 'yes' ? 'selected' : '' }}>
+                Banned
+                </option>
 
-                            <option
-                                value="no"
-                                {{ request('banned') === 'no' ? 'selected' : '' }}>
-                                Not Banned
-                            </option>
+                <option
+                    value="no"
+                    {{ request('banned') === 'no' ? 'selected' : '' }}>
+                    Not Banned
+                </option>
 
-                        </select>
+                </select>
 
-                    </div>
-
-
-                    {{-- Promoted --}}
-                    <div class="col-lg-2 col-md-6">
-
-                        <label class="form-label fw-semibold">
-                            Promoted
-                        </label>
-
-                        <select
-                            name="promoted"
-                            class="form-select">
-
-                            <option value="">
-                                All
-                            </option>
-
-                            <option
-                                value="yes"
-                                {{ request('promoted') === 'yes' ? 'selected' : '' }}>
-
-                                Promoted
-
-                            </option>
-
-                            <option
-                                value="no"
-                                {{ request('promoted') === 'no' ? 'selected' : '' }}>
-
-                                Not Promoted
-
-                            </option>
-
-                        </select>
-
-                    </div>
+        </div> --}}
 
 
-                    {{-- Visibility --}}
-                    <div class="col-lg-2 col-md-6">
+        {{-- Promoted -
+        <div class="col-lg-2 col-md-6">
 
-                        <label class="form-label fw-semibold">
-                            Visibility
-                        </label>
+            <label class="form-label fw-semibold">
+                Promoted
+            </label>
 
-                        <select
-                            name="visibility"
-                            class="form-select">
+            <select
+                name="promoted"
+                class="form-select">
 
-                            <option value="">
-                                All
-                            </option>
+                <option value="">
+                    All
+                </option>
 
-                            <option
-                                value="visible"
-                                {{ request('visibility') === 'visible' ? 'selected' : '' }}>
+                <option
+                    value="yes"
+                    {{ request('promoted') === 'yes' ? 'selected' : '' }}>
 
-                                Visible
+        Promoted
 
-                            </option>
+        </option>
 
-                            <option
-                                value="hidden"
-                                {{ request('visibility') === 'hidden' ? 'selected' : '' }}>
+        <option
+            value="no"
+            {{ request('promoted') === 'no' ? 'selected' : '' }}>
 
-                                Hidden
+            Not Promoted
 
-                            </option>
+        </option>
 
-                        </select>
+        </select>
 
-                    </div>
+    </div> -}}
 
-                    {{-- Membership Plan --}}
 
-                    <div class="col-lg-2 col-md-6">
+    {{-- Visibility --}}
+    <div class="col-lg-2 col-md-6">
 
-                        <label class="form-label fw-semibold">
-                            Membership Plan
-                        </label>
+        <label class="form-label fw-semibold">
+            Visibility
+        </label>
 
-                        <select
-                            name="plan_id"
-                            class="form-select">
+        <select
+            name="visibility"
+            class="form-select">
 
-                            <option value="">
-                                All Plans
-                            </option>
+            <option value="">
+                All
+            </option>
 
-                            <option
-                                value="none"
-                                {{ request('plan_id') === 'none' ? 'selected' : '' }}>
+            <option
+                value="visible"
+                {{ request('visibility') === 'visible' ? 'selected' : '' }}>
 
-                                No Plan
+                Visible
 
-                            </option>
+            </option>
 
-                            @foreach($plans as $plan)
+            <option
+                value="hidden"
+                {{ request('visibility') === 'hidden' ? 'selected' : '' }}>
 
-                            <option
-                                value="{{ $plan->id }}"
-                                {{ request()->filled('plan_id') &&
+                Hidden
+
+            </option>
+
+        </select>
+
+    </div>
+
+    {{-- Membership Plan --}}
+
+    <div class="col-lg-2 col-md-6">
+
+        <label class="form-label fw-semibold">
+            Membership Plan
+        </label>
+
+        <select
+            name="plan_id"
+            class="form-select">
+
+            <option value="">
+                All Plans
+            </option>
+
+            <option
+                value="none"
+                {{ request('plan_id') === 'none' ? 'selected' : '' }}>
+
+                No Plan
+
+            </option>
+
+            @foreach($plans as $plan)
+
+            <option
+                value="{{ $plan->id }}"
+                {{ request()->filled('plan_id') &&
                                     (string) request('plan_id') === (string) $plan->id
                                     ? 'selected'
                                     : '' }}>
 
-                                {{ $plan->plan_name }}
+                {{ $plan->plan_name }}
 
-                            </option>
+            </option>
 
-                            @endforeach
+            @endforeach
 
-                        </select>
+        </select>
 
-                    </div>
+    </div>
 
-                    {{-- Sort --}}
+    {{-- Sort --}}
 
-                    <div class="col-lg-2 col-md-6">
+    <div class="col-lg-2 col-md-6">
 
-                        <label class="form-label fw-semibold">
-                            Sort By
-                        </label>
+        <label class="form-label fw-semibold">
+            Sort By
+        </label>
 
-                        <select
-                            name="sort"
-                            class="form-select">
+        <select
+            name="sort"
+            class="form-select">
 
-                            <option
-                                value="newest"
-                                {{ request('sort', 'newest') === 'newest' ? 'selected' : '' }}>
-                                Newest First
-                            </option>
+            <option
+                value="newest"
+                {{ request('sort', 'newest') === 'newest' ? 'selected' : '' }}>
+                Newest First
+            </option>
 
-                            <option
-                                value="oldest"
-                                {{ request('sort') === 'oldest' ? 'selected' : '' }}>
-                                Oldest First
-                            </option>
+            <option
+                value="oldest"
+                {{ request('sort') === 'oldest' ? 'selected' : '' }}>
+                Oldest First
+            </option>
 
-                            <option
-                                value="name_asc"
-                                {{ request('sort') === 'name_asc' ? 'selected' : '' }}>
-                                Name A-Z
-                            </option>
+            <option
+                value="name_asc"
+                {{ request('sort') === 'name_asc' ? 'selected' : '' }}>
+                Name A-Z
+            </option>
 
-                            <option
-                                value="name_desc"
-                                {{ request('sort') === 'name_desc' ? 'selected' : '' }}>
-                                Name Z-A
-                            </option>
+            <option
+                value="name_desc"
+                {{ request('sort') === 'name_desc' ? 'selected' : '' }}>
+                Name Z-A
+            </option>
 
-                            <option
-                                value="profile_asc"
-                                {{ request('sort') === 'profile_asc' ? 'selected' : '' }}>
-                                Profile ID A-Z
-                            </option>
+            <option
+                value="profile_asc"
+                {{ request('sort') === 'profile_asc' ? 'selected' : '' }}>
+                Profile ID A-Z
+            </option>
 
-                            <option
-                                value="profile_desc"
-                                {{ request('sort') === 'profile_desc' ? 'selected' : '' }}>
-                                Profile ID Z-A
-                            </option>
+            <option
+                value="profile_desc"
+                {{ request('sort') === 'profile_desc' ? 'selected' : '' }}>
+                Profile ID Z-A
+            </option>
 
-                        </select>
+        </select>
 
-                    </div>
-
-
-                    {{-- Buttons --}}
-                    <div class="col-12">
-
-                        <div class="d-flex gap-2">
-
-                            <button
-                                type="submit"
-                                class="btn btn-primary">
-
-                                <i class="bi bi-funnel me-1"></i>
-                                Apply Filters
-
-                            </button>
+    </div>
 
 
-                            <a
-                                href="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}"
-                                class="btn btn-outline-secondary">
+    {{-- Buttons --}}
+    <div class="col-12">
 
-                                <i class="bi bi-arrow-counterclockwise me-1"></i>
-                                Reset
+        <div class="d-flex gap-2">
 
-                            </a>
+            <button
+                type="submit"
+                class="btn btn-primary">
 
-                        </div>
+                <i class="bi bi-funnel me-1"></i>
+                Apply Filters
 
-                    </div>
+            </button>
 
-                </div>
 
-            </form>
+            <a
+                href="{{ route($newMembersOnly ? 'admin.members.new' : ($bannedMembersOnly ? 'admin.members.banned' : 'admin.members.index')) }}"
+                class="btn btn-outline-secondary">
+
+                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                Reset
+
+            </a>
 
         </div>
 
     </div>
 
-    {{-- =========================================================
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+{{-- =========================================================
     Active Filters
 ========================================================= --}}
 
-    @php
-    $hasFilters =
-    request()->filled('search') ||
-    request()->filled('status') ||
-    request()->filled('trusted') ||
-    request()->filled('promoted') ||
-    request()->filled('visibility') ||
-    request()->filled('banned') ||
-    request()->filled('plan_id') ||
-    request()->filled('relationship_manager') ||
-    request()->filled('sort');
-    @endphp
+@php
+$hasFilters =
+request()->filled('search') ||
+request()->filled('gender') ||
+request()->filled('status') ||
+request()->filled('trusted') ||
+request()->filled('promoted') ||
+request()->filled('visibility') ||
+request()->filled('banned') ||
+request()->filled('plan_id') ||
+request()->filled('relationship_manager') ||
+request()->filled('sort');
+@endphp
 
 
-    @if($hasFilters)
+@if($hasFilters)
 
-    <div class="card border-0 shadow-sm mb-4">
+<div class="card border-0 shadow-sm mb-4">
 
-        <div class="card-body py-3">
+    <div class="card-body py-3">
 
-            <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
 
-                <span class="fw-semibold text-muted me-1">
-                    <i class="bi bi-funnel me-1"></i>
-                    Active Filters:
-                </span>
+            <span class="fw-semibold text-muted me-1">
+                <i class="bi bi-funnel me-1"></i>
+                Active Filters:
+            </span>
 
 
-                {{-- Search --}}
+            {{-- Search --}}
 
-                @if(request()->filled('search'))
+            @if(request()->filled('search'))
 
-                <span class="badge bg-primary d-flex align-items-center gap-1">
+            <span class="badge bg-primary d-flex align-items-center gap-1">
 
-                    Search:
-                    {{ request('search') }}
+                Search:
+                {{ request('search') }}
 
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
+                <a
+                    href="{{ request()->fullUrlWithQuery([
                                 'search' => null,
                                 'page' => null
                             ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove search">
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove search">
 
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-                {{-- Relationship Manager --}}
-
-                @if(request()->filled('relationship_manager'))
-
-                <span class="badge bg-primary d-flex align-items-center gap-1">
-
-                    Relationship Manager:
-                    {{ request('relationship_manager') === '__unassigned'
-                        ? 'Unassigned'
-                        : request('relationship_manager') }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'relationship_manager' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove relationship manager filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Status --}}
-
-                @if(request()->filled('status'))
-
-                <span class="badge bg-secondary d-flex align-items-center gap-1">
-
-                    Status:
-                    {{ request('status') === 'active' ? 'Active' : 'Inactive' }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'status' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove status">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Trusted --}}
-
-                @if(request()->filled('trusted'))
-
-                <span class="badge bg-info text-dark d-flex align-items-center gap-1">
-
-                    Trusted:
-                    {{ request('trusted') === 'yes' ? 'Yes' : 'No' }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'trusted' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-dark text-decoration-none ms-1"
-                        title="Remove trusted filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-                {{-- Banned --}}
-
-                @if(request()->filled('banned'))
-
-                <span class="badge bg-danger d-flex align-items-center gap-1">
-
-                    Banned:
-                    {{ request('banned') === 'yes' ? 'Yes' : 'No' }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                'banned' => null,
-                'page' => null
-            ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove banned filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Promoted --}}
-
-                @if(request()->filled('promoted'))
-
-                <span class="badge bg-warning text-dark d-flex align-items-center gap-1">
-
-                    Promoted:
-                    {{ request('promoted') === 'yes' ? 'Yes' : 'No' }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'promoted' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-dark text-decoration-none ms-1"
-                        title="Remove promoted filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Visibility --}}
-
-                @if(request()->filled('visibility'))
-
-                <span class="badge bg-dark d-flex align-items-center gap-1">
-
-                    Visibility:
-                    {{ request('visibility') === 'visible' ? 'Visible' : 'Hidden' }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'visibility' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove visibility filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Membership Plan --}}
-
-                @if(request()->filled('plan_id'))
-
-                @php
-                $selectedPlan = null;
-
-                if (request('plan_id') !== 'none') {
-                $selectedPlan = $plans->firstWhere(
-                'id',
-                request('plan_id')
-                );
-                }
-                @endphp
-
-
-                <span class="badge bg-primary d-flex align-items-center gap-1">
-
-                    Plan:
-
-                    @if(request('plan_id') === 'none')
-
-                    No Plan
-
-                    @elseif($selectedPlan)
-
-                    {{ $selectedPlan->plan_name }}
-
-                    @else
-
-                    Unknown Plan
-
-                    @endif
-
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'plan_id' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-white text-decoration-none ms-1"
-                        title="Remove membership filter">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Sort --}}
-
-                @if(request()->filled('sort'))
-
-                @php
-                $sortLabels = [
-                'newest' => 'Newest First',
-                'oldest' => 'Oldest First',
-                'name_asc' => 'Name A-Z',
-                'name_desc' => 'Name Z-A',
-                'profile_asc' => 'Profile ID A-Z',
-                'profile_desc' => 'Profile ID Z-A',
-                ];
-
-                $sortLabel = $sortLabels[request('sort')] ?? request('sort');
-                @endphp
-
-
-                <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
-
-                    Sort:
-                    {{ $sortLabel }}
-
-                    <a
-                        href="{{ request()->fullUrlWithQuery([
-                                'sort' => null,
-                                'page' => null
-                            ]) }}"
-                        class="text-dark text-decoration-none ms-1"
-                        title="Remove sorting">
-
-                        &times;
-
-                    </a>
-
-                </span>
-
-                @endif
-
-
-                {{-- Clear All --}}
-
-                <a
-                    href="{{ route($newMembersOnly ? 'admin.members.new' : 'admin.members.index') }}"
-                    class="btn btn-sm btn-outline-danger ms-1">
-
-                    <i class="bi bi-x-circle me-1"></i>
-                    Clear All
+                    &times;
 
                 </a>
 
-            </div>
+            </span>
+
+            @endif
+
+            @if(request()->filled('gender'))
+            <span class="badge bg-primary d-flex align-items-center gap-1">
+                Gender: {{ request('gender') }}
+                <a
+                    href="{{ request()->fullUrlWithQuery(['gender' => null, 'page' => null]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove gender filter"
+                    aria-label="Remove gender filter">
+                    &times;
+                </a>
+            </span>
+            @endif
+
+            {{-- Relationship Manager --}}
+
+            @if(request()->filled('relationship_manager'))
+
+            <span class="badge bg-primary d-flex align-items-center gap-1">
+
+                Relationship Manager:
+                {{ request('relationship_manager') === '__unassigned'
+                        ? 'Unassigned'
+                        : request('relationship_manager') }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'relationship_manager' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove relationship manager filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Status --}}
+
+            @if(request()->filled('status'))
+
+            <span class="badge bg-secondary d-flex align-items-center gap-1">
+
+                Status:
+                {{ request('status') === 'active' ? 'Active' : 'Inactive' }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'status' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove status">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Trusted --}}
+
+            @if(request()->filled('trusted'))
+
+            <span class="badge bg-info text-dark d-flex align-items-center gap-1">
+
+                Trusted:
+                {{ request('trusted') === 'yes' ? 'Yes' : 'No' }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'trusted' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-dark text-decoration-none ms-1"
+                    title="Remove trusted filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+            {{-- Banned --}}
+
+            @if(request()->filled('banned'))
+
+            <span class="badge bg-danger d-flex align-items-center gap-1">
+
+                Banned:
+                {{ request('banned') === 'yes' ? 'Yes' : 'No' }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                'banned' => null,
+                'page' => null
+            ]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove banned filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Promoted --}}
+
+            @if(request()->filled('promoted'))
+
+            <span class="badge bg-warning text-dark d-flex align-items-center gap-1">
+
+                Promoted:
+                {{ request('promoted') === 'yes' ? 'Yes' : 'No' }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'promoted' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-dark text-decoration-none ms-1"
+                    title="Remove promoted filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Visibility --}}
+
+            @if(request()->filled('visibility'))
+
+            <span class="badge bg-dark d-flex align-items-center gap-1">
+
+                Visibility:
+                {{ request('visibility') === 'visible' ? 'Visible' : 'Hidden' }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'visibility' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove visibility filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Membership Plan --}}
+
+            @if(request()->filled('plan_id'))
+
+            @php
+            $selectedPlan = null;
+
+            if (request('plan_id') !== 'none') {
+            $selectedPlan = $plans->firstWhere(
+            'id',
+            request('plan_id')
+            );
+            }
+            @endphp
+
+
+            <span class="badge bg-primary d-flex align-items-center gap-1">
+
+                Plan:
+
+                @if(request('plan_id') === 'none')
+
+                No Plan
+
+                @elseif($selectedPlan)
+
+                {{ $selectedPlan->plan_name }}
+
+                @else
+
+                Unknown Plan
+
+                @endif
+
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'plan_id' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-white text-decoration-none ms-1"
+                    title="Remove membership filter">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Sort --}}
+
+            @if(request()->filled('sort'))
+
+            @php
+            $sortLabels = [
+            'newest' => 'Newest First',
+            'oldest' => 'Oldest First',
+            'name_asc' => 'Name A-Z',
+            'name_desc' => 'Name Z-A',
+            'profile_asc' => 'Profile ID A-Z',
+            'profile_desc' => 'Profile ID Z-A',
+            ];
+
+            $sortLabel = $sortLabels[request('sort')] ?? request('sort');
+            @endphp
+
+
+            <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
+
+                Sort:
+                {{ $sortLabel }}
+
+                <a
+                    href="{{ request()->fullUrlWithQuery([
+                                'sort' => null,
+                                'page' => null
+                            ]) }}"
+                    class="text-dark text-decoration-none ms-1"
+                    title="Remove sorting">
+
+                    &times;
+
+                </a>
+
+            </span>
+
+            @endif
+
+
+            {{-- Clear All --}}
+
+            <a
+                href="{{ route($newMembersOnly ? 'admin.members.new' : ($bannedMembersOnly ? 'admin.members.banned' : 'admin.members.index')) }}"
+                class="btn btn-sm btn-outline-danger ms-1">
+
+                <i class="bi bi-x-circle me-1"></i>
+                Clear All
+
+            </a>
 
         </div>
 
     </div>
 
+</div>
+
+@endif
+
+
+@if($newMembersOnly)
+<div class="d-flex align-items-center gap-3 mb-3">
+    <span class="badge bg-primary">{{ $members->total() }} new members</span>
+    @if(auth('admin')->user()?->hasPermission('edit-member') && !app(\App\Services\RelationshipManagerAccess::class)->isRestricted())
+    <form id="assign-new-members" method="POST" action="{{ route('admin.members.new.assign-staff') }}" class="d-flex gap-2">
+        @csrf
+        <select name="staff_id" class="form-select" aria-label="Assign staff" required>
+            <option value="">Select staff</option>
+            @foreach($assignmentStaff as $manager)
+            <option value="{{ $manager->id }}">{{ $manager->name }}</option>
+            @endforeach
+        </select>
+        <button class="btn btn-primary text-nowrap" type="submit">Assign Staff</button>
+    </form>
     @endif
+</div>
+@endif
+{{-- Members Table --}}
+<div class="card border-0 shadow-sm">
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        @if($newMembersOnly)
+                        <th><input type="checkbox" id="select-new-members" aria-label="Select all members on this page"></th>
+                        @endif
+                        @if($bannedMembersOnly)
+                        <th>Photo</th>
+                        <th>Completed</th>
+                        @endif
+
+                        <th>Profile ID</th>
+                        <th>{{ $newMembersOnly ? 'Name' : 'Member' }}</th>
+
+                        @unless($newMembersOnly)
+                        <th>Mobile</th>
+                        @endunless
+
+                        <th>Gender</th>
+
+                        <th>Registration</th>
+
+                        <th>{{ $newMembersOnly ? 'Plan' : 'Membership' }}</th>
+
+                        @if($newMembersOnly)
+                        <th>Profile %</th>
+
+                        <th>Assigned To</th>
+
+                        <th>Source</th>
+
+                        @else
+                        <th>Relationship Manager</th>
+
+                        <th>Status</th>
+                        @endif
+
+                        <th class="text-end">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
 
 
-    {{-- Members Table --}}
-    <div class="card border-0 shadow-sm">
+                <tbody>
 
-        <div class="card-body p-0">
+                    @forelse($members as $member)
 
-            <div class="table-responsive">
+                    <tr>
 
-                <table class="table table-hover align-middle mb-0">
+                        @if($newMembersOnly)
+                        <td><input type="checkbox" class="new-member-checkbox" name="member_ids[]" value="{{ $member->id }}" form="assign-new-members" aria-label="Select {{ $member->profile_id }}"></td>
+                        @endif
+                        @if($bannedMembersOnly)
+                        <td>
+                            @if($member->photo)
+                            <img src="{{ app(\App\Services\MemberPhotoService::class)->url($member->photo) }}" alt="{{ $member->full_name }}" width="64" height="64" class="rounded object-fit-cover" loading="lazy">
+                            @else
+                            <span class="text-muted">No photo</span>
+                            @endif
+                        </td>
+                        <td>{{ $member->profile_completed ?? 0 }}%</td>
+                        @endif
+                        {{-- Profile ID --}}
+                        <td>
 
-                    <thead class="table-light">
+                            <strong>
+                                {{ $member->profile_id }}
+                            </strong>
 
-                        <tr>
-
-                            <th>Profile ID</th>
-
-                            <th>Member</th>
-
-                            <th>Mobile</th>
-
-                            <th>Gender</th>
-
-                            <th>Registration</th>
-
-                            <th>Membership</th>
-
-                            <th>Relationship Manager</th>
-
-                            <th>Status</th>
-
-                            <th class="text-end">
-                                Action
-                            </th>
-
-                        </tr>
-
-                    </thead>
+                        </td>
 
 
-                    <tbody>
+                        {{-- Member --}}
+                        <td>
 
-                        @forelse($members as $member)
-
-                        <tr>
-
-                            {{-- Profile ID --}}
-                            <td>
+                            <div>
 
                                 <strong>
-                                    {{ $member->profile_id }}
+                                    {{ $member->full_name }}
                                 </strong>
 
-                            </td>
-
-
-                            {{-- Member --}}
-                            <td>
-
-                                <div>
-
-                                    <strong>
-                                        {{ $member->full_name }}
-                                    </strong>
-
-                                    <div class="small text-muted">
-                                        {{ $member->email }}
-                                    </div>
-
+                                @unless($newMembersOnly)
+                                <div class="small text-muted">
+                                    {{ $member->email }}
                                 </div>
+                                @endunless
 
-                            </td>
+                            </div>
 
-
-                            {{-- Mobile --}}
-                            <td>
-                                {{ $member->mobile_number }}
-                            </td>
+                        </td>
 
 
-                            {{-- Gender --}}
-                            <td>
-                                {{ $member->gender }}
-                            </td>
+                        {{-- Mobile --}}
+                        @unless($newMembersOnly)
+                        <td>
+                            {{ $member->mobile_number }}
+                        </td>
+                        @endunless
 
 
-                            {{-- Registration --}}
-                            <td>
-                                {{ $member->registration_date }}
-                            </td>
-
-                            <td>
-                                @if(!empty($member->membership_plan_name))
-
-                                @php
-                                $planName = strtolower($member->membership_plan_name);
-
-                                $planClass = match (true) {
-                                str_contains($planName, 'platinum'),
-                                str_contains($planName, 'vip') => 'bg-danger',
-
-                                str_contains($planName, 'premium') => 'bg-primary',
-
-                                str_contains($planName, 'gold') => 'bg-warning text-dark',
-
-                                str_contains($planName, 'silver') => 'bg-info text-dark',
-
-                                str_contains($planName, 'basic'),
-                                str_contains($planName, 'free') => 'bg-secondary',
-
-                                default => 'bg-dark',
-                                };
-                                @endphp
-
-                                <span class="badge {{ $planClass }}">
-                                    {{ $member->membership_plan_name }}
-                                </span>
-
-                                @else
-
-                                <span class="badge bg-light text-muted border">
-                                    No Plan
-                                </span>
-
-                                @endif
-                            </td>
-
-                            {{-- Relationship Manager --}}
-                            <td>
-                                @if(!empty($member->relationship_manager))
-                                <span class="badge bg-light text-dark border">
-                                    <i class="bi bi-person-badge me-1"></i>
-                                    {{ $member->relationship_manager }}
-                                </span>
-                                @else
-                                <span class="text-muted">Unassigned</span>
-                                @endif
-                            </td>
-
-                            {{-- Status --}}
-                            <td>
-
-                                @if($member->active === 'Yes')
-
-                                <span class="badge bg-success">
-                                    Active
-                                </span>
-
-                                @else
-
-                                <span class="badge bg-secondary">
-                                    Inactive
-                                </span>
-
-                                @endif
-
-                            </td>
+                        {{-- Gender --}}
+                        <td>
+                            {{ $member->gender }}
+                        </td>
 
 
-                            <td class="text-end">
+                        {{-- Registration --}}
+                        <td>
+                            {{ $member->registration_date }}
+                        </td>
 
-                                <div class="dropdown">
+                        <td>
+                            @if(!empty($member->membership_plan_name))
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
+                            @php
+                            $planName = strtolower($member->membership_plan_name);
 
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                        Actions
+                            $planClass = match (true) {
+                            str_contains($planName, 'platinum'),
+                            str_contains($planName, 'vip') => 'bg-danger',
 
-                                    </button>
+                            str_contains($planName, 'premium') => 'bg-primary',
 
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            str_contains($planName, 'gold') => 'bg-warning text-dark',
 
-                                        {{-- View Profile --}}
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="{{ route('admin.members.show', $member->id) }}">
+                            str_contains($planName, 'silver') => 'bg-info text-dark',
 
-                                                <i class="bi bi-person me-2 text-primary"></i>
-                                                View Profile
+                            str_contains($planName, 'basic'),
+                            str_contains($planName, 'free') => 'bg-secondary',
 
-                                            </a>
-                                        </li>
+                            default => 'bg-dark',
+                            };
+                            @endphp
+
+                            <span class="badge {{ $planClass }}">
+                                {{ $member->membership_plan_name }}
+                            </span>
+
+                            @else
+
+                            <span class="badge bg-light text-muted border">
+                                No Plan
+                            </span>
+
+                            @endif
+                        </td>
+
+                        @if($newMembersOnly)
+                        <td>{{ $member->profile_completed ?? 0 }}%</td>
+                        <td>{{ $member->assigned_to ?: 'Unassigned' }}</td>
+                        <td>{{ $member->register_through ?: '—' }}</td>
+                        @else
+                        {{-- Relationship Manager --}}
+                        <td>
+                            @if(!empty($member->relationship_manager))
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-person-badge me-1"></i>
+                                {{ $member->relationship_manager }}
+                            </span>
+                            @else
+                            <span class="text-muted">Unassigned</span>
+                            @endif
+                        </td>
+
+                        {{-- Status --}}
+                        <td>
+
+                            @if($member->active === 'Yes')
+
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+
+                            @else
+
+                            <span class="badge {{ $member->active === 'Banned' ? 'bg-danger' : 'bg-secondary' }}">
+                                {{ $member->active === 'Banned' ? 'Banned' : 'Inactive' }}
+                            </span>
+
+                            @endif
+
+                        </td>
 
 
-                                        {{-- Edit Profile --}}
+                        @endif
 
-                                        @if(auth('admin')->user()?->hasPermission('edit-member'))
+                        <td class="text-end">
 
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="{{ route('admin.members.edit', $member->id) }}">
+                            <div class="dropdown">
 
-                                                <i class="bi bi-pencil me-2 text-primary"></i>
-                                                Edit Profile
+                                <button
+                                    type="button"
+                                    class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
 
-                                            </a>
-                                        </li>
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                    Actions
 
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+
+                                    {{-- View Profile --}}
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="{{ route('admin.members.show', $member->id) }}">
+
+                                            <i class="bi bi-person me-2 text-primary"></i>
+                                            View Profile
+
+                                        </a>
+                                    </li>
+
+
+                                    @if($bannedMembersOnly)
+                                    <li><a class="dropdown-item" href="{{ route('admin.members.show', $member->id) }}#identity-proof">Identity Proof</a></li>
+                                    @endif
+                                    @if($newMembersOnly || $bannedMembersOnly)
+                                    @if(auth('admin')->user()?->hasRole('super-admin'))
+                                    <li><a class="dropdown-item" href="{{ route('admin.members.print', $member->id) }}" target="_blank" rel="noopener">Print Profile</a></li>
+                                    @endif
+                                    @endif
+                                    {{-- Edit Profile --}}
+
+                                    @if(auth('admin')->user()?->hasPermission('edit-member'))
+
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="{{ route('admin.members.edit', $member->id) }}">
+
+                                            <i class="bi bi-pencil me-2 text-primary"></i>
+                                            Edit Profile
+
+                                        </a>
+                                    </li>
+
+                                    @endif
+
+                                    <li>
+                                        <button
+                                            type="button"
+                                            class="dropdown-item"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#remarkModal"
+                                            data-remark-action="{{ route('admin.members.remarks.update', $member->id) }}"
+                                            data-member-name="{{ $member->full_name }}">
+                                            <i class="bi bi-chat-left-text me-2 text-warning"></i>
+                                            Remarks
+                                        </button>
+                                    </li>
+
+                                    @if(auth('admin')->user()?->hasPermission('add-rotations'))
+
+                                    <li>
+                                        <button
+                                            type="button"
+                                            class="dropdown-item"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#rotationModal"
+                                            data-member-id="{{ $member->id }}"
+                                            data-member-name="{{ $member->full_name }}">
+
+                                            <i class="bi bi-arrow-repeat me-2"></i>
+                                            Add Rotation
+
+                                        </button>
+                                    </li>
+
+                                    @endif
+
+
+                                    {{-- Activity --}}
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="{{ route('admin.activities.member', [
+                        'memberId' => $member->id,
+                        'activity' => 'shortlisted'
+                    ]) }}">
+
+                                            <i class="bi bi-activity me-2 text-info"></i>
+                                            View Activity
+
+                                        </a>
+                                    </li>
+
+
+                                    {{-- Photos --}}
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="{{ route('admin.members.show', $member->id) }}#gallery">
+
+                                            <i class="bi bi-images me-2 text-info"></i>
+                                            Manage Photos
+
+                                        </a>
+                                    </li>
+
+
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+
+
+                                    {{-- Trusted and promoted member actions are temporarily disabled. --}}
+                                    @if(false)
+                                    {{-- Trusted --}}
+                                    <li>
+
+                                        <form
+                                            action="{{ route('admin.members.toggle-trusted', $member->id) }}"
+                                            method="POST"
+                                            class="member-action-form"
+                                            data-confirm-title="Change Trusted Status"
+                                            data-confirm="Are you sure you want to change this member's trusted status?">
+
+                                            @csrf
+
+                                            <button type="submit" class="dropdown-item">
+                                                @if($member->is_trusted === 'Yes')
+                                                <i class="bi bi-patch-check-fill me-2 text-success"></i>
+                                                Remove Trusted
+                                                @else
+                                                <i class="bi bi-patch-check me-2 text-success"></i>
+                                                Mark as Trusted
+                                                @endif
+                                            </button>
+
+                                        </form>
+
+                                    </li>
+
+
+                                    {{-- Promoted --}}
+                                    <li>
+
+                                        <form
+                                            action="{{ route('admin.members.toggle-promoted', $member->id) }}"
+                                            method="POST"
+                                            class="member-action-form"
+                                            data-confirm-title="Change Promotion Status"
+                                            data-confirm="Are you sure you want to change this member's promotion status?">
+
+                                            @csrf
+
+                                            <button type="submit" class="dropdown-item">
+                                                @if($member->promoted === 'Yes')
+                                                <i class="bi bi-star-fill me-2 text-warning"></i>
+                                                Remove Promotion
+                                                @else
+                                                <i class="bi bi-star me-2 text-warning"></i>
+                                                Promote Member
+                                                @endif
+                                            </button>
+
+                                        </form>
+
+                                    </li>
+                                    @endif
+
+
+                                    @if($member->active !== 'Banned')
+                                    {{-- Active / Inactive --}}
+                                    <li>
+                                        @if($member->active !== 'Yes')
+                                        @if(auth('admin')->user()?->hasPermission('edit-member') && !app(\App\Services\RelationshipManagerAccess::class)->isRestricted())
+                                        <a class="dropdown-item" href="{{ route('admin.members.activation.create', $member->id) }}">
+                                            <i class="bi bi-person-check me-2 text-success"></i>Activate Member
+                                        </a>
                                         @endif
+                                        @else
+                                        <form
+                                            action="{{ route('admin.members.toggle-status', $member->id) }}"
+                                            method="POST"
+                                            class="member-action-form"
+                                            data-confirm-title="Change Member Status"
+                                            data-confirm="Are you sure you want to change this member's active status?">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">
+                                                @if($member->active === 'Yes')
+                                                <i class="bi bi-person-x me-2 text-danger"></i>
+                                                Deactivate Member
+                                                @else
+                                                <i class="bi bi-person-check me-2 text-success"></i>
+                                                Activate Member
+                                                @endif
+                                            </button>
+                                        </form>
+                                    </li>
+                                    @endif
+                                    @endif
 
-                                        @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
+                                    {{-- Visibility --}}
+                                    <li>
 
+                                        <form
+                                            action="{{ route('admin.members.toggle-visibility', $member->id) }}"
+                                            method="POST"
+                                            class="member-action-form"
+                                            data-confirm-title="Change Profile Visibility"
+                                            data-confirm="Are you sure you want to change this member's profile visibility?">
+
+                                            @csrf
+
+                                            <button type="submit" class="dropdown-item">
+                                                @if($member->profile_hide === 'Yes')
+                                                <i class="bi bi-eye me-2 text-success"></i>
+                                                Show Profile
+                                                @else
+                                                <i class="bi bi-eye-slash me-2 text-warning"></i>
+                                                Hide Profile
+                                                @endif
+                                            </button>
+
+                                        </form>
+
+                                    </li>
+
+
+                                    @if(auth('admin')->user()?->hasRole('super-admin'))
+                                    <li>
+                                        <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" class="member-action-form" data-confirm-title="Change Ban Status" data-confirm="{{ $member->active === 'Banned' ? 'Unban and activate this member?' : 'Ban this member?' }}">
+                                            @csrf
+                                            <input type="hidden" name="banned" value="{{ $member->active === 'Banned' ? 0 : 1 }}">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi {{ $member->active === 'Banned' ? 'bi-person-check' : 'bi-person-slash' }} me-2"></i>
+                                                {{ $member->active === 'Banned' ? 'Unban Member' : 'Ban Member' }}
+                                            </button>
+                                        </form>
+                                    </li>
+                                    @endif
+                                    @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
+
+                                    <li>
                                         <button
                                             type="button"
                                             class="dropdown-item text-danger"
@@ -951,236 +1246,121 @@
                                             data-profile-id="{{ $member->profile_id }}"
                                             data-member-name="{{ $member->full_name }}">
                                             <i class="bi bi-trash3 me-2"></i>
-                                            Raise Delete Request
+                                            Delete Profile
                                         </button>
+                                    </li>
 
-                                        @endif
+                                    @endif
 
+                                </ul>
 
-                                        {{-- Activity --}}
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="{{ route('admin.activities.member', [
-                        'memberId' => $member->id,
-                        'activity' => 'shortlisted'
-                    ]) }}">
+                            </div>
 
-                                                <i class="bi bi-activity me-2 text-info"></i>
-                                                View Activity
+                        </td>
 
-                                            </a>
-                                        </li>
+                    </tr>
 
+                    @empty
 
-                                        {{-- Photos --}}
-                                        <li>
-                                            <a
-                                                class="dropdown-item"
-                                                href="{{ route('admin.members.show', $member->id) }}#gallery">
+                    <tr>
 
-                                                <i class="bi bi-images me-2 text-info"></i>
-                                                Manage Photos
+                        <td
+                            colspan="{{ $newMembersOnly ? 10 : ($bannedMembersOnly ? 11 : 9) }}"
+                            class="text-center py-5 text-muted">
+                            No members found.
+                        </td>
 
-                                            </a>
-                                        </li>
+                    </tr>
 
+                    @endforelse
 
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
+                </tbody>
 
-
-                                        {{-- Trusted --}}
-                                        <li>
-
-                                            <form
-                                                action="{{ route('admin.members.toggle-trusted', $member->id) }}"
-                                                method="POST"
-                                                class="member-action-form"
-                                                data-confirm-title="Change Trusted Status"
-                                                data-confirm="Are you sure you want to change this member's trusted status?">
-
-                                                @csrf
-
-                                                <button type="submit" class="dropdown-item">
-                                                    @if($member->is_trusted === 'Yes')
-                                                    <i class="bi bi-patch-check-fill me-2 text-success"></i>
-                                                    Remove Trusted
-                                                    @else
-                                                    <i class="bi bi-patch-check me-2 text-success"></i>
-                                                    Mark as Trusted
-                                                    @endif
-                                                </button>
-
-                                            </form>
-
-                                        </li>
-
-
-                                        {{-- Promoted --}}
-                                        <li>
-
-                                            <form
-                                                action="{{ route('admin.members.toggle-promoted', $member->id) }}"
-                                                method="POST"
-                                                class="member-action-form"
-                                                data-confirm-title="Change Promotion Status"
-                                                data-confirm="Are you sure you want to change this member's promotion status?">
-
-                                                @csrf
-
-                                                <button type="submit" class="dropdown-item">
-                                                    @if($member->promoted === 'Yes')
-                                                    <i class="bi bi-star-fill me-2 text-warning"></i>
-                                                    Remove Promotion
-                                                    @else
-                                                    <i class="bi bi-star me-2 text-warning"></i>
-                                                    Promote Member
-                                                    @endif
-                                                </button>
-
-                                            </form>
-
-                                        </li>
-
-
-                                        {{-- Visibility --}}
-                                        <li>
-
-                                            <form
-                                                action="{{ route('admin.members.toggle-visibility', $member->id) }}"
-                                                method="POST"
-                                                class="member-action-form"
-                                                data-confirm-title="Change Profile Visibility"
-                                                data-confirm="Are you sure you want to change this member's profile visibility?">
-
-                                                @csrf
-
-                                                <button type="submit" class="dropdown-item">
-                                                    @if($member->profile_hide === 'Yes')
-                                                    <i class="bi bi-eye me-2 text-success"></i>
-                                                    Show Profile
-                                                    @else
-                                                    <i class="bi bi-eye-slash me-2 text-warning"></i>
-                                                    Hide Profile
-                                                    @endif
-                                                </button>
-
-                                            </form>
-
-                                        </li>
-
-
-                                        {{-- Active / Inactive --}}
-                                        <li>
-
-                                            <form
-                                                action="{{ route('admin.members.toggle-status', $member->id) }}"
-                                                method="POST"
-                                                class="member-action-form"
-                                                data-confirm-title="Change Member Status"
-                                                data-confirm="Are you sure you want to change this member's active status?">
-
-                                                @csrf
-
-                                                <button type="submit" class="dropdown-item">
-
-                                                    @if($member->active === 'Yes')
-                                                    <i class="bi bi-person-x me-2 text-danger"></i>
-                                                    Deactivate Member
-                                                    @else
-                                                    <i class="bi bi-person-check me-2 text-success"></i>
-                                                    Activate Member
-                                                    @endif
-
-                                                </button>
-
-                                            </form>
-
-                                        </li>
-
-                                        @if(auth('admin')->user()?->hasPermission('add-rotations'))
-
-                                        <li>
-                                            <button
-                                                type="button"
-                                                class="dropdown-item"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#rotationModal"
-                                                data-member-id="{{ $member->id }}"
-                                                data-member-name="{{ $member->full_name }}">
-
-                                                <i class="bi bi-arrow-repeat me-2"></i>
-                                                Add Rotation
-
-                                            </button>
-                                        </li>
-
-                                        @endif
-
-                                    </ul>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-
-                            <td
-                                colspan="9"
-                                class="text-center py-5 text-muted">
-                                No members found.
-                            </td>
-
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
-            </div>
+            </table>
 
         </div>
-
-
-        {{-- Pagination --}}
-        @if($members->hasPages())
-
-        <div class="card-footer bg-white">
-
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-
-                <div class="text-muted small">
-
-                    Showing
-                    <strong>{{ $members->firstItem() }}</strong>
-                    to
-                    <strong>{{ $members->lastItem() }}</strong>
-                    of
-                    <strong>{{ $members->total() }}</strong>
-                    members
-
-                </div>
-
-                <div>
-                    {{ $members->onEachSide(1)->links() }}
-                </div>
-
-            </div>
-
-        </div>
-
-        @endif
 
     </div>
 
+
+    {{-- Pagination --}}
+    @if($members->hasPages())
+
+    <div class="card-footer bg-white">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+
+            <div class="text-muted small">
+
+                Showing
+                <strong>{{ $members->firstItem() }}</strong>
+                to
+                <strong>{{ $members->lastItem() }}</strong>
+                of
+                <strong>{{ $members->total() }}</strong>
+                members
+
+            </div>
+
+            <div>
+                {{ $members->onEachSide(1)->links() }}
+            </div>
+
+        </div>
+
+    </div>
+
+    @endif
+
+</div>
+
+</div>
+
+{{-- =========================================================
+    REMARK MODAL
+========================================================= --}}
+
+<div
+    class="modal fade"
+    id="remarkModal"
+    tabindex="-1"
+    aria-labelledby="remarkModalLabel"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="remarkModalLabel">Add Remark</h5>
+                    <small class="text-muted" id="remarkMemberName"></small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form method="POST" id="remarkForm">
+                @csrf
+                <div class="modal-body">
+                    <label for="remarkText" class="form-label fw-semibold">Remark</label>
+                    <textarea
+                        name="remarks"
+                        id="remarkText"
+                        rows="4"
+                        maxlength="10000"
+                        class="form-control"
+                        placeholder="Enter an internal remark..."
+                        required></textarea>
+                    <div class="form-text">Saving creates a staff-attributed entry in the member's remark history.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Save Remark
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 {{-- =========================================================
@@ -1424,6 +1604,49 @@
 @endsection
 
 @push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const remarkModal = document.getElementById('remarkModal');
+        const remarkMemberName = document.getElementById('remarkMemberName');
+        const remarkForm = document.getElementById('remarkForm');
+        const remarkText = document.getElementById('remarkText');
+
+        if (!remarkModal || !remarkForm || !remarkText) {
+            return;
+        }
+
+        remarkModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+
+            remarkForm.action = button.dataset.remarkAction;
+            remarkMemberName.textContent = button.dataset.memberName;
+            remarkText.value = '';
+        });
+
+        remarkModal.addEventListener('shown.bs.modal', function() {
+            remarkText.focus();
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const selectAll = document.getElementById('select-new-members');
+        const boxes = [...document.querySelectorAll('.new-member-checkbox')];
+        selectAll?.addEventListener('change', () => boxes.forEach(box => box.checked = selectAll.checked));
+        boxes.forEach(box => box.addEventListener('change', () => {
+            selectAll.checked = boxes.every(item => item.checked);
+            selectAll.indeterminate = boxes.some(item => item.checked) && !selectAll.checked;
+        }));
+        document.getElementById('assign-new-members')?.addEventListener('submit', event => {
+            if (!boxes.some(box => box.checked)) {
+                event.preventDefault();
+                alert('Please select at least one member to assign staff.');
+            }
+        });
+    });
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 

@@ -126,11 +126,16 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                         @endif
 
+                        <a href="{{ route('admin.members.banned') }}" class="nav-dropdown-item {{ request()->routeIs('admin.members.banned') ? 'active' : '' }}">
+                            <i class="bi bi-person-slash me-2"></i>
+                            Banned Members
+                        </a>
+
                         @if(auth('admin')->user()?->hasPermission('view-delete-profile-request'))
 
                         <a
-                            href="{{ route('admin.delete-profile-requests.index') }}"
-                            class="{{ request()->routeIs('admin.delete-profile-requests.*') ? 'active' : '' }}">
+                            href="{{ route('admin.members.delete-requests.index') }}"
+                            class="{{ request()->routeIs('admin.members.delete-requests.index') ? 'active' : '' }}">
                             <i class="bi bi-person-x me-2"></i>
                             Delete Requests
                         </a>
@@ -456,11 +461,16 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                         </a>
 
+                        <a href="{{ route('admin.members.banned') }}" class="nav-dropdown-item {{ request()->routeIs('admin.members.banned') ? 'active' : '' }}">
+                            <i class="bi bi-person-slash me-2"></i>
+                            Banned Members
+                        </a>
+
                         @if(auth('admin')->user()?->hasPermission('view-delete-profile-request'))
 
                         <a
-                            href="{{ route('admin.delete-profile-requests.index') }}"
-                            class="nav-dropdown-item {{ request()->routeIs('admin.delete-profile-requests.*') ? 'active' : '' }}">
+                            href="{{ route('admin.members.delete-requests.index') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.members.delete-requests.index') ? 'active' : '' }}">
                             <i class="bi bi-trash3 me-2"></i>
 
                             Delete Requests

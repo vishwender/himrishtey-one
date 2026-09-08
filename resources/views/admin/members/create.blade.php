@@ -88,6 +88,9 @@
     ========================================================== --}}
 
     <form
+        id="create-member-form"
+        data-states-url="{{ route('admin.members.location.states', ['countryId' => '__ID__']) }}"
+        data-cities-url="{{ route('admin.members.location.cities', ['stateId' => '__ID__']) }}"
         method="POST"
         action="{{ route('admin.members.store') }}"
         enctype="multipart/form-data">

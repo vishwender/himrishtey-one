@@ -9,7 +9,6 @@ use App\Http\Middleware\EnsureContentManagerAccess;
 use App\Http\Middleware\EnsureRelationshipManagerMemberAccess;
 use App\Http\Middleware\ResolveApplication;
 use App\Http\Middleware\SetAdminSiteConnection;
-use App\Http\Middleware\SetCurrentSite;
 use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -32,7 +31,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => CheckRole::class,
             'content.manager' => EnsureContentManagerAccess::class,
             'relationship.manager.member' => EnsureRelationshipManagerMemberAccess::class,
-            'site.current' => SetCurrentSite::class,
             'admin.site' => SetAdminSiteConnection::class,
             'application' => ResolveApplication::class,
         ]);

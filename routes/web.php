@@ -140,6 +140,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('/members', [MemberController::class, 'index'])->name('members.index');
 
+            Route::get('/members/{id}/print', [MemberController::class, 'printProfile'])->whereNumber('id')->name('members.print');
+
+            Route::post('/members/new/assign-staff', [MemberController::class, 'assignNewMembers'])->middleware('permission:edit-member')->name('members.new.assign-staff');
+
+            Route::get('/members/banned', [MemberController::class, 'index'])->name('members.banned');
+            Route::post('/members/{id}/ban', [MemberController::class, 'updateBan'])->whereNumber('id')->name('members.ban.update');
+
             Route::get('/members/new', [MemberController::class, 'index'])->name('members.new');
 
             /*
@@ -180,6 +187,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('/members/{id}/toggle-status', [MemberController::class, 'toggleStatus'])->name('members.toggle-status');
 
+            Route::get('/members/{id}/activate', [\App\Http\Controllers\Admin\MemberActivationController::class, 'create'])
+                ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.create');
+            Route::post('/members/{id}/activate', [\App\Http\Controllers\Admin\MemberActivationController::class, 'store'])
+                ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.store');
+
             Route::post('/members/{id}/toggle-trusted', [MemberController::class, 'toggleTrusted'])->name('members.toggle-trusted');
 
             Route::post('/members/{id}/toggle-visibility', [MemberController::class, 'toggleVisibility'])->name('members.toggle-visibility');
@@ -196,6 +208,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 ->middleware('permission:raise-delete-request')
                 ->name('members.delete-request');
             Route::get('/members/delete-requests', [DeleteProfileRequestController::class, 'index'])
+                ->middleware('permission:view-delete-profile-request')
+                ->name('members.delete-requests.index');
+
+            Route::get('/delete-profile-requests', [DeleteProfileRequestController::class, 'index'])
                 ->middleware('permission:view-delete-profile-request')
                 ->name('delete-profile-requests.index');
 

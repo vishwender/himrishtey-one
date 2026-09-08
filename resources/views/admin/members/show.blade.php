@@ -33,6 +33,33 @@
     .member-profile-section .card-body {
         padding: 1.5rem;
     }
+
+    .profile-collapsible-section>.card-header {
+        position: relative;
+        padding-right: 4rem !important;
+        cursor: pointer;
+    }
+
+    .profile-section-toggle {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        transform: translateY(-50%);
+    }
+
+    .profile-section-toggle i {
+        transition: transform .2s ease;
+    }
+
+    .profile-section-toggle[aria-expanded="false"] i {
+        transform: rotate(-90deg);
+    }
 </style>
 @endpush
 
@@ -2125,6 +2152,22 @@
         </div>
 </div>
 
+<div id="identity-proof" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Identity Proof</h5>
+    </div>
+    <div class="card-body">
+        @php
+        $proofPath = 'id_proofs/' . basename((string) $member->id_proof);
+        @endphp
+        @if($member->id_proof && \Illuminate\Support\Facades\Storage::disk('public')->exists($proofPath))
+        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($proofPath) }}" target="_blank" rel="noopener" class="btn btn-outline-primary">View Identity Proof</a>
+        @else
+        <p class="text-muted mb-0">No identity proof file available.</p>
+        @endif
+    </div>
+</div>
+
 {{-- =========================================================
     ACCOUNT STATUS
 ========================================================= --}}
@@ -2939,10 +2982,10 @@
 </div>
 
 {{-- =========================================================
-    ADMIN REMARKS
+    MEMBER LOGS
 ========================================================= --}}
 
-<div class="card border-0 shadow-sm mb-4">
+<div id="member-logs" class="card border-0 shadow-sm mb-4 member-logs-card">
 
     <div class="card-header bg-white py-3">
 
@@ -2959,11 +3002,11 @@
             <div>
 
                 <h5 class="mb-0">
-                    Admin Remarks
+                    Member Logs
                 </h5>
 
                 <small class="text-muted">
-                    Internal notes about this member
+                    Staff notes and remark history for this member
                 </small>
 
             </div>
@@ -3033,9 +3076,40 @@
 
         </form>
 
+        @if($remarkHistory->isNotEmpty())
+        <hr class="my-4">
+
+        <h6 class="mb-3">Remark History</h6>
+
+        <div class="list-group list-group-flush">
+            @foreach($remarkHistory as $remarkEntry)
+            @php($remarkMetadata = $remarkEntry->metadata ?? [])
+            <div class="list-group-item px-0">
+                <div class="d-flex justify-content-between gap-3">
+                    <span class="fw-semibold">
+                        {{ $remarkEntry->admin?->name ?? 'Staff member unavailable' }}
+                    </span>
+                    <small class="text-muted">
+                        {{ $remarkEntry->created_at?->format('d-m-Y H:i') ?? '-' }}
+                    </small>
+                </div>
+                <div class="small text-muted mb-1">
+                    {{ $remarkMetadata['remark_type'] ?? 'Remark' }}
+                </div>
+                <div>{{ $remarkMetadata['new_remarks'] ?? '-' }}</div>
+            </div>
+            @endforeach
+        </div>
+        @endif
+
     </div>
 
 </div>
+
+<script>
+    document.querySelector('.container-fluid.py-4 > .card')
+        ?.after(document.getElementById('member-logs'));
+</script>
 
 {{-- Photos & Gallery --}}
 <div class="card border-0 shadow-sm mb-4">
@@ -3442,7 +3516,15 @@
         <div class="d-flex flex-wrap align-items-start gap-2 mt-3">
 
             {{-- Activate / Deactivate --}}
-            @if($member->is_active)
+            @if($member->active === 'Banned')
+            @if(auth('admin')->user()?->hasRole('super-admin'))
+            <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" onsubmit="return confirm('Unban and activate this member?')">
+                @csrf
+                <input type="hidden" name="banned" value="0">
+                <button type="submit" class="btn btn-success">Unban Member</button>
+            </form>
+            @endif
+            @elseif($member->is_active)
 
             <form method="POST"
                 action="{{ route('admin.members.toggle-status', $member->id) }}">
@@ -3467,22 +3549,22 @@
             @endif
 
 
-            {{-- Trust --}}
+            {{-- Trust 
             <form method="POST"
                 action="{{ route('admin.members.toggle-trusted', $member->id) }}">
-                @csrf
+            @csrf
 
-                <button type="submit" class="btn btn-outline-primary">
+            <button type="submit" class="btn btn-outline-primary">
 
-                    @if(strtolower((string) $member->is_trusted) === 'yes')
-                    Remove Trusted
-                    @else
-                    Mark Trusted
-                    @endif
+                @if(strtolower((string) $member->is_trusted) === 'yes')
+                Remove Trusted
+                @else
+                Mark Trusted
+                @endif
 
-                </button>
+            </button>
             </form>
-
+            --}}
 
             {{-- Hide / Show --}}
             <form method="POST"
@@ -3506,21 +3588,22 @@
             </form>
 
 
-            {{-- Promote --}}
+            {{-- Promote 
             <form method="POST"
                 action="{{ route('admin.members.toggle-promoted', $member->id) }}">
-                @csrf
+            @csrf
 
-                <button type="submit" class="btn btn-outline-success">
+            <button type="submit" class="btn btn-outline-success">
 
-                    @if(strtolower((string) $member->promoted) === 'yes')
-                    Remove Promotion
-                    @else
-                    Promote Profile
-                    @endif
+                @if(strtolower((string) $member->promoted) === 'yes')
+                Remove Promotion
+                @else
+                Promote Profile
+                @endif
 
-                </button>
+            </button>
             </form>
+            --}}
 
             @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
@@ -3883,6 +3966,114 @@
         </div>
 
     </div>
+
+    @push('scripts')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileContainer = document.querySelector('.container-fluid.py-4');
+
+            if (!profileContainer || typeof bootstrap === 'undefined') {
+                return;
+            }
+
+            const storageKey = 'member-profile-sections-{{ (int) $member->id }}';
+            let collapsedSections = [];
+
+            try {
+                collapsedSections = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+            } catch (error) {
+                collapsedSections = [];
+            }
+
+            const saveState = function() {
+                const collapsed = Array.from(
+                    profileContainer.querySelectorAll('.profile-section-toggle[aria-expanded="false"]')
+                ).map(function(button) {
+                    return button.dataset.sectionKey;
+                });
+
+                sessionStorage.setItem(storageKey, JSON.stringify(collapsed));
+            };
+
+            profileContainer.querySelectorAll(':scope > .card').forEach(function(card, index) {
+                const header = Array.from(card.children).find(function(child) {
+                    return child.classList.contains('card-header');
+                });
+                const body = Array.from(card.children).find(function(child) {
+                    return child.classList.contains('card-body');
+                });
+
+                if (!header || !body) {
+                    return;
+                }
+
+                const heading = header.querySelector('h2, h3, h4, h5, h6');
+                const sectionName = heading?.textContent.trim() || `Section ${index + 1}`;
+                const sectionKey = card.id || sectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                const collapseId = `profile-section-${index + 1}`;
+                const startsCollapsed = collapsedSections.includes(sectionKey);
+
+                card.classList.add('profile-collapsible-section');
+                body.id = collapseId;
+                body.classList.add('collapse');
+                body.classList.toggle('show', !startsCollapsed);
+
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                toggle.className = 'btn btn-sm btn-outline-secondary profile-section-toggle';
+                toggle.setAttribute('aria-controls', collapseId);
+                toggle.setAttribute('aria-expanded', String(!startsCollapsed));
+                toggle.setAttribute('aria-label', `${startsCollapsed ? 'Expand' : 'Collapse'} ${sectionName}`);
+                toggle.dataset.sectionKey = sectionKey;
+                toggle.innerHTML = '<i class="bi bi-chevron-down" aria-hidden="true"></i>';
+                header.appendChild(toggle);
+
+                const collapse = bootstrap.Collapse.getOrCreateInstance(body, {
+                    toggle: false
+                });
+                const toggleSection = function() {
+                    collapse.toggle();
+                };
+
+                toggle.addEventListener('click', toggleSection);
+                header.addEventListener('click', function(event) {
+                    if (event.target.closest('a, button, input, select, textarea, label')) {
+                        return;
+                    }
+
+                    toggleSection();
+                });
+
+                body.addEventListener('shown.bs.collapse', function() {
+                    toggle.setAttribute('aria-expanded', 'true');
+                    toggle.setAttribute('aria-label', `Collapse ${sectionName}`);
+                    saveState();
+                });
+                body.addEventListener('hidden.bs.collapse', function() {
+                    toggle.setAttribute('aria-expanded', 'false');
+                    toggle.setAttribute('aria-label', `Expand ${sectionName}`);
+                    saveState();
+                });
+            });
+
+            if (window.location.hash) {
+                const target = document.querySelector(window.location.hash);
+                const section = target?.closest('.profile-collapsible-section');
+                const body = section && Array.from(section.children).find(function(child) {
+                    return child.classList.contains('card-body');
+                });
+
+                if (body) {
+                    bootstrap.Collapse.getOrCreateInstance(body, {
+                        toggle: false
+                    }).show();
+                }
+            }
+        });
+    </script>
+
+    @endpush
 
     @push('scripts')
 

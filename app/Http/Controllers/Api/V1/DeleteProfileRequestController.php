@@ -49,7 +49,7 @@ class DeleteProfileRequestController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $existingRequest = DeleteProfileRequest::query()
+        $existingRequest = DeleteProfileRequest::query()->fromSource('member')
             ->where('user_id', $member->id)
             ->where('status', 0)
             ->latest('id')
@@ -79,7 +79,7 @@ class DeleteProfileRequestController extends Controller
 
             'reason' => $validated['reason'] ?? null,
 
-            'request_by' => $member->id,
+            'request_by' => 0,
 
             'date' => now()->format('Y-m-d H:i:s'),
 
@@ -132,7 +132,7 @@ class DeleteProfileRequestController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $requests = DeleteProfileRequest::query()
+        $requests = DeleteProfileRequest::query()->fromSource('member')
             ->where('user_id', $member->id)
             ->orderByDesc('id')
             ->get();

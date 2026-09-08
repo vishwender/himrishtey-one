@@ -10,6 +10,7 @@ use App\Services\AdminActivityLogger;
 use App\Services\RelationshipManagerAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class DeleteProfileRequestController extends Controller
@@ -29,43 +30,15 @@ class DeleteProfileRequestController extends Controller
             $perPage = 25;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Latest request for each member
-        |--------------------------------------------------------------------------
-        */
+        $source = $request->routeIs('admin.members.delete-requests.index') ? 'staff' : 'member';
+        $indexRoute = $source === 'staff' ? 'admin.members.delete-requests.index' : 'admin.delete-profile-requests.index';
+        $latestIds = DeleteProfileRequest::query()->fromSource($source)
+            ->selectRaw('MAX(id)')->groupBy('user_id');
+        $summaryQuery = DeleteProfileRequest::query()->fromSource($source)
+            ->whereIn('id', $latestIds)
+            ->when(app(RelationshipManagerAccess::class)->isRestricted(), fn ($query) => $query->whereHas('member'));
 
-        $query = DeleteProfileRequest::query()
-            ->with('member')
-            ->when(
-                app(RelationshipManagerAccess::class)->isRestricted(),
-                fn ($query) => $query->whereHas('member')
-            )
-            ->whereIn('id', function ($subQuery) {
-
-                $subQuery
-                    ->selectRaw('MAX(id)')
-                    ->from('delete_profile_request')
-                    ->groupBy('user_id');
-            })
-            ->select('delete_profile_request.*')
-
-            /*
-            |--------------------------------------------------------------------------
-            | Number of requests raised for this member
-            |--------------------------------------------------------------------------
-            */
-
-            ->selectSub(function ($subQuery) {
-
-                $subQuery
-                    ->from('delete_profile_request as dpr_count')
-                    ->selectRaw('COUNT(*)')
-                    ->whereColumn(
-                        'dpr_count.user_id',
-                        'delete_profile_request.user_id'
-                    );
-            }, 'request_count');
+        $query = (clone $summaryQuery)->with('member')->select('delete_profile_request.*');
 
         /*
         |--------------------------------------------------------------------------
@@ -136,6 +109,13 @@ class DeleteProfileRequestController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        $counts = DeleteProfileRequest::query()->fromSource($source)
+            ->whereIn('user_id', $requests->getCollection()->pluck('user_id'))
+            ->selectRaw('user_id, COUNT(*) as request_count')->groupBy('user_id')->pluck('request_count', 'user_id');
+        $requests->getCollection()->each(function ($item) use ($counts) {
+            $item->request_count = $counts[$item->user_id] ?? 0;
+        });
+
         $adminIds = $requests
             ->getCollection()
             ->pluck('request_by')
@@ -144,9 +124,32 @@ class DeleteProfileRequestController extends Controller
             ->values();
 
         $admins = Admin::query()
+            ->when($source === 'member', fn ($query) => $query->whereRaw('1 = 0'))
             ->whereIn('id', $adminIds)
             ->get()
             ->keyBy('id');
+
+        $missingAdminIds = $adminIds->reject(fn ($id) => filled($admins->get($id)?->name));
+
+        if ($source === 'staff' && $missingAdminIds->isNotEmpty() && Schema::connection('site')->hasTable('users')) {
+            $columns = Schema::connection('site')->getColumnListing('users');
+            $nameColumns = array_values(array_intersect(['display_name', 'name'], $columns));
+
+            if ($nameColumns !== []) {
+                $legacyStaff = DB::connection('site')->table('users')
+                    ->whereIn('id', $missingAdminIds)->get(['id', ...$nameColumns]);
+
+                foreach ($legacyStaff as $staff) {
+                    $name = trim((string) ($staff->display_name ?? ''));
+                    if ($name === '') {
+                        $name = trim((string) ($staff->name ?? ''));
+                    }
+                    if ($name !== '') {
+                        $admins->put($staff->id, (object) ['name' => $name, 'profile_id' => null]);
+                    }
+                }
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -156,23 +159,6 @@ class DeleteProfileRequestController extends Controller
         | Count latest request per member.
         |--------------------------------------------------------------------------
         */
-
-        $latestIds = DB::connection('site')
-            ->table('delete_profile_request')
-            ->selectRaw('MAX(id) as id')
-            ->groupBy('user_id');
-
-        $summaryQuery = DB::connection('site')
-            ->table('delete_profile_request')
-            ->whereIn('id', $latestIds);
-
-        if (app(RelationshipManagerAccess::class)->isRestricted()) {
-            $assignedMemberIds = app(RelationshipManagerAccess::class)->scope(
-                DB::connection('site')->table('members')->select('id')
-            );
-
-            $summaryQuery->whereIn('user_id', $assignedMemberIds);
-        }
 
         $totalCount = (clone $summaryQuery)->count();
 
@@ -191,6 +177,8 @@ class DeleteProfileRequestController extends Controller
         return view(
             'admin.delete-profile-requests.index',
             compact(
+                'source',
+                'indexRoute',
                 'requests',
                 'admins',
                 'search',
@@ -225,7 +213,7 @@ class DeleteProfileRequestController extends Controller
 
         $siteMember = SiteMember::query()->findOrFail($member);
 
-        $pendingRequestExists = DeleteProfileRequest::query()
+        $pendingRequestExists = DeleteProfileRequest::query()->fromSource('staff')
             ->where('user_id', $siteMember->id)
             ->where('status', 0)
             ->exists();
