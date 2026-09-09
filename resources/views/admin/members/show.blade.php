@@ -119,6 +119,13 @@
             </button>
 
             <a
+                href="{{ route('admin.members.edit', $member->id) }}"
+                class="btn btn-primary">
+                <i class="bi bi-pencil-square me-1"></i>
+                Edit Profile
+            </a>
+
+            <a
                 href="{{ $backUrl }}"
                 class="btn btn-outline-secondary">
 
@@ -2737,885 +2744,885 @@
         ?.after(document.getElementById('member-logs'));
 </script>
 
-        <div class="d-flex flex-wrap align-items-start gap-2 mt-3">
+<div class="d-flex flex-wrap align-items-start gap-2 mt-3">
 
-            {{-- Activate / Deactivate --}}
-            @if($member->active === 'Banned')
-            @if(auth('admin')->user()?->hasRole('super-admin'))
-            <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" onsubmit="return confirm('Unban and activate this member?')">
-                @csrf
-                <input type="hidden" name="banned" value="0">
-                <button type="submit" class="btn btn-success">Unban Member</button>
-            </form>
-            @endif
-            @elseif($member->is_active)
+    {{-- Activate / Deactivate --}}
+    @if($member->active === 'Banned')
+    @if(auth('admin')->user()?->hasRole('super-admin'))
+    <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" onsubmit="return confirm('Unban and activate this member?')">
+        @csrf
+        <input type="hidden" name="banned" value="0">
+        <button type="submit" class="btn btn-success">Unban Member</button>
+    </form>
+    @endif
+    @elseif($member->is_active)
 
+    <form method="POST"
+        action="{{ route('admin.members.toggle-status', $member->id) }}">
+        @csrf
+
+        <button type="submit" class="btn btn-warning">
+            Deactivate
+        </button>
+    </form>
+
+    @else
+
+    <form method="POST"
+        action="{{ route('admin.members.toggle-status', $member->id) }}">
+        @csrf
+
+        <button type="submit" class="btn btn-success">
+            Activate
+        </button>
+    </form>
+
+    @endif
+
+
+    {{-- Trust 
             <form method="POST"
-                action="{{ route('admin.members.toggle-status', $member->id) }}">
-                @csrf
+                action="{{ route('admin.members.toggle-trusted', $member->id) }}">
+    @csrf
 
-                <button type="submit" class="btn btn-warning">
-                    Deactivate
-                </button>
-            </form>
+    <button type="submit" class="btn btn-outline-primary">
+
+        @if(strtolower((string) $member->is_trusted) === 'yes')
+        Remove Trusted
+        @else
+        Mark Trusted
+        @endif
+
+    </button>
+    </form>
+    --}}
+
+    {{-- Hide / Show --}}
+    <form method="POST"
+        action="{{ route('admin.members.toggle-visibility', $member->id) }}">
+        @csrf
+
+        <button type="submit" class="btn btn-outline-secondary">
+
+            @if(!empty($member->profile_hide) &&
+            strtolower((string) $member->profile_hide) === 'yes')
+
+            Show Profile
 
             @else
 
-            <form method="POST"
-                action="{{ route('admin.members.toggle-status', $member->id) }}">
-                @csrf
-
-                <button type="submit" class="btn btn-success">
-                    Activate
-                </button>
-            </form>
+            Hide Profile
 
             @endif
 
-
-            {{-- Trust 
-            <form method="POST"
-                action="{{ route('admin.members.toggle-trusted', $member->id) }}">
-            @csrf
-
-            <button type="submit" class="btn btn-outline-primary">
-
-                @if(strtolower((string) $member->is_trusted) === 'yes')
-                Remove Trusted
-                @else
-                Mark Trusted
-                @endif
-
-            </button>
-            </form>
-            --}}
-
-            {{-- Hide / Show --}}
-            <form method="POST"
-                action="{{ route('admin.members.toggle-visibility', $member->id) }}">
-                @csrf
-
-                <button type="submit" class="btn btn-outline-secondary">
-
-                    @if(!empty($member->profile_hide) &&
-                    strtolower((string) $member->profile_hide) === 'yes')
-
-                    Show Profile
-
-                    @else
-
-                    Hide Profile
-
-                    @endif
-
-                </button>
-            </form>
+        </button>
+    </form>
 
 
-            {{-- Promote 
+    {{-- Promote 
             <form method="POST"
                 action="{{ route('admin.members.toggle-promoted', $member->id) }}">
-            @csrf
+    @csrf
 
-            <button type="submit" class="btn btn-outline-success">
+    <button type="submit" class="btn btn-outline-success">
 
-                @if(strtolower((string) $member->promoted) === 'yes')
-                Remove Promotion
-                @else
-                Promote Profile
-                @endif
+        @if(strtolower((string) $member->promoted) === 'yes')
+        Remove Promotion
+        @else
+        Promote Profile
+        @endif
 
-            </button>
-            </form>
-            --}}
+    </button>
+    </form>
+    --}}
 
-            @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
+    @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
-            <button
-                type="button"
-                class="btn btn-outline-danger"
-                data-bs-toggle="modal"
-                data-bs-target="#deleteRequestModal"
-                data-action="{{ route('admin.members.delete-request', $member->id) }}"
-                data-member-id="{{ $member->id }}"
-                data-profile-id="{{ $member->profile_id }}"
-                data-member-name="{{ $member->full_name }}">
-                <i class="bi bi-trash3 me-1"></i>
-                Raise Delete Request
-            </button>
+    <button
+        type="button"
+        class="btn btn-outline-danger"
+        data-bs-toggle="modal"
+        data-bs-target="#deleteRequestModal"
+        data-action="{{ route('admin.members.delete-request', $member->id) }}"
+        data-member-id="{{ $member->id }}"
+        data-profile-id="{{ $member->profile_id }}"
+        data-member-name="{{ $member->full_name }}">
+        <i class="bi bi-trash3 me-1"></i>
+        Raise Delete Request
+    </button>
 
-            @endif
+    @endif
 
-        </div>
+</div>
 
-    </div>
+</div>
 
-    <div
-        class="modal fade"
-        id="shareProfileModal"
-        tabindex="-1"
-        aria-labelledby="shareProfileModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div>
-                        <h5 class="modal-title" id="shareProfileModalLabel">
-                            Share {{ $member->full_name }}'s Profile
-                        </h5>
-                        <div class="small text-muted mt-1">
-                            This secure link expires in 7 days and hides contact details.
-                        </div>
+<div
+    class="modal fade"
+    id="shareProfileModal"
+    tabindex="-1"
+    aria-labelledby="shareProfileModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="shareProfileModalLabel">
+                        Share {{ $member->full_name }}'s Profile
+                    </h5>
+                    <div class="small text-muted mt-1">
+                        This secure link expires in 7 days and hides contact details.
                     </div>
+                </div>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <label for="sharedProfileUrl" class="form-label">
+                    Shareable profile link
+                </label>
+
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="sharedProfileUrl"
+                        class="form-control"
+                        value="{{ $shareUrl }}"
+                        readonly>
                     <button
                         type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                        class="btn btn-outline-primary"
+                        id="copySharedProfileUrl">
+                        <i class="bi bi-copy me-1"></i>
+                        <span>Copy</span>
+                    </button>
                 </div>
+            </div>
 
-                <div class="modal-body">
-                    <label for="sharedProfileUrl" class="form-label">
-                        Shareable profile link
-                    </label>
-
-                    <div class="input-group">
-                        <input
-                            type="text"
-                            id="sharedProfileUrl"
-                            class="form-control"
-                            value="{{ $shareUrl }}"
-                            readonly>
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary"
-                            id="copySharedProfileUrl">
-                            <i class="bi bi-copy me-1"></i>
-                            <span>Copy</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <a
-                        href="{{ $whatsappShareUrl }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="btn btn-success">
-                        <i class="bi bi-whatsapp me-1"></i>
-                        Share on WhatsApp
-                    </a>
-                    <a
-                        href="{{ $shareUrl }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="btn btn-outline-secondary">
-                        Preview
-                    </a>
-                </div>
+            <div class="modal-footer">
+                <a
+                    href="{{ $whatsappShareUrl }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-success">
+                    <i class="bi bi-whatsapp me-1"></i>
+                    Share on WhatsApp
+                </a>
+                <a
+                    href="{{ $shareUrl }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-outline-secondary">
+                    Preview
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    @endsection
+@endsection
 
-    {{-- =========================================================
+{{-- =========================================================
     CHANGE MEMBERSHIP MODAL
 ========================================================= --}}
 
-    <div
-        class="modal fade"
-        id="changeMembershipModal"
-        tabindex="-1"
-        aria-labelledby="changeMembershipModalLabel"
-        aria-hidden="true">
+<div
+    class="modal fade"
+    id="changeMembershipModal"
+    tabindex="-1"
+    aria-labelledby="changeMembershipModalLabel"
+    aria-hidden="true">
 
-        <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
 
-            <div class="modal-content border-0 shadow">
+        <div class="modal-content border-0 shadow">
 
-                {{-- Header --}}
+            {{-- Header --}}
 
-                <div class="modal-header">
+            <div class="modal-header">
 
-                    <div>
+                <div>
 
-                        <h5
-                            class="modal-title"
-                            id="changeMembershipModalLabel">
+                    <h5
+                        class="modal-title"
+                        id="changeMembershipModalLabel">
 
-                            <i class="bi bi-award me-2"></i>
-                            Change Membership
+                        <i class="bi bi-award me-2"></i>
+                        Change Membership
 
-                        </h5>
+                    </h5>
 
-                        <small class="text-muted">
-                            Select a membership plan for
-                            {{ $member->full_name }}
-                        </small>
+                    <small class="text-muted">
+                        Select a membership plan for
+                        {{ $member->full_name }}
+                    </small>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            {{-- Form --}}
+
+            <form
+                action="{{ route('admin.members.membership.change', [
+                    'memberId' => $member->id
+                ]) }}"
+                method="POST">
+
+                @csrf
+
+
+                <div class="modal-body">
+
+                    {{-- Plan --}}
+
+                    <div class="mb-4">
+
+                        <label
+                            for="membership_plan_id"
+                            class="form-label fw-semibold">
+
+                            Membership Plan
+
+                        </label>
+
+
+                        <select
+                            name="plan_id"
+                            id="membership_plan_id"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select a plan
+                            </option>
+
+                            @foreach($plans as $plan)
+
+                            <option
+                                value="{{ $plan->id }}"
+                                data-duration="{{ $plan->duration_days }}"
+                                data-profile-views="{{ $plan->view_profile }}"
+                                data-contact-views="{{ $plan->view_contact }}"
+                                data-cost="{{ $plan->final_cost }}">
+
+                                {{ $plan->plan_name }}
+
+                                @if(!empty($plan->membership_type))
+                                — {{ $plan->membership_type }}
+                                @endif
+
+                                — ₹{{ number_format((float) $plan->final_cost, 2) }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+
+                        @error('plan_id')
+
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+
+                        @enderror
 
                     </div>
 
+
+                    {{-- Plan Details --}}
+
+                    <div
+                        id="selectedPlanDetails"
+                        class="border rounded-3 p-3 bg-light d-none">
+
+                        <h6 class="mb-3">
+                            Selected Plan
+                        </h6>
+
+
+                        <div class="row g-3">
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted d-block">
+                                    Duration
+                                </small>
+
+                                <strong id="planDuration">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted d-block">
+                                    Profile Views
+                                </small>
+
+                                <strong id="planProfileViews">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted d-block">
+                                    Contact Views
+                                </small>
+
+                                <strong id="planContactViews">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <small class="text-muted d-block">
+                                    Cost
+                                </small>
+
+                                <strong id="planCost">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- Activation Date --}}
+
+                    <div class="mt-4">
+
+                        <label
+                            for="plan_activation_date"
+                            class="form-label fw-semibold">
+
+                            Activation Date
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            name="plan_activation_date"
+                            id="plan_activation_date"
+                            class="form-control"
+                            value="{{ $member->plan_activation_date ?: now()->format('Y-m-d') }}"
+                            required>
+
+
+                        @error('plan_activation_date')
+
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+
+                        @enderror
+
+                    </div>
+
+
+                    {{-- Expiry Preview --}}
+
+                    <div
+                        id="membershipExpiryPreview"
+                        class="alert alert-info mt-4 d-none">
+
+                        <i class="bi bi-calendar-check me-2"></i>
+
+                        Membership expiry:
+
+                        <strong id="membershipExpiryDate">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                {{-- Footer --}}
+
+                <div class="modal-footer">
+
                     <button
                         type="button"
-                        class="btn-close"
+                        class="btn btn-light"
                         data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+
+                        <i class="bi bi-check-circle me-1"></i>
+
+                        Save Membership
+
                     </button>
 
                 </div>
 
-
-                {{-- Form --}}
-
-                <form
-                    action="{{ route('admin.members.membership.change', [
-                    'memberId' => $member->id
-                ]) }}"
-                    method="POST">
-
-                    @csrf
-
-
-                    <div class="modal-body">
-
-                        {{-- Plan --}}
-
-                        <div class="mb-4">
-
-                            <label
-                                for="membership_plan_id"
-                                class="form-label fw-semibold">
-
-                                Membership Plan
-
-                            </label>
-
-
-                            <select
-                                name="plan_id"
-                                id="membership_plan_id"
-                                class="form-select"
-                                required>
-
-                                <option value="">
-                                    Select a plan
-                                </option>
-
-                                @foreach($plans as $plan)
-
-                                <option
-                                    value="{{ $plan->id }}"
-                                    data-duration="{{ $plan->duration_days }}"
-                                    data-profile-views="{{ $plan->view_profile }}"
-                                    data-contact-views="{{ $plan->view_contact }}"
-                                    data-cost="{{ $plan->final_cost }}">
-
-                                    {{ $plan->plan_name }}
-
-                                    @if(!empty($plan->membership_type))
-                                    — {{ $plan->membership_type }}
-                                    @endif
-
-                                    — ₹{{ number_format((float) $plan->final_cost, 2) }}
-
-                                </option>
-
-                                @endforeach
-
-                            </select>
-
-
-                            @error('plan_id')
-
-                            <div class="text-danger small mt-1">
-                                {{ $message }}
-                            </div>
-
-                            @enderror
-
-                        </div>
-
-
-                        {{-- Plan Details --}}
-
-                        <div
-                            id="selectedPlanDetails"
-                            class="border rounded-3 p-3 bg-light d-none">
-
-                            <h6 class="mb-3">
-                                Selected Plan
-                            </h6>
-
-
-                            <div class="row g-3">
-
-                                <div class="col-md-3">
-
-                                    <small class="text-muted d-block">
-                                        Duration
-                                    </small>
-
-                                    <strong id="planDuration">
-                                        —
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="col-md-3">
-
-                                    <small class="text-muted d-block">
-                                        Profile Views
-                                    </small>
-
-                                    <strong id="planProfileViews">
-                                        —
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="col-md-3">
-
-                                    <small class="text-muted d-block">
-                                        Contact Views
-                                    </small>
-
-                                    <strong id="planContactViews">
-                                        —
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="col-md-3">
-
-                                    <small class="text-muted d-block">
-                                        Cost
-                                    </small>
-
-                                    <strong id="planCost">
-                                        —
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        {{-- Activation Date --}}
-
-                        <div class="mt-4">
-
-                            <label
-                                for="plan_activation_date"
-                                class="form-label fw-semibold">
-
-                                Activation Date
-
-                            </label>
-
-
-                            <input
-                                type="date"
-                                name="plan_activation_date"
-                                id="plan_activation_date"
-                                class="form-control"
-                                value="{{ $member->plan_activation_date ?: now()->format('Y-m-d') }}"
-                                required>
-
-
-                            @error('plan_activation_date')
-
-                            <div class="text-danger small mt-1">
-                                {{ $message }}
-                            </div>
-
-                            @enderror
-
-                        </div>
-
-
-                        {{-- Expiry Preview --}}
-
-                        <div
-                            id="membershipExpiryPreview"
-                            class="alert alert-info mt-4 d-none">
-
-                            <i class="bi bi-calendar-check me-2"></i>
-
-                            Membership expiry:
-
-                            <strong id="membershipExpiryDate">
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- Footer --}}
-
-                    <div class="modal-footer">
-
-                        <button
-                            type="button"
-                            class="btn btn-light"
-                            data-bs-dismiss="modal">
-
-                            Cancel
-
-                        </button>
-
-
-                        <button
-                            type="submit"
-                            class="btn btn-primary">
-
-                            <i class="bi bi-check-circle me-1"></i>
-
-                            Save Membership
-
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
+            </form>
 
         </div>
 
     </div>
 
-    @push('scripts')
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const profileContainer = document.querySelector('.container-fluid.py-4');
+@push('scripts')
 
-            if (!profileContainer || typeof bootstrap === 'undefined') {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileContainer = document.querySelector('.container-fluid.py-4');
+
+        if (!profileContainer || typeof bootstrap === 'undefined') {
+            return;
+        }
+
+        const storageKey = 'member-profile-sections-{{ (int) $member->id }}';
+        let collapsedSections = [];
+
+        try {
+            collapsedSections = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+        } catch (error) {
+            collapsedSections = [];
+        }
+
+        const saveState = function() {
+            const collapsed = Array.from(
+                profileContainer.querySelectorAll('.profile-section-toggle[aria-expanded="false"]')
+            ).map(function(button) {
+                return button.dataset.sectionKey;
+            });
+
+            sessionStorage.setItem(storageKey, JSON.stringify(collapsed));
+        };
+
+        profileContainer.querySelectorAll(':scope > .card').forEach(function(card, index) {
+            const header = Array.from(card.children).find(function(child) {
+                return child.classList.contains('card-header');
+            });
+            const body = Array.from(card.children).find(function(child) {
+                return child.classList.contains('card-body');
+            });
+
+            if (!header || !body) {
                 return;
             }
 
-            const storageKey = 'member-profile-sections-{{ (int) $member->id }}';
-            let collapsedSections = [];
+            const heading = header.querySelector('h2, h3, h4, h5, h6');
+            const sectionName = heading?.textContent.trim() || `Section ${index + 1}`;
+            const sectionKey = card.id || sectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const collapseId = `profile-section-${index + 1}`;
+            const startsCollapsed = collapsedSections.includes(sectionKey);
 
-            try {
-                collapsedSections = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
-            } catch (error) {
-                collapsedSections = [];
-            }
+            card.classList.add('profile-collapsible-section');
+            body.id = collapseId;
+            body.classList.add('collapse');
+            body.classList.toggle('show', !startsCollapsed);
 
-            const saveState = function() {
-                const collapsed = Array.from(
-                    profileContainer.querySelectorAll('.profile-section-toggle[aria-expanded="false"]')
-                ).map(function(button) {
-                    return button.dataset.sectionKey;
-                });
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'btn btn-sm btn-outline-secondary profile-section-toggle';
+            toggle.setAttribute('aria-controls', collapseId);
+            toggle.setAttribute('aria-expanded', String(!startsCollapsed));
+            toggle.setAttribute('aria-label', `${startsCollapsed ? 'Expand' : 'Collapse'} ${sectionName}`);
+            toggle.dataset.sectionKey = sectionKey;
+            toggle.innerHTML = '<i class="bi bi-chevron-down" aria-hidden="true"></i>';
+            header.appendChild(toggle);
 
-                sessionStorage.setItem(storageKey, JSON.stringify(collapsed));
+            const collapse = bootstrap.Collapse.getOrCreateInstance(body, {
+                toggle: false
+            });
+            const toggleSection = function() {
+                collapse.toggle();
             };
 
-            profileContainer.querySelectorAll(':scope > .card').forEach(function(card, index) {
-                const header = Array.from(card.children).find(function(child) {
-                    return child.classList.contains('card-header');
-                });
-                const body = Array.from(card.children).find(function(child) {
-                    return child.classList.contains('card-body');
-                });
-
-                if (!header || !body) {
+            toggle.addEventListener('click', toggleSection);
+            header.addEventListener('click', function(event) {
+                if (event.target.closest('a, button, input, select, textarea, label')) {
                     return;
                 }
 
-                const heading = header.querySelector('h2, h3, h4, h5, h6');
-                const sectionName = heading?.textContent.trim() || `Section ${index + 1}`;
-                const sectionKey = card.id || sectionName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                const collapseId = `profile-section-${index + 1}`;
-                const startsCollapsed = collapsedSections.includes(sectionKey);
+                toggleSection();
+            });
 
-                card.classList.add('profile-collapsible-section');
-                body.id = collapseId;
-                body.classList.add('collapse');
-                body.classList.toggle('show', !startsCollapsed);
+            body.addEventListener('shown.bs.collapse', function() {
+                toggle.setAttribute('aria-expanded', 'true');
+                toggle.setAttribute('aria-label', `Collapse ${sectionName}`);
+                saveState();
+            });
+            body.addEventListener('hidden.bs.collapse', function() {
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', `Expand ${sectionName}`);
+                saveState();
+            });
+        });
 
-                const toggle = document.createElement('button');
-                toggle.type = 'button';
-                toggle.className = 'btn btn-sm btn-outline-secondary profile-section-toggle';
-                toggle.setAttribute('aria-controls', collapseId);
-                toggle.setAttribute('aria-expanded', String(!startsCollapsed));
-                toggle.setAttribute('aria-label', `${startsCollapsed ? 'Expand' : 'Collapse'} ${sectionName}`);
-                toggle.dataset.sectionKey = sectionKey;
-                toggle.innerHTML = '<i class="bi bi-chevron-down" aria-hidden="true"></i>';
-                header.appendChild(toggle);
+        if (window.location.hash) {
+            const target = document.querySelector(window.location.hash);
+            const section = target?.closest('.profile-collapsible-section');
+            const body = section && Array.from(section.children).find(function(child) {
+                return child.classList.contains('card-body');
+            });
 
-                const collapse = bootstrap.Collapse.getOrCreateInstance(body, {
+            if (body) {
+                bootstrap.Collapse.getOrCreateInstance(body, {
                     toggle: false
-                });
-                const toggleSection = function() {
-                    collapse.toggle();
-                };
-
-                toggle.addEventListener('click', toggleSection);
-                header.addEventListener('click', function(event) {
-                    if (event.target.closest('a, button, input, select, textarea, label')) {
-                        return;
-                    }
-
-                    toggleSection();
-                });
-
-                body.addEventListener('shown.bs.collapse', function() {
-                    toggle.setAttribute('aria-expanded', 'true');
-                    toggle.setAttribute('aria-label', `Collapse ${sectionName}`);
-                    saveState();
-                });
-                body.addEventListener('hidden.bs.collapse', function() {
-                    toggle.setAttribute('aria-expanded', 'false');
-                    toggle.setAttribute('aria-label', `Expand ${sectionName}`);
-                    saveState();
-                });
-            });
-
-            if (window.location.hash) {
-                const target = document.querySelector(window.location.hash);
-                const section = target?.closest('.profile-collapsible-section');
-                const body = section && Array.from(section.children).find(function(child) {
-                    return child.classList.contains('card-body');
-                });
-
-                if (body) {
-                    bootstrap.Collapse.getOrCreateInstance(body, {
-                        toggle: false
-                    }).show();
-                }
+                }).show();
             }
-        });
-    </script>
+        }
+    });
+</script>
 
-    @endpush
+@endpush
 
-    @push('scripts')
+@push('scripts')
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
 
-            const input = document.getElementById('member_photo');
+        const input = document.getElementById('member_photo');
 
-            const previewContainer =
-                document.getElementById('photoPreviewContainer');
+        const previewContainer =
+            document.getElementById('photoPreviewContainer');
 
-            const preview =
-                document.getElementById('photoPreview');
+        const preview =
+            document.getElementById('photoPreview');
 
 
-            if (!input) {
+        if (!input) {
+            return;
+        }
+
+
+        input.addEventListener('change', function() {
+
+            const file = this.files[0];
+
+            if (!file) {
+
+                previewContainer.classList.add('d-none');
+
+                preview.src = '';
+
                 return;
             }
-
-
-            input.addEventListener('change', function() {
-
-                const file = this.files[0];
-
-                if (!file) {
-
-                    previewContainer.classList.add('d-none');
-
-                    preview.src = '';
-
-                    return;
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Client-side validation
-                |--------------------------------------------------------------------------
-                */
-
-                const allowedTypes = [
-                    'image/jpeg',
-                    'image/png',
-                    'image/webp'
-                ];
-
-
-                if (!allowedTypes.includes(file.type)) {
-
-                    alert(
-                        'Please select a JPG, JPEG, PNG or WebP image.'
-                    );
-
-                    this.value = '';
-
-                    previewContainer.classList.add('d-none');
-
-                    return;
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | 10 MB limit
-                |--------------------------------------------------------------------------
-                */
-
-                if (file.size > 10 * 1024 * 1024) {
-
-                    alert(
-                        'The selected image cannot be larger than 10 MB.'
-                    );
-
-                    this.value = '';
-
-                    previewContainer.classList.add('d-none');
-
-                    return;
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Preview
-                |--------------------------------------------------------------------------
-                */
-
-                const reader = new FileReader();
-
-                reader.onload = function(event) {
-
-                    preview.src = event.target.result;
-
-                    previewContainer.classList.remove('d-none');
-
-                };
-
-                reader.readAsDataURL(file);
-
-            });
-
-        });
-    </script>
-
-    @endpush
-
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const copyButton = document.getElementById('copySharedProfileUrl');
-            const shareInput = document.getElementById('sharedProfileUrl');
-
-            if (!copyButton || !shareInput) {
-                return;
-            }
-
-            copyButton.addEventListener('click', async function() {
-                try {
-                    await navigator.clipboard.writeText(shareInput.value);
-                } catch (error) {
-                    shareInput.select();
-                    document.execCommand('copy');
-                }
-
-                const label = copyButton.querySelector('span');
-                label.textContent = 'Copied';
-
-                setTimeout(function() {
-                    label.textContent = 'Copy';
-                }, 1800);
-            });
-        });
-    </script>
-    @endpush
-
-    @push('scripts')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const planSelect =
-                document.getElementById('membership_plan_id');
-
-            const activationDate =
-                document.getElementById('plan_activation_date');
-
-            const details =
-                document.getElementById('selectedPlanDetails');
-
-            const expiryPreview =
-                document.getElementById('membershipExpiryPreview');
-
-            const durationElement =
-                document.getElementById('planDuration');
-
-            const profileViewsElement =
-                document.getElementById('planProfileViews');
-
-            const contactViewsElement =
-                document.getElementById('planContactViews');
-
-            const costElement =
-                document.getElementById('planCost');
-
-            const expiryElement =
-                document.getElementById('membershipExpiryDate');
-
-
-            function updatePlanPreview() {
-
-                const option =
-                    planSelect.options[planSelect.selectedIndex];
-
-
-                if (!option || !option.value) {
-
-                    details.classList.add('d-none');
-
-                    expiryPreview.classList.add('d-none');
-
-                    return;
-                }
-
-
-                const duration =
-                    parseInt(
-                        option.dataset.duration || 0,
-                        10
-                    );
-
-
-                const profileViews =
-                    option.dataset.profileViews || '0';
-
-
-                const contactViews =
-                    option.dataset.contactViews || '0';
-
-
-                const cost =
-                    parseFloat(
-                        option.dataset.cost || 0
-                    );
-
-
-                durationElement.textContent =
-                    duration + (duration === 1 ? ' Day' : ' Days');
-
-
-                profileViewsElement.textContent =
-                    profileViews;
-
-
-                contactViewsElement.textContent =
-                    contactViews;
-
-
-                costElement.textContent =
-                    '₹' + cost.toLocaleString('en-IN', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-
-
-                details.classList.remove('d-none');
-
-                updateExpiryDate();
-
-            }
-
-
-            function updateExpiryDate() {
-
-                const option =
-                    planSelect.options[planSelect.selectedIndex];
-
-
-                if (!option || !option.value) {
-                    return;
-                }
-
-
-                const duration =
-                    parseInt(
-                        option.dataset.duration || 0,
-                        10
-                    );
-
-
-                const dateValue =
-                    activationDate.value;
-
-
-                if (!dateValue || !duration) {
-
-                    expiryPreview.classList.add('d-none');
-
-                    return;
-                }
-
-
-                const date =
-                    new Date(dateValue + 'T00:00:00');
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Activation date is Day 1
-                |--------------------------------------------------------------------------
-                */
-
-                date.setDate(
-                    date.getDate() + duration - 1
-                );
-
-
-                const day =
-                    String(date.getDate()).padStart(2, '0');
-
-
-                const month =
-                    String(date.getMonth() + 1).padStart(2, '0');
-
-
-                const year =
-                    date.getFullYear();
-
-
-                expiryElement.textContent =
-                    `${day}-${month}-${year}`;
-
-
-                expiryPreview.classList.remove('d-none');
-
-            }
-
-
-            planSelect.addEventListener(
-                'change',
-                updatePlanPreview
-            );
-
-
-            activationDate.addEventListener(
-                'change',
-                updateExpiryDate
-            );
 
 
             /*
             |--------------------------------------------------------------------------
-            | Initialize if a plan is already selected
+            | Client-side validation
             |--------------------------------------------------------------------------
             */
 
-            updatePlanPreview();
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/webp'
+            ];
+
+
+            if (!allowedTypes.includes(file.type)) {
+
+                alert(
+                    'Please select a JPG, JPEG, PNG or WebP image.'
+                );
+
+                this.value = '';
+
+                previewContainer.classList.add('d-none');
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | 10 MB limit
+            |--------------------------------------------------------------------------
+            */
+
+            if (file.size > 10 * 1024 * 1024) {
+
+                alert(
+                    'The selected image cannot be larger than 10 MB.'
+                );
+
+                this.value = '';
+
+                previewContainer.classList.add('d-none');
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Preview
+            |--------------------------------------------------------------------------
+            */
+
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+
+                preview.src = event.target.result;
+
+                previewContainer.classList.remove('d-none');
+
+            };
+
+            reader.readAsDataURL(file);
 
         });
-    </script>
 
-    @endpush
+    });
+</script>
+
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const copyButton = document.getElementById('copySharedProfileUrl');
+        const shareInput = document.getElementById('sharedProfileUrl');
+
+        if (!copyButton || !shareInput) {
+            return;
+        }
+
+        copyButton.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(shareInput.value);
+            } catch (error) {
+                shareInput.select();
+                document.execCommand('copy');
+            }
+
+            const label = copyButton.querySelector('span');
+            label.textContent = 'Copied';
+
+            setTimeout(function() {
+                label.textContent = 'Copy';
+            }, 1800);
+        });
+    });
+</script>
+@endpush
+
+@push('scripts')
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const planSelect =
+            document.getElementById('membership_plan_id');
+
+        const activationDate =
+            document.getElementById('plan_activation_date');
+
+        const details =
+            document.getElementById('selectedPlanDetails');
+
+        const expiryPreview =
+            document.getElementById('membershipExpiryPreview');
+
+        const durationElement =
+            document.getElementById('planDuration');
+
+        const profileViewsElement =
+            document.getElementById('planProfileViews');
+
+        const contactViewsElement =
+            document.getElementById('planContactViews');
+
+        const costElement =
+            document.getElementById('planCost');
+
+        const expiryElement =
+            document.getElementById('membershipExpiryDate');
+
+
+        function updatePlanPreview() {
+
+            const option =
+                planSelect.options[planSelect.selectedIndex];
+
+
+            if (!option || !option.value) {
+
+                details.classList.add('d-none');
+
+                expiryPreview.classList.add('d-none');
+
+                return;
+            }
+
+
+            const duration =
+                parseInt(
+                    option.dataset.duration || 0,
+                    10
+                );
+
+
+            const profileViews =
+                option.dataset.profileViews || '0';
+
+
+            const contactViews =
+                option.dataset.contactViews || '0';
+
+
+            const cost =
+                parseFloat(
+                    option.dataset.cost || 0
+                );
+
+
+            durationElement.textContent =
+                duration + (duration === 1 ? ' Day' : ' Days');
+
+
+            profileViewsElement.textContent =
+                profileViews;
+
+
+            contactViewsElement.textContent =
+                contactViews;
+
+
+            costElement.textContent =
+                '₹' + cost.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+
+            details.classList.remove('d-none');
+
+            updateExpiryDate();
+
+        }
+
+
+        function updateExpiryDate() {
+
+            const option =
+                planSelect.options[planSelect.selectedIndex];
+
+
+            if (!option || !option.value) {
+                return;
+            }
+
+
+            const duration =
+                parseInt(
+                    option.dataset.duration || 0,
+                    10
+                );
+
+
+            const dateValue =
+                activationDate.value;
+
+
+            if (!dateValue || !duration) {
+
+                expiryPreview.classList.add('d-none');
+
+                return;
+            }
+
+
+            const date =
+                new Date(dateValue + 'T00:00:00');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Activation date is Day 1
+            |--------------------------------------------------------------------------
+            */
+
+            date.setDate(
+                date.getDate() + duration - 1
+            );
+
+
+            const day =
+                String(date.getDate()).padStart(2, '0');
+
+
+            const month =
+                String(date.getMonth() + 1).padStart(2, '0');
+
+
+            const year =
+                date.getFullYear();
+
+
+            expiryElement.textContent =
+                `${day}-${month}-${year}`;
+
+
+            expiryPreview.classList.remove('d-none');
+
+        }
+
+
+        planSelect.addEventListener(
+            'change',
+            updatePlanPreview
+        );
+
+
+        activationDate.addEventListener(
+            'change',
+            updateExpiryDate
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Initialize if a plan is already selected
+        |--------------------------------------------------------------------------
+        */
+
+        updatePlanPreview();
+
+    });
+</script>
+
+@endpush

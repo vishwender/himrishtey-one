@@ -226,7 +226,7 @@
                         <select name="height" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('height', $member->height) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('height', $member->height) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -257,7 +257,7 @@
                         <select name="marital_status" class="form-select">
                             <option value="">Select Marital Status</option>
                             @foreach($maritalStatuses as $status)
-                                <option value="{{ $status->marital_status }}" @selected(old('marital_status', $member->marital_status) == $status->marital_status)>{{ $status->marital_status }}</option>
+                            <option value="{{ $status->marital_status }}" @selected(old('marital_status', $member->marital_status) == $status->marital_status)>{{ $status->marital_status }}</option>
                             @endforeach
                         </select>
 
@@ -299,7 +299,7 @@
                         <select name="religion" class="form-select">
                             <option value="">Select Religion</option>
                             @foreach($religions as $religion)
-                                <option value="{{ $religion->religion }}" @selected(old('religion', $member->religion) == $religion->religion)>{{ $religion->religion }}</option>
+                            <option value="{{ $religion->religion }}" @selected(old('religion', $member->religion) == $religion->religion)>{{ $religion->religion }}</option>
                             @endforeach
                         </select>
 
@@ -315,7 +315,7 @@
                         <select name="mother_tongue" class="form-select">
                             <option value="">Select Mother Tongue</option>
                             @foreach($motherTongues as $motherTongue)
-                                <option value="{{ $motherTongue->mother_tongue }}" @selected(old('mother_tongue', $member->mother_tongue) == $motherTongue->mother_tongue)>{{ $motherTongue->mother_tongue }}</option>
+                            <option value="{{ $motherTongue->mother_tongue }}" @selected(old('mother_tongue', $member->mother_tongue) == $motherTongue->mother_tongue)>{{ $motherTongue->mother_tongue }}</option>
                             @endforeach
                         </select>
 
@@ -331,7 +331,7 @@
                         <select name="cast" class="form-select">
                             <option value="">Select Caste</option>
                             @foreach($casts as $cast)
-                                <option value="{{ $cast->cast }}" @selected(old('cast', $member->cast) == $cast->cast)>{{ $cast->cast }}</option>
+                            <option value="{{ $cast->cast }}" @selected(old('cast', $member->cast) == $cast->cast)>{{ $cast->cast }}</option>
                             @endforeach
                         </select>
 
@@ -377,7 +377,7 @@
                         <select name="manglik" class="form-select">
                             <option value="">Select</option>
                             @foreach(['Yes', 'No'] as $value)
-                                <option value="{{ $value }}" @selected(old('manglik', $member->manglik) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('manglik', $member->manglik) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -419,7 +419,7 @@
                         <select name="education" class="form-select">
                             <option value="">Select Education</option>
                             @foreach($educations as $education)
-                                <option value="{{ $education->education }}" @selected(old('education', $member->education) == $education->education)>{{ $education->education }}</option>
+                            <option value="{{ $education->education }}" @selected(old('education', $member->education) == $education->education)>{{ $education->education }}</option>
                             @endforeach
                         </select>
 
@@ -490,7 +490,7 @@
                         <select name="employed_in" class="form-select">
                             <option value="">Select Employer Type</option>
                             @foreach($employers as $employer)
-                                <option value="{{ $employer->employer }}" @selected(old('employed_in', $member->employed_in) == $employer->employer)>{{ $employer->employer }}</option>
+                            <option value="{{ $employer->employer }}" @selected(old('employed_in', $member->employed_in) == $employer->employer)>{{ $employer->employer }}</option>
                             @endforeach
                         </select>
 
@@ -506,7 +506,7 @@
                         <select name="occupation" class="form-select">
                             <option value="">Select Occupation</option>
                             @foreach($occupations as $occupation)
-                                <option value="{{ $occupation->occupation }}" @selected(old('occupation', $member->occupation) == $occupation->occupation)>{{ $occupation->occupation }}</option>
+                            <option value="{{ $occupation->occupation }}" @selected(old('occupation', $member->occupation) == $occupation->occupation)>{{ $occupation->occupation }}</option>
                             @endforeach
                         </select>
 
@@ -567,7 +567,7 @@
                         <select name="annual_income" class="form-select">
                             <option value="">Select Annual Income</option>
                             @foreach($annualIncomes as $income)
-                                <option value="{{ $income->annual_income }}" @selected(old('annual_income', $member->annual_income) == $income->annual_income)>{{ $income->annual_income }}</option>
+                            <option value="{{ $income->annual_income }}" @selected(old('annual_income', $member->annual_income) == $income->annual_income)>{{ $income->annual_income }}</option>
                             @endforeach
                         </select>
 
@@ -623,7 +623,7 @@
                         <select name="country_living_in" id="country_living_in" class="form-select">
                             <option value="">Select Country</option>
                             @foreach($countries as $country)
-                                <option value="{{ $country->name }}" data-id="{{ $country->id }}" @selected(old('country_living_in', $member->country_living_in) == $country->name)>{{ $country->name }}</option>
+                            <option value="{{ $country->name }}" data-id="{{ $country->id }}" @selected(old('country_living_in', $member->country_living_in) == $country->name)>{{ $country->name }}</option>
                             @endforeach
                         </select>
 
@@ -736,7 +736,7 @@
                         <select name="family_status" class="form-select">
                             <option value="">Select Family Status</option>
                             @foreach($familyStatuses as $status)
-                                <option value="{{ $status->value }}" @selected(old('family_status', $member->family_status) == $status->value)>{{ $status->value }}</option>
+                            <option value="{{ $status->value }}" @selected(old('family_status', $member->family_status) == $status->value)>{{ $status->value }}</option>
                             @endforeach
                         </select>
 
@@ -817,6 +817,66 @@
 
                     </div>
 
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Brother
+                        </label>
+
+                        <select name="no_of_brothers" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected(old('no_of_brothers', $member->no_of_brothers) == $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Married Brother
+                        </label>
+
+                        <select name="married_brothers" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected(old('married_brothers', $member->married_brothers) == $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Sister
+                        </label>
+
+                        <select name="no_of_sisters" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected(old('no_of_sisters', $member->no_of_sisters) == $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Married Sister
+                        </label>
+
+                        <select name="married_sisters" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected(old('married_sisters', $member->married_sisters) == $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
 
                     <div class="col-12">
 
@@ -867,7 +927,7 @@
                         <select name="diet" class="form-select">
                             <option value="">Select Diet</option>
                             @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
-                                <option value="{{ $value }}" @selected(old('diet', $member->diet) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('diet', $member->diet) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -883,7 +943,7 @@
                         <select name="is_drinking" class="form-select">
                             <option value="">Select</option>
                             @foreach(['Yes', 'No', 'Occasionally'] as $value)
-                                <option value="{{ $value }}" @selected(old('is_drinking', $member->is_drinking) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('is_drinking', $member->is_drinking) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -899,7 +959,7 @@
                         <select name="is_smoking" class="form-select">
                             <option value="">Select</option>
                             @foreach(['Yes', 'No', 'Occasionally'] as $value)
-                                <option value="{{ $value }}" @selected(old('is_smoking', $member->is_smoking) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('is_smoking', $member->is_smoking) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -915,7 +975,7 @@
                         <select name="any_disability" id="any_disability" class="form-select">
                             <option value="">Select</option>
                             @foreach(['Yes', 'No'] as $value)
-                                <option value="{{ $value }}" @selected(old('any_disability', $member->any_disability) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('any_disability', $member->any_disability) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -1157,7 +1217,7 @@
                         <select name="looking_for" id="looking_for" class="form-select">
                             <option value="">Select Marital Status</option>
                             @foreach($maritalStatuses as $status)
-                                <option value="{{ $status->marital_status }}" @selected(old('looking_for', $member->looking_for) == $status->marital_status)>{{ $status->marital_status }}</option>
+                            <option value="{{ $status->marital_status }}" @selected(old('looking_for', $member->looking_for) == $status->marital_status)>{{ $status->marital_status }}</option>
                             @endforeach
                         </select>
 
@@ -1214,7 +1274,7 @@
                         <select name="partner_height_from" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_from', $member->partner_height_from) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_from', $member->partner_height_from) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -1230,7 +1290,7 @@
                         <select name="partner_height_to" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_to', $member->partner_height_to) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_to', $member->partner_height_to) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -1264,7 +1324,7 @@
                         <select name="partner_country" id="partner_country" class="form-select">
                             <option value="">Select Country</option>
                             @foreach($countries as $country)
-                                <option value="{{ $country->name }}" data-id="{{ $country->id }}" @selected(old('partner_country', $member->partner_country) == $country->name)>{{ $country->name }}</option>
+                            <option value="{{ $country->name }}" data-id="{{ $country->id }}" @selected(old('partner_country', $member->partner_country) == $country->name)>{{ $country->name }}</option>
                             @endforeach
                         </select>
 
@@ -1326,7 +1386,7 @@
                         <select name="partner_religion" id="partner_religion" class="form-select">
                             <option value="">Select Religion</option>
                             @foreach($religions as $religion)
-                                <option value="{{ $religion->religion }}" @selected(old('partner_religion', $member->partner_religion) == $religion->religion)>{{ $religion->religion }}</option>
+                            <option value="{{ $religion->religion }}" @selected(old('partner_religion', $member->partner_religion) == $religion->religion)>{{ $religion->religion }}</option>
                             @endforeach
                         </select>
 
@@ -1343,7 +1403,7 @@
                         <select name="partner_cast" id="partner_cast" class="form-select">
                             <option value="">Select Caste</option>
                             @foreach($casts as $cast)
-                                <option value="{{ $cast->cast }}" @selected(old('partner_cast', $member->partner_cast) == $cast->cast)>{{ $cast->cast }}</option>
+                            <option value="{{ $cast->cast }}" @selected(old('partner_cast', $member->partner_cast) == $cast->cast)>{{ $cast->cast }}</option>
                             @endforeach
                         </select>
 
@@ -1360,7 +1420,7 @@
                         <select name="partner_mothertongue" id="partner_mothertongue" class="form-select">
                             <option value="">Select Mother Tongue</option>
                             @foreach($motherTongues as $motherTongue)
-                                <option value="{{ $motherTongue->mother_tongue }}" @selected(old('partner_mothertongue', $member->partner_mothertongue) == $motherTongue->mother_tongue)>{{ $motherTongue->mother_tongue }}</option>
+                            <option value="{{ $motherTongue->mother_tongue }}" @selected(old('partner_mothertongue', $member->partner_mothertongue) == $motherTongue->mother_tongue)>{{ $motherTongue->mother_tongue }}</option>
                             @endforeach
                         </select>
 
@@ -1427,7 +1487,7 @@
                         <select name="partner_education" id="partner_education" class="form-select">
                             <option value="">Select Education</option>
                             @foreach($educations as $education)
-                                <option value="{{ $education->education }}" @selected(old('partner_education', $member->partner_education) == $education->education)>{{ $education->education }}</option>
+                            <option value="{{ $education->education }}" @selected(old('partner_education', $member->partner_education) == $education->education)>{{ $education->education }}</option>
                             @endforeach
                         </select>
 
@@ -1444,7 +1504,7 @@
                         <select name="partner_occupation" id="partner_occupation" class="form-select">
                             <option value="">Select Occupation</option>
                             @foreach($occupations as $occupation)
-                                <option value="{{ $occupation->occupation }}" @selected(old('partner_occupation', $member->partner_occupation) == $occupation->occupation)>{{ $occupation->occupation }}</option>
+                            <option value="{{ $occupation->occupation }}" @selected(old('partner_occupation', $member->partner_occupation) == $occupation->occupation)>{{ $occupation->occupation }}</option>
                             @endforeach
                         </select>
 
@@ -1461,7 +1521,7 @@
                         <select name="partner_annual_income_from" id="partner_annual_income_from" class="form-select">
                             <option value="">Select Income</option>
                             @foreach($annualIncomes as $income)
-                                <option value="{{ $income->annual_income }}" @selected(old('partner_annual_income_from', $member->partner_annual_income_from) == $income->annual_income)>{{ $income->annual_income }}</option>
+                            <option value="{{ $income->annual_income }}" @selected(old('partner_annual_income_from', $member->partner_annual_income_from) == $income->annual_income)>{{ $income->annual_income }}</option>
                             @endforeach
                         </select>
 
@@ -1478,7 +1538,7 @@
                         <select name="partner_annual_income_to" id="partner_annual_income_to" class="form-select">
                             <option value="">Select Income</option>
                             @foreach($annualIncomes as $income)
-                                <option value="{{ $income->annual_income }}" @selected(old('partner_annual_income_to', $member->partner_annual_income_to) == $income->annual_income)>{{ $income->annual_income }}</option>
+                            <option value="{{ $income->annual_income }}" @selected(old('partner_annual_income_to', $member->partner_annual_income_to) == $income->annual_income)>{{ $income->annual_income }}</option>
                             @endforeach
                         </select>
 
@@ -1512,7 +1572,7 @@
                         <select name="partner_diet" id="partner_diet" class="form-select">
                             <option value="">Select Diet</option>
                             @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
-                                <option value="{{ $value }}" @selected(old('partner_diet', $member->partner_diet) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('partner_diet', $member->partner_diet) == $value)>{{ $value }}</option>
                             @endforeach
                         </select>
 
@@ -1536,7 +1596,7 @@
                             </option>
 
                             @foreach(['Yes', 'No', 'Occasionally'] as $value)
-                                <option value="{{ $value }}" @selected(old('is_partner_smoking', $member->is_partner_smoking) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('is_partner_smoking', $member->is_partner_smoking) == $value)>{{ $value }}</option>
                             @endforeach
 
                         </select>
@@ -1561,7 +1621,7 @@
                             </option>
 
                             @foreach(['Yes', 'No', 'Occasionally'] as $value)
-                                <option value="{{ $value }}" @selected(old('is_partner_drinking', $member->is_partner_drinking) == $value)>{{ $value }}</option>
+                            <option value="{{ $value }}" @selected(old('is_partner_drinking', $member->is_partner_drinking) == $value)>{{ $value }}</option>
                             @endforeach
 
                         </select>
@@ -1647,7 +1707,7 @@
         font-size: 1.1rem;
     }
 
-    .member-section .card-header h5 > i {
+    .member-section .card-header h5>i {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -1668,7 +1728,7 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('member-edit-form');
         const country = document.getElementById('country_living_in');
         const state = document.getElementById('state_living_in');
@@ -1702,7 +1762,10 @@
             }
 
             const response = await fetch(form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(stateId)), {
-                headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
             if (!response.ok) throw new Error('Unable to load cities.');
 
@@ -1724,7 +1787,10 @@
 
             try {
                 const response = await fetch(form.dataset.statesUrl.replace('__ID__', encodeURIComponent(countryId)), {
-                    headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 if (!response.ok) throw new Error('Unable to load states.');
 
@@ -1756,7 +1822,10 @@
             }
 
             const response = await fetch(form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(stateId)), {
-                headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
             if (!response.ok) throw new Error('Unable to load partner cities.');
 
@@ -1778,7 +1847,10 @@
 
             try {
                 const response = await fetch(form.dataset.statesUrl.replace('__ID__', encodeURIComponent(countryId)), {
-                    headers: {'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 if (!response.ok) throw new Error('Unable to load partner states.');
 
@@ -1813,7 +1885,7 @@
         disability?.addEventListener('change', () => toggleDisabilityDescription(true));
         toggleDisabilityDescription();
 
-        idProofInput?.addEventListener('change', function () {
+        idProofInput?.addEventListener('change', function() {
             const file = this.files?.[0];
             if (!file) return;
 

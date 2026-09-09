@@ -66,7 +66,7 @@ class MemberController extends Controller
 
         DB::connection('site')->transaction(function () use ($validated, $staff) {
             $members = SiteMember::query()->whereIn('id', $validated['member_ids'])
-                ->where(fn ($query) => $query->whereNull('active')->orWhere('active', ''))
+                ->where(fn($query) => $query->whereNull('active')->orWhere('active', ''))
                 ->lockForUpdate()->get();
             abort_unless($members->count() === count($validated['member_ids']), 422, 'Some selected members are no longer new. Refresh the list and try again.');
 
@@ -352,7 +352,7 @@ class MemberController extends Controller
         $relationshipManagers = Admin::query()
             ->when(
                 $relationshipManagerAccess->isRestricted(),
-                fn ($query) => $query->whereKey(
+                fn($query) => $query->whereKey(
                     $relationshipManagerAccess->admin()?->getKey()
                 )
             )
@@ -865,7 +865,7 @@ class MemberController extends Controller
             ]
         );
 
-        $whatsappShareUrl = 'https://wa.me/?text='.rawurlencode(
+        $whatsappShareUrl = 'https://wa.me/?text=' . rawurlencode(
             "View {$member->full_name}'s profile: {$shareUrl}"
         );
 
@@ -969,7 +969,7 @@ class MemberController extends Controller
         $relationshipManagers = Admin::query()
             ->when(
                 $relationshipManagerAccess->isRestricted(),
-                fn ($query) => $query->whereKey(
+                fn($query) => $query->whereKey(
                     $relationshipManagerAccess->admin()?->getKey()
                 )
             )
@@ -1040,7 +1040,7 @@ class MemberController extends Controller
             'birth_date_time' => [
                 'required',
                 'date',
-                'before_or_equal:'.today()->subYears(18)->toDateString(),
+                'before_or_equal:' . today()->subYears(18)->toDateString(),
             ],
 
             'gender' => [
@@ -1421,11 +1421,11 @@ class MemberController extends Controller
             $file = $request->file('id_proof');
 
             $filename =
-                'id-proof-'.
-                $member->id.
-                '-'.
-                Str::random(10).
-                '.'.
+                'id-proof-' .
+                $member->id .
+                '-' .
+                Str::random(10) .
+                '.' .
                 $file->getClientOriginalExtension();
 
             $file->storeAs(
@@ -1449,7 +1449,7 @@ class MemberController extends Controller
             ->route('admin.members.index')
             ->with(
                 'success',
-                'Member created successfully. Profile ID: '.
+                'Member created successfully. Profile ID: ' .
                     $member->profile_id
             );
     }
@@ -1521,7 +1521,7 @@ class MemberController extends Controller
         $relationshipManagers = Admin::query()
             ->when(
                 $relationshipManagerAccess->isRestricted(),
-                fn ($query) => $query->whereKey(
+                fn($query) => $query->whereKey(
                     $relationshipManagerAccess->admin()?->getKey()
                 )
             )
@@ -1559,7 +1559,7 @@ class MemberController extends Controller
             $query->where(
                 'profile_id',
                 'like',
-                '%'.trim($request->profile_id).'%'
+                '%' . trim($request->profile_id) . '%'
             );
         }
 
@@ -1567,7 +1567,7 @@ class MemberController extends Controller
             $query->where(
                 'full_name',
                 'like',
-                '%'.trim($request->full_name).'%'
+                '%' . trim($request->full_name) . '%'
             );
         }
 
@@ -1575,7 +1575,7 @@ class MemberController extends Controller
             $query->where(
                 'email',
                 'like',
-                '%'.trim($request->email).'%'
+                '%' . trim($request->email) . '%'
             );
         }
 
@@ -1583,7 +1583,7 @@ class MemberController extends Controller
             $query->where(
                 'mobile_number',
                 'like',
-                '%'.trim($request->mobile_number).'%'
+                '%' . trim($request->mobile_number) . '%'
             );
         }
 
@@ -1801,7 +1801,7 @@ class MemberController extends Controller
         $relationshipManagers = Admin::query()
             ->when(
                 $relationshipManagerAccess->isRestricted(),
-                fn ($query) => $query->whereKey(
+                fn($query) => $query->whereKey(
                     $relationshipManagerAccess->admin()?->getKey()
                 )
             )
@@ -2262,7 +2262,7 @@ class MemberController extends Controller
         if (! $photoStillUsed) {
 
             $photoPath = storage_path(
-                'app/public/'.ltrim($photo->photo, '/')
+                'app/public/' . ltrim($photo->photo, '/')
             );
 
             if (is_file($photoPath)) {
@@ -2436,7 +2436,7 @@ class MemberController extends Controller
             'birth_date_time' => [
                 'nullable',
                 'date',
-                'before_or_equal:'.now()->subYears(18)->toDateTimeString(),
+                'before_or_equal:' . now()->subYears(18)->toDateTimeString(),
             ],
 
             'height' => [
@@ -2598,6 +2598,31 @@ class MemberController extends Controller
                 'nullable',
                 'string',
                 'max:255',
+            ],
+
+            'no_of_brothers' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:100',
+            ],
+            'married_brothers' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:100',
+            ],
+            'no_of_sisters' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:100',
+            ],
+            'married_sisters' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:100',
             ],
 
             'diet' => [
@@ -2878,14 +2903,14 @@ class MemberController extends Controller
             ->update($validated);
 
         if ($idProof) {
-            $filename = 'id-proof-'.$member->id.'-'.Str::random(10).'.'.$idProof->getClientOriginalExtension();
+            $filename = 'id-proof-' . $member->id . '-' . Str::random(10) . '.' . $idProof->getClientOriginalExtension();
             $idProof->storeAs('id_proofs', $filename, 'public');
 
             $db->table('members')->where('id', $id)->update(['id_proof' => $filename]);
 
             $oldProof = basename((string) $member->id_proof);
             if ($oldProof !== '' && $oldProof !== $filename) {
-                Storage::disk('public')->delete('id_proofs/'.$oldProof);
+                Storage::disk('public')->delete('id_proofs/' . $oldProof);
             }
 
             $changes['id_proof'] = [
@@ -3311,7 +3336,7 @@ class MemberController extends Controller
             ->back()
             ->with(
                 'success',
-                'Rotation scheduled for '.
+                'Rotation scheduled for ' .
                     $nextRotationAt->format('d M Y h:i A')
             );
     }
@@ -3390,7 +3415,7 @@ class MemberController extends Controller
             ->back()
             ->with(
                 'success',
-                'Member rotation scheduled successfully for '.
+                'Member rotation scheduled successfully for ' .
                     $nextRotationAt->format('d M Y h:i A')
             );
     }
