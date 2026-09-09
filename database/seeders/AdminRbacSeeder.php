@@ -51,6 +51,14 @@ class AdminRbacSeeder extends Seeder
             ]
         );
 
+        Permission::updateOrCreate(
+            ['slug' => 'manage-member-status'],
+            [
+                'name' => 'Manage Member Status',
+                'description' => 'Activate and deactivate members',
+            ]
+        );
+
         $memberManagerPermissions = [
             'view-members',
             'create-members',

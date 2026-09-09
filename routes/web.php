@@ -190,12 +190,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             |--------------------------------------------------------------------------
             */
 
-            Route::post('/members/{id}/toggle-status', [MemberController::class, 'toggleStatus'])->name('members.toggle-status');
+            Route::post('/members/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
+                ->middleware('permission.any:manage-member-status,edit-member,edit-members')->name('members.toggle-status');
 
             Route::get('/members/{id}/activate', [MemberActivationController::class, 'create'])
-                ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.create');
+                ->whereNumber('id')->middleware('permission.any:manage-member-status,edit-member,edit-members')->name('members.activation.create');
             Route::post('/members/{id}/activate', [MemberActivationController::class, 'store'])
-                ->whereNumber('id')->middleware('permission:edit-member')->name('members.activation.store');
+                ->whereNumber('id')->middleware('permission.any:manage-member-status,edit-member,edit-members')->name('members.activation.store');
 
             Route::post('/members/{id}/toggle-trusted', [MemberController::class, 'toggleTrusted'])->name('members.toggle-trusted');
 

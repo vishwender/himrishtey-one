@@ -1167,12 +1167,13 @@ request()->filled('sort');
                                     {{-- Active / Inactive --}}
                                     <li>
                                         @if($member->active !== 'Yes')
-                                        @if(auth('admin')->user()?->hasPermission('edit-member') && !app(\App\Services\RelationshipManagerAccess::class)->isRestricted())
+                                        @if(auth('admin')->user()?->hasAnyPermission(['manage-member-status', 'edit-member', 'edit-members']))
                                         <a class="dropdown-item" href="{{ route('admin.members.activation.create', $member->id) }}">
                                             <i class="bi bi-person-check me-2 text-success"></i>Activate Member
                                         </a>
                                         @endif
                                         @else
+                                        @if(auth('admin')->user()?->hasAnyPermission(['manage-member-status', 'edit-member', 'edit-members']))
                                         <form
                                             action="{{ route('admin.members.toggle-status', $member->id) }}"
                                             method="POST"
@@ -1190,6 +1191,7 @@ request()->filled('sort');
                                                 @endif
                                             </button>
                                         </form>
+                                        @endif
                                     </li>
                                     @endif
                                     @endif

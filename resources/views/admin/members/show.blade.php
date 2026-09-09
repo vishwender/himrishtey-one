@@ -1776,7 +1776,9 @@
         $proofPath = 'id_proofs/' . basename((string) $member->id_proof);
         @endphp
         @if($member->id_proof && \Illuminate\Support\Facades\Storage::disk('public')->exists($proofPath))
-        @php($proofUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($proofPath))
+        @php
+        $proofUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($proofPath);
+        @endphp
         <div class="row g-3 align-items-start">
             <div class="col-md-5 col-lg-4">
                 <a href="{{ $proofUrl }}" target="_blank" rel="noopener">
@@ -2716,7 +2718,9 @@
 
         <div class="list-group list-group-flush">
             @foreach($remarkHistory as $remarkEntry)
-            @php($remarkMetadata = $remarkEntry->metadata ?? [])
+            @php
+            $remarkMetadata = $remarkEntry->metadata ?? [];
+            @endphp
             <div class="list-group-item px-0">
                 <div class="d-flex justify-content-between gap-3">
                     <span class="fw-semibold">
@@ -2747,6 +2751,10 @@
 <div class="d-flex flex-wrap align-items-start gap-2 mt-3">
 
     {{-- Activate / Deactivate --}}
+    @php
+        $memberIsActive = strtolower(trim((string) $member->active)) === 'yes';
+    @endphp
+    @if(auth('admin')->user()?->hasAnyPermission(['manage-member-status', 'edit-member', 'edit-members']))
     @if($member->active === 'Banned')
     @if(auth('admin')->user()?->hasRole('super-admin'))
     <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" onsubmit="return confirm('Unban and activate this member?')">
@@ -2755,7 +2763,7 @@
         <button type="submit" class="btn btn-success">Unban Member</button>
     </form>
     @endif
-    @elseif($member->is_active)
+    @elseif($memberIsActive)
 
     <form method="POST"
         action="{{ route('admin.members.toggle-status', $member->id) }}">
@@ -2777,6 +2785,7 @@
         </button>
     </form>
 
+    @endif
     @endif
 
 

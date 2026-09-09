@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\SiteMember;
 use App\Services\AdminActivityLogger;
-use App\Services\RelationshipManagerAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,8 +17,11 @@ class MemberActivationController extends Controller
 {
     private function authorizeActivation(): void
     {
-        abort_unless(auth('admin')->user()?->hasPermission('edit-member')
-            && ! app(RelationshipManagerAccess::class)->isRestricted(), 403);
+        abort_unless(auth('admin')->user()?->hasAnyPermission([
+            'manage-member-status',
+            'edit-member',
+            'edit-members',
+        ]), 403);
     }
 
     private function ensureEligible(SiteMember $member): void

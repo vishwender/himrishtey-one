@@ -14,7 +14,9 @@
 @endpush
 
 @section('content')
-@php($site = app(\App\Services\SiteManager::class)->current())
+@php
+    $site = app(\App\Services\SiteManager::class)->current();
+@endphp
 
 <div class="container-fluid">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
