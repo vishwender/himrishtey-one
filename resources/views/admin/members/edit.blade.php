@@ -712,22 +712,43 @@
 
                 <div class="row g-3">
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label class="form-label">
                             Family Type
                         </label>
 
-                        <input
-                            type="text"
+                        <select
                             name="family_type"
-                            class="form-control"
-                            value="{{ old('family_type', $member->family_type) }}">
+                            id="family_type"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            <option
+                                value="Joint"
+                                @selected(old('family_type')=='Joint' )>
+
+                                Joint
+
+                            </option>
+
+                            <option
+                                value="Nuclear"
+                                @selected(old('family_type')=='Nuclear' )>
+
+                                Nuclear
+
+                            </option>
+
+                        </select>
 
                     </div>
 
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label class="form-label">
                             Family Status
@@ -742,20 +763,6 @@
 
                     </div>
 
-
-                    <div class="col-md-4">
-
-                        <label class="form-label">
-                            Family Income
-                        </label>
-
-                        <input
-                            type="text"
-                            name="family_income"
-                            class="form-control"
-                            value="{{ old('family_income', $member->family_income) }}">
-
-                    </div>
 
 
                     <div class="col-md-6">

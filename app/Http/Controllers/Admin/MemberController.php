@@ -947,6 +947,7 @@ class MemberController extends Controller
             ->get();
 
         $countries = Country::query()
+            ->orderByRaw("CASE WHEN LOWER(name) = 'india' THEN 0 ELSE 1 END")
             ->orderBy('name')
             ->get();
         $maritalStatuses = MaritalStatus::query()
@@ -958,7 +959,12 @@ class MemberController extends Controller
             ->get();
 
         $annualIncomes = AnnualIncome::query()
+            ->orderBy('display_order')
             ->orderBy('annual_income')
+            ->get();
+
+        $employers = Employer::query()
+            ->orderBy('employer')
             ->get();
 
         $relationshipManagerAccess = app(RelationshipManagerAccess::class);
@@ -990,6 +996,7 @@ class MemberController extends Controller
             'maritalStatuses',
             'familyStatuses',
             'annualIncomes',
+            'employers',
             'relationshipManagers',
             'defaultRelationshipManager'
         ));
@@ -1000,6 +1007,23 @@ class MemberController extends Controller
         Request $request
     ) {
         $validated = $request->validate([
+
+            ...array_fill_keys([
+                'blood_group', 'health_info', 'birth_place', 'sub_cast', 'gotra', 'manglik',
+                'no_of_child', 'about_my_education', 'any_other_qualifications', 'about_my_career',
+                'employed_in', 'designation', 'organization_name', 'job_location', 'annual_income',
+                'address_living_in', 'native_place', 'family_type', 'family_status', 'father_name',
+                'father_occupation', 'mother_name', 'mother_occupation', 'no_of_brothers',
+                'no_of_sisters', 'married_brothers', 'married_sisters', 'about_family',
+                'diet', 'is_drinking', 'is_smoking', 'about_me', 'any_disability', 'looking_for',
+                'partner_age_from', 'partner_age_to', 'partner_country', 'partner_religion',
+                'partner_cast', 'partner_height_from', 'partner_height_to', 'partner_education',
+                'partner_mothertongue', 'partner_annual_income_from', 'partner_annual_income_to',
+                'is_partner_manglik', 'partner_occupation', 'partner_state', 'partner_city',
+                'partner_diet', 'is_partner_smoking', 'is_partner_drinking', 'about_my_partner',
+                'horoscope_needed', 'active', 'member_type', 'is_trusted', 'profile_hide', 'promoted',
+                'remarks',
+            ], ['nullable', 'string', 'max:255']),
 
             'profile_created_for' => [
                 'required',
@@ -1040,7 +1064,7 @@ class MemberController extends Controller
             'birth_date_time' => [
                 'required',
                 'date',
-                'before_or_equal:' . today()->subYears(18)->toDateString(),
+                'before_or_equal:' . now()->subYears(18)->toDateTimeString(),
             ],
 
             'gender' => [
@@ -1109,6 +1133,18 @@ class MemberController extends Controller
                 'max:255',
             ],
 
+            'family_type' => ['nullable', Rule::in(['Joint', 'Nuclear'])],
+            'diet' => ['nullable', Rule::in(['Veg', 'Veg & Non Veg', 'Non Veg'])],
+            'partner_diet' => ['nullable', Rule::in(['Veg', 'Veg & Non Veg', 'Non Veg'])],
+            'is_drinking' => ['nullable', Rule::in(['Yes', 'No', 'Occasionally'])],
+            'is_smoking' => ['nullable', Rule::in(['Yes', 'No', 'Occasionally'])],
+            'is_partner_drinking' => ['nullable', Rule::in(['Yes', 'No', 'Occasionally'])],
+            'is_partner_smoking' => ['nullable', Rule::in(['Yes', 'No', 'Occasionally'])],
+            'manglik' => ['nullable', Rule::in(['Yes', 'No'])],
+            'is_partner_manglik' => ['nullable', Rule::in(['Yes', 'No'])],
+            'any_disability' => ['nullable', Rule::in(['Yes', 'No'])],
+            'health_info' => ['nullable', 'string', 'max:255', 'required_if:any_disability,Yes'],
+
             'password' => [
                 'required',
                 'string',
@@ -1137,6 +1173,7 @@ class MemberController extends Controller
             ],
         ], [
             'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
+            'health_info.required_if' => 'Please describe the disability.',
         ]);
 
         /*
@@ -1392,6 +1429,15 @@ class MemberController extends Controller
             */
 
             $member->profile_id = $member->generateProfileId($member->id);
+
+            $member->fill(collect($validated)->except([
+                'password',
+                'photo',
+                'id_proof',
+                'relationship_manager',
+            ])->all());
+
+            $member->relationship_manager = $relationshipManager;
 
             $member->save();
         });

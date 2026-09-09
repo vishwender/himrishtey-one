@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const partnerCountry = document.getElementById('partner_country');
     const partnerState = document.getElementById('partner_state');
     const partnerCity = document.getElementById('partner_city');
+    const disabilitySelect = document.getElementById('any_disability');
+    const disabilityGroup = document.getElementById('disability_description_group');
+    const disabilityDescription = document.getElementById('health_info');
 
     const passwordInput = document.getElementById('password');
     const togglePasswordButton = document.getElementById('togglePassword');
@@ -539,5 +542,18 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
     );
+
+    function toggleDisabilityDescription() {
+        const visible = disabilitySelect?.value === 'Yes';
+        disabilityGroup?.classList.toggle('d-none', !visible);
+
+        if (disabilityDescription) {
+            disabilityDescription.required = visible;
+            if (!visible) disabilityDescription.value = '';
+        }
+    }
+
+    disabilitySelect?.addEventListener('change', toggleDisabilityDescription);
+    toggleDisabilityDescription();
 
 });

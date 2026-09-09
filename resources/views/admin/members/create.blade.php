@@ -7,7 +7,7 @@
 
 @section('content')
 
-<div class="container-fluid py-4">
+<div class="container-fluid">
 
     {{-- =========================================================
         PAGE HEADER
@@ -102,7 +102,7 @@
             IMAGES & DOCUMENTS
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -270,7 +270,7 @@
             BASIC INFORMATION
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -522,7 +522,7 @@
                             for="birth_date_time"
                             class="form-label">
 
-                            Date of Birth
+                            Date of Birth and Time
 
                             <span class="text-danger">*</span>
 
@@ -530,12 +530,12 @@
 
 
                         <input
-                            type="date"
+                            type="datetime-local"
                             name="birth_date_time"
                             id="birth_date_time"
                             class="form-control"
                             value="{{ old('birth_date_time') }}"
-                            max="{{ today()->subYears(18)->toDateString() }}"
+                            max="{{ now()->subYears(18)->format('Y-m-d\TH:i') }}"
                             required>
 
                         <div class="form-text">
@@ -647,28 +647,6 @@
 
                     </div>
 
-
-                    {{-- Health Information --}}
-
-                    <div class="col-md-12">
-
-                        <label
-                            for="health_info"
-                            class="form-label">
-
-                            Health Information
-
-                        </label>
-
-
-                        <textarea
-                            name="health_info"
-                            id="health_info"
-                            class="form-control"
-                            rows="3">{{ old('health_info') }}</textarea>
-
-                    </div>
-
                 </div>
 
             </div>
@@ -681,7 +659,7 @@
             RELIGION & HOROSCOPE
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -1052,7 +1030,7 @@
             EDUCATION & CAREER
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -1151,25 +1129,17 @@
                             id="employed_in"
                             class="form-select">
 
-                            <option value="">
-                                Select
-                            </option>
+                            <option value="">Select Employer Type</option>
 
-                            @foreach([
-                            'Private',
-                            'Government',
-                            'Business',
-                            'Self Employed',
-                            'Not Working'
-                            ] as $value)
+                            @foreach($employers as $employer)
 
                             <option
-                                value="{{ $value }}"
+                                value="{{ $employer->employer }}"
                                 @selected(
-                                old('employed_in')==$value
+                                old('employed_in')==$employer->employer
                                 )>
 
-                                {{ $value }}
+                                {{ $employer->employer }}
 
                             </option>
 
@@ -1386,7 +1356,7 @@
             MEMBER LOCATION
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -1555,7 +1525,7 @@
             FAMILY INFORMATION
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -1574,7 +1544,7 @@
 
                     {{-- Family Type --}}
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label
                             for="family_type"
@@ -1617,7 +1587,7 @@
 
                     {{-- Family Status --}}
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
 
                         <label
                             for="family_status"
@@ -1640,12 +1610,12 @@
                             @foreach($familyStatuses as $status)
 
                             <option
-                                value="{{ $status->family_status }}"
+                                value="{{ $status->value }}"
                                 @selected(
-                                old('family_status')==$status->family_status
+                                old('family_status')==$status->value
                                 )>
 
-                                {{ $status->family_status }}
+                                {{ $status->value }}
 
                             </option>
 
@@ -1655,28 +1625,6 @@
 
                     </div>
 
-
-                    {{-- Family Income --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="family_income"
-                            class="form-label">
-
-                            Family Income
-
-                        </label>
-
-
-                        <input
-                            type="text"
-                            name="family_income"
-                            id="family_income"
-                            class="form-control"
-                            value="{{ old('family_income') }}">
-
-                    </div>
 
 
                     {{-- Father Name --}}
@@ -1900,7 +1848,7 @@
             LIFESTYLE
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -1939,12 +1887,7 @@
                                 Select
                             </option>
 
-                            @foreach([
-                            'Vegetarian',
-                            'Non-Vegetarian',
-                            'Eggetarian',
-                            'Vegan'
-                            ] as $value)
+                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
 
                             <option
                                 value="{{ $value }}"
@@ -2098,6 +2041,13 @@
                     </div>
 
 
+                    <div class="col-md-8 {{ old('any_disability') === 'Yes' ? '' : 'd-none' }}" id="disability_description_group">
+                        <label for="health_info" class="form-label">Describe Disability</label>
+                        <textarea name="health_info" id="health_info" class="form-control" rows="3"
+                            maxlength="255">{{ old('health_info') }}</textarea>
+                    </div>
+
+
                     {{-- About Me --}}
 
                     <div class="col-md-8">
@@ -2131,7 +2081,7 @@
             PARTNER PREFERENCES
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -2171,12 +2121,12 @@
                         </label>
 
 
-                        <input
-                            type="text"
-                            name="looking_for"
-                            id="looking_for"
-                            class="form-control"
-                            value="{{ old('looking_for') }}">
+                        <select name="looking_for" id="looking_for" class="form-select">
+                            <option value="">Select Marital Status</option>
+                            @foreach($maritalStatuses as $status)
+                            <option value="{{ $status->marital_status }}" @selected(old('looking_for')==$status->marital_status)>{{ $status->marital_status }}</option>
+                            @endforeach
+                        </select>
 
                     </div>
 
@@ -2839,12 +2789,7 @@
                                 Select
                             </option>
 
-                            @foreach([
-                            'Vegetarian',
-                            'Non-Vegetarian',
-                            'Eggetarian',
-                            'Vegan'
-                            ] as $value)
+                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
 
                             <option
                                 value="{{ $value }}"
@@ -2986,7 +2931,7 @@
             ACCOUNT & ADMIN SETTINGS
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
             <div class="card-header bg-white py-3">
 
@@ -3287,11 +3232,11 @@
                             <option
                                 value="{{ $manager->name }}"
                                 @selected(
-                                    old('relationship_manager', $defaultRelationshipManager) === $manager->name
+                                old('relationship_manager', $defaultRelationshipManager)===$manager->name
                                 )>
                                 {{ $manager->name }}
                                 @if($manager->profile_id)
-                                    ({{ $manager->profile_id }})
+                                ({{ $manager->profile_id }})
                                 @endif
                             </option>
                             @endforeach
@@ -3336,44 +3281,54 @@
 
 
 
-        {{-- =====================================================
-            SUBMIT
-        ====================================================== --}}
-
-        <div class="card border-0 shadow-sm">
-
-            <div class="card-body">
-
-                <div class="d-flex justify-content-end gap-2">
-
-                    <a
-                        href="{{ route('admin.members.index') }}"
-                        class="btn btn-light">
-
-                        Cancel
-
-                    </a>
-
-
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
-
-                        <i class="bi bi-person-plus me-1"></i>
-
-                        Create Member
-
-                    </button>
-
-                </div>
-
-            </div>
-
+        {{-- Submit Buttons --}}
+        <div class="d-flex justify-content-end gap-2 mb-5">
+            <a href="{{ route('admin.members.index') }}" class="btn btn-light">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-person-plus me-1"></i>
+                Create Member
+            </button>
         </div>
 
 
     </form>
 
 </div>
+
+@push('styles')
+<style>
+    .member-section .card-header {
+        padding: 1.5rem 1.5rem 0;
+        background: #fff;
+        border: 0;
+    }
+
+    .member-section .card-header h5 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+    }
+
+    .member-section .card-header h5>i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin-right: 1rem !important;
+        border-radius: 50%;
+        background: var(--bs-primary-bg-subtle);
+        color: var(--bs-primary);
+        font-size: 1.15rem;
+    }
+
+    .member-section .card-body {
+        padding: 1.5rem;
+    }
+</style>
+@endpush
 
 @endsection
