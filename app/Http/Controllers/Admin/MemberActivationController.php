@@ -57,10 +57,10 @@ class MemberActivationController extends Controller
             'profile_hide' => ['required', Rule::in(['Yes', 'No'])],
             'profile_view_count' => ['required', 'integer', 'min:0', 'max:2147483647'],
             'wallet_amount' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
-            'ranges' => ['required', 'array', 'min:1', 'max:20'],
-            'ranges.*.range_from' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'ranges.*.range_to' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'ranges.*.price' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
+            'ranges' => ['nullable', 'array', 'max:20'],
+            'ranges.*.range_from' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'ranges.*.range_to' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'ranges.*.price' => ['nullable', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
         ]);
         $staff = Admin::query()->where('status', true)->whereNotNull('name')->where('name', '<>', '')->find($data['staff_id']);
         if (! $staff) {
@@ -70,7 +70,20 @@ class MemberActivationController extends Controller
         if ((int) $data['plan_id'] !== 0 && ! $db->table('membership_plans')->where('id', $data['plan_id'])->exists()) {
             throw ValidationException::withMessages(['plan_id' => 'Select a valid membership plan.']);
         }
-        $ranges = collect($data['ranges'])->sortBy('range_from')->values();
+        $submittedRanges = collect($data['ranges'] ?? []);
+        foreach ($submittedRanges as $index => $range) {
+            $filledValues = collect(['range_from', 'range_to', 'price'])
+                ->filter(fn (string $field) => ($range[$field] ?? '') !== '')
+                ->count();
+            if ($filledValues > 0 && $filledValues < 3) {
+                throw ValidationException::withMessages([
+                    "ranges.$index.range_from" => 'Complete the From, To, and Price fields for this range.',
+                ]);
+            }
+        }
+        $ranges = $submittedRanges
+            ->filter(fn (array $range) => collect($range)->contains(fn ($value) => $value !== null && $value !== ''))
+            ->sortBy('range_from')->values();
         $previousEnd = 0;
         foreach ($ranges as $range) {
             if ($range['range_from'] > $range['range_to'] || $range['range_from'] <= $previousEnd) {
@@ -102,12 +115,14 @@ class MemberActivationController extends Controller
                     'profile_view_count' => $data['profile_view_count'],
                 ]);
                 $db->table('member_profile_range')->where('member_id', $id)->delete();
-                $db->table('member_profile_range')->insert($ranges->map(fn ($range) => [
-                    'member_id' => $id,
-                    'range_from' => $range['range_from'],
-                    'range_to' => $range['range_to'],
-                    'price' => $range['price'],
-                ])->all());
+                if ($ranges->isNotEmpty()) {
+                    $db->table('member_profile_range')->insert($ranges->map(fn ($range) => [
+                        'member_id' => $id,
+                        'range_from' => $range['range_from'],
+                        'range_to' => $range['range_to'],
+                        'price' => $range['price'],
+                    ])->all());
+                }
 
                 if ((float) $data['wallet_amount'] > 0) {
                     $balance = $db->table('member_wallet')->where('member_id', $id)->latest('id')->lockForUpdate()->value('wallet_balance') ?? 0;

@@ -65,9 +65,12 @@
         </div>
 
         @php
-            $defaultRanges = collect([[1, 20, 3], [21, 50, 8], [51, 100, 15], [101, 200, 25], [201, 1000, 50]])
-                ->map(fn ($range) => ['range_from' => $range[0], 'range_to' => $range[1], 'price' => $range[2]])->all();
-            $formRanges = old('ranges', $ranges->isNotEmpty() ? $ranges->map(fn ($range) => (array) $range)->all() : $defaultRanges);
+            $formRanges = old(
+                'ranges',
+                $ranges->isNotEmpty()
+                    ? $ranges->map(fn ($range) => (array) $range)->all()
+                    : [['range_from' => '', 'range_to' => '', 'price' => '']]
+            );
         @endphp
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-header bg-white"><h2 class="h5 mb-0">Profile View Rates</h2></div>
@@ -76,9 +79,9 @@
                 <div id="activation-ranges">
                     @foreach($formRanges as $index => $range)
                     <div class="row g-2 mb-3" data-rate-row>
-                        <div class="col"><label class="form-label">From<input aria-label="Range {{ $index + 1 }} start" class="form-control" type="number" min="1" name="ranges[{{ $index }}][range_from]" value="{{ $range['range_from'] ?? '' }}" required></label></div>
-                        <div class="col"><label class="form-label">To<input aria-label="Range {{ $index + 1 }} end" class="form-control" type="number" min="1" name="ranges[{{ $index }}][range_to]" value="{{ $range['range_to'] ?? '' }}" required></label></div>
-                        <div class="col"><label class="form-label">Price (₹)<input aria-label="Range {{ $index + 1 }} price" class="form-control" type="number" min="0" max="1000000" step="0.01" name="ranges[{{ $index }}][price]" value="{{ $range['price'] ?? '' }}" required></label></div>
+                        <div class="col"><label class="form-label">From<input aria-label="Range {{ $index + 1 }} start" class="form-control" type="number" min="1" name="ranges[{{ $index }}][range_from]" value="{{ $range['range_from'] ?? '' }}"></label></div>
+                        <div class="col"><label class="form-label">To<input aria-label="Range {{ $index + 1 }} end" class="form-control" type="number" min="1" name="ranges[{{ $index }}][range_to]" value="{{ $range['range_to'] ?? '' }}"></label></div>
+                        <div class="col"><label class="form-label">Price (₹)<input aria-label="Range {{ $index + 1 }} price" class="form-control" type="number" min="0" max="1000000" step="0.01" name="ranges[{{ $index }}][price]" value="{{ $range['price'] ?? '' }}"></label></div>
                         <div class="col-auto align-self-end mb-2"><button type="button" class="btn btn-outline-danger" data-remove-rate aria-label="Remove range">×</button></div>
                     </div>
                     @endforeach

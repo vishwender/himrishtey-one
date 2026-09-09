@@ -61,6 +61,46 @@ document.addEventListener('DOMContentLoaded', function () {
     syncMarriedSiblingCount(brothersSelect, marriedBrothersSelect, marriedBrothersZero);
     syncMarriedSiblingCount(sistersSelect, marriedSistersSelect, marriedSistersZero);
 
+    const profileRangeRows = document.getElementById('profileRangeRows');
+    const addProfileRangeButton = document.getElementById('addProfileRange');
+
+    function addProfileRangeRow() {
+        if (!profileRangeRows || profileRangeRows.children.length >= 20) return;
+
+        const index = Date.now();
+        const row = document.createElement('div');
+        row.className = 'profile-range-row row g-2 mb-3 align-items-center';
+        row.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label d-md-none" for="profile_range_from_${index}">From</label>
+                <input type="number" name="profile_ranges[${index}][range_from]" id="profile_range_from_${index}" class="form-control" min="1">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label d-md-none" for="profile_range_to_${index}">To</label>
+                <input type="number" name="profile_ranges[${index}][range_to]" id="profile_range_to_${index}" class="form-control" min="1">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label d-md-none" for="profile_range_price_${index}">Price</label>
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input type="number" name="profile_ranges[${index}][price]" id="profile_range_price_${index}" class="form-control" min="0" max="1000000" step="0.01">
+                </div>
+            </div>
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-profile-range">Remove</button>
+            </div>`;
+        profileRangeRows.appendChild(row);
+    }
+
+    addProfileRangeButton?.addEventListener('click', addProfileRangeRow);
+    profileRangeRows?.addEventListener('click', event => {
+        const removeButton = event.target.closest('.remove-profile-range');
+        if (!removeButton) return;
+
+        removeButton.closest('.profile-range-row')?.remove();
+        if (!profileRangeRows.children.length) addProfileRangeRow();
+    });
+
     togglePasswordButton?.addEventListener('click', function () {
         const passwordIsVisible = passwordInput.type === 'text';
 

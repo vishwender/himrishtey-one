@@ -1231,17 +1231,31 @@ class MemberController extends Controller
                 'max:5120',
             ],
 
-            'profile_ranges' => ['required', 'array', 'size:5'],
-            'profile_ranges.*.range_from' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'profile_ranges.*.range_to' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'profile_ranges.*.price' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
+            'profile_ranges' => ['nullable', 'array', 'max:20'],
+            'profile_ranges.*.range_from' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.range_to' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.price' => ['nullable', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
         ], [
             'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
             'health_info.required_if' => 'Please describe the disability.',
-            'profile_ranges.size' => 'All five profile view ranges are required.',
         ]);
 
-        $profileRanges = collect($validated['profile_ranges'])
+        $submittedProfileRanges = collect($validated['profile_ranges'] ?? []);
+
+        foreach ($submittedProfileRanges as $index => $range) {
+            $filledValues = collect(['range_from', 'range_to', 'price'])
+                ->filter(fn (string $field) => ($range[$field] ?? '') !== '')
+                ->count();
+
+            if ($filledValues > 0 && $filledValues < 3) {
+                throw ValidationException::withMessages([
+                    "profile_ranges.$index.range_from" => 'Complete the From, To, and Price fields for this range.',
+                ]);
+            }
+        }
+
+        $profileRanges = $submittedProfileRanges
+            ->filter(fn (array $range) => collect($range)->contains(fn ($value) => $value !== null && $value !== ''))
             ->sortBy('range_from')
             ->values();
         $previousRangeEnd = 0;
@@ -1524,14 +1538,16 @@ class MemberController extends Controller
 
             $member->save();
 
-            DB::connection('site')->table('member_profile_range')->insert(
-                $profileRanges->map(fn (array $range) => [
-                    'member_id' => $member->id,
-                    'range_from' => $range['range_from'],
-                    'range_to' => $range['range_to'],
-                    'price' => $range['price'],
-                ])->all()
-            );
+            if ($profileRanges->isNotEmpty()) {
+                DB::connection('site')->table('member_profile_range')->insert(
+                    $profileRanges->map(fn (array $range) => [
+                        'member_id' => $member->id,
+                        'range_from' => $range['range_from'],
+                        'range_to' => $range['range_to'],
+                        'price' => $range['price'],
+                    ])->all()
+                );
+            }
         });
 
         /*
@@ -2976,18 +2992,32 @@ class MemberController extends Controller
                 'max:255',
             ],
 
-            'profile_ranges' => ['required', 'array', 'size:5'],
-            'profile_ranges.*.range_from' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'profile_ranges.*.range_to' => ['required', 'integer', 'min:1', 'max:2147483647'],
-            'profile_ranges.*.price' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
+            'profile_ranges' => ['nullable', 'array', 'max:20'],
+            'profile_ranges.*.range_from' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.range_to' => ['nullable', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.price' => ['nullable', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
 
         ], [
             'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
             'health_info.required_if' => 'Please describe the disability.',
-            'profile_ranges.size' => 'All five profile view ranges are required.',
         ]);
 
-        $profileRanges = collect($validated['profile_ranges'])
+        $submittedProfileRanges = collect($validated['profile_ranges'] ?? []);
+
+        foreach ($submittedProfileRanges as $index => $range) {
+            $filledValues = collect(['range_from', 'range_to', 'price'])
+                ->filter(fn (string $field) => ($range[$field] ?? '') !== '')
+                ->count();
+
+            if ($filledValues > 0 && $filledValues < 3) {
+                throw ValidationException::withMessages([
+                    "profile_ranges.$index.range_from" => 'Complete the From, To, and Price fields for this range.',
+                ]);
+            }
+        }
+
+        $profileRanges = $submittedProfileRanges
+            ->filter(fn (array $range) => collect($range)->contains(fn ($value) => $value !== null && $value !== ''))
             ->sortBy('range_from')
             ->values();
         $previousRangeEnd = 0;
@@ -3098,14 +3128,16 @@ class MemberController extends Controller
                 ->update($validated);
 
             $db->table('member_profile_range')->where('member_id', $id)->delete();
-            $db->table('member_profile_range')->insert(
-                $profileRanges->map(fn (array $range) => [
-                    'member_id' => $id,
-                    'range_from' => $range['range_from'],
-                    'range_to' => $range['range_to'],
-                    'price' => $range['price'],
-                ])->all()
-            );
+            if ($profileRanges->isNotEmpty()) {
+                $db->table('member_profile_range')->insert(
+                    $profileRanges->map(fn (array $range) => [
+                        'member_id' => $id,
+                        'range_from' => $range['range_from'],
+                        'range_to' => $range['range_to'],
+                        'price' => $range['price'],
+                    ])->all()
+                );
+            }
         });
 
         if ($idProof) {

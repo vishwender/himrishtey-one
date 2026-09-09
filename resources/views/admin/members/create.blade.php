@@ -2879,15 +2879,9 @@
         ====================================================== --}}
 
 @php
-    $profileRangeDefaults = [
-        ['range_from' => 1, 'range_to' => 20, 'price' => 3],
-        ['range_from' => 21, 'range_to' => 50, 'price' => 8],
-        ['range_from' => 51, 'range_to' => 100, 'price' => 15],
-        ['range_from' => 101, 'range_to' => 200, 'price' => 25],
-        ['range_from' => 201, 'range_to' => 1000, 'price' => 50],
-    ];
-    $rangeFromOptions = [1, 21, 51, 101, 201];
-    $rangeToOptions = [20, 50, 100, 200, 1000];
+    $profileRangeRows = old('profile_ranges', [
+        ['range_from' => '', 'range_to' => '', 'price' => ''],
+    ]);
 @endphp
 
 <div class="card border-0 shadow-sm mb-4 member-section">
@@ -2908,31 +2902,24 @@
             <div class="col-md-4">Price</div>
         </div>
 
-        @foreach($profileRangeDefaults as $index => $range)
-        <div class="row g-2 mb-2 align-items-center">
+        <div id="profileRangeRows">
+        @foreach($profileRangeRows as $index => $range)
+        <div class="profile-range-row row g-2 mb-3 align-items-center">
             <div class="col-md-4">
                 <label class="form-label d-md-none" for="profile_range_from_{{ $index }}">From</label>
-                <select
+                <input type="number"
                     name="profile_ranges[{{ $index }}][range_from]"
                     id="profile_range_from_{{ $index }}"
-                    class="form-select @error('profile_ranges.'.$index.'.range_from') is-invalid @enderror"
-                    required>
-                    @foreach($rangeFromOptions as $value)
-                    <option value="{{ $value }}" @selected((int) old('profile_ranges.'.$index.'.range_from', $range['range_from']) === $value)>{{ $value }}</option>
-                    @endforeach
-                </select>
+                    class="form-control @error('profile_ranges.'.$index.'.range_from') is-invalid @enderror"
+                    value="{{ $range['range_from'] ?? '' }}" min="1">
             </div>
             <div class="col-md-4">
                 <label class="form-label d-md-none" for="profile_range_to_{{ $index }}">To</label>
-                <select
+                <input type="number"
                     name="profile_ranges[{{ $index }}][range_to]"
                     id="profile_range_to_{{ $index }}"
-                    class="form-select @error('profile_ranges.'.$index.'.range_to') is-invalid @enderror"
-                    required>
-                    @foreach($rangeToOptions as $value)
-                    <option value="{{ $value }}" @selected((int) old('profile_ranges.'.$index.'.range_to', $range['range_to']) === $value)>{{ $value }}</option>
-                    @endforeach
-                </select>
+                    class="form-control @error('profile_ranges.'.$index.'.range_to') is-invalid @enderror"
+                    value="{{ $range['range_to'] ?? '' }}" min="1">
             </div>
             <div class="col-md-4">
                 <label class="form-label d-md-none" for="profile_range_price_{{ $index }}">Price</label>
@@ -2947,11 +2934,19 @@
                         min="0"
                         max="1000000"
                         step="0.01"
-                        required>
+                        >
                 </div>
+            </div>
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-profile-range">Remove</button>
             </div>
         </div>
         @endforeach
+        </div>
+
+        <button type="button" id="addProfileRange" class="btn btn-sm btn-outline-primary mt-1">
+            <i class="bi bi-plus-lg me-1"></i>Add Range
+        </button>
 
         @error('profile_ranges')
         <div class="text-danger small mt-2">{{ $message }}</div>
