@@ -1724,7 +1724,7 @@
                         <select name="no_of_brothers" id="no_of_brothers" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
-                            <option value="{{ $number }}" @selected((string) old('no_of_brothers') === (string) $number)>{{ $number }}</option>
+                            <option value="{{ $number }}" @selected((string) old('no_of_brothers')===(string) $number)>{{ $number }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -1734,7 +1734,7 @@
                         <select name="married_brothers" id="married_brothers" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
-                            <option value="{{ $number }}" @selected((string) old('married_brothers') === (string) $number)>{{ $number }}</option>
+                            <option value="{{ $number }}" @selected((string) old('married_brothers')===(string) $number)>{{ $number }}</option>
                             @endforeach
                         </select>
                         <input type="hidden" id="married_brothers_zero" value="0" disabled>
@@ -1745,7 +1745,7 @@
                         <select name="no_of_sisters" id="no_of_sisters" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
-                            <option value="{{ $number }}" @selected((string) old('no_of_sisters') === (string) $number)>{{ $number }}</option>
+                            <option value="{{ $number }}" @selected((string) old('no_of_sisters')===(string) $number)>{{ $number }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -1755,31 +1755,33 @@
                         <select name="married_sisters" id="married_sisters" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
-                            <option value="{{ $number }}" @selected((string) old('married_sisters') === (string) $number)>{{ $number }}</option>
+                            <option value="{{ $number }}" @selected((string) old('married_sisters')===(string) $number)>{{ $number }}</option>
                             @endforeach
                         </select>
                         <input type="hidden" id="married_sisters_zero" value="0" disabled>
                     </div>
 
 
-                {{-- About Family --}}
+                    {{-- About Family --}}
 
-                <div class="col-12">
+                    <div class="col-12">
 
-                    <label
-                        for="about_family"
-                        class="form-label">
+                        <label
+                            for="about_family"
+                            class="form-label">
 
-                        About Family
+                            About Family
 
-                    </label>
+                        </label>
 
 
-                    <textarea
-                        name="about_family"
-                        id="about_family"
-                        class="form-control"
-                        rows="4">{{ old('about_family') }}</textarea>
+                        <textarea
+                            name="about_family"
+                            id="about_family"
+                            class="form-control"
+                            rows="4">{{ old('about_family') }}</textarea>
+
+                    </div>
 
                 </div>
 
@@ -1787,1445 +1789,1527 @@
 
         </div>
 
-</div>
 
 
-
-{{-- =====================================================
+        {{-- =====================================================
             LIFESTYLE
         ====================================================== --}}
 
-<div class="card border-0 shadow-sm mb-4 member-section">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
-    <div class="card-header bg-white py-3">
+            <div class="card-header bg-white py-3">
 
-        <h5 class="mb-0">
-            <i class="bi bi-heart me-2"></i>
-            Lifestyle & About Me
-        </h5>
-
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3">
-
-
-            {{-- Diet --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="diet"
-                    class="form-label">
-
-                    Diet
-
-                </label>
-
-
-                <select
-                    name="diet"
-                    id="diet"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
-
-                    <option
-                        value="{{ $value }}"
-                        @selected(old('diet')==$value)>
-
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
+                <h5 class="mb-0">
+                    <i class="bi bi-heart me-2"></i>
+                    Lifestyle & About Me
+                </h5>
 
             </div>
 
 
-            {{-- Drinking --}}
+            <div class="card-body">
 
-            <div class="col-md-4">
-
-                <label
-                    for="is_drinking"
-                    class="form-label">
-
-                    Drinking
-
-                </label>
+                <div class="row g-3">
 
 
-                <select
-                    name="is_drinking"
-                    id="is_drinking"
-                    class="form-select">
+                    {{-- Diet --}}
 
-                    <option value="">
-                        Select
-                    </option>
+                    <div class="col-md-4">
 
-                    @foreach([
-                    'Yes',
-                    'No',
-                    'Occasionally'
-                    ] as $value)
+                        <label
+                            for="diet"
+                            class="form-label">
 
-                    <option
-                        value="{{ $value }}"
-                        @selected(
-                        old('is_drinking')==$value
-                        )>
+                            Diet
 
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
+                        </label>
 
 
-            {{-- Smoking --}}
+                        <select
+                            name="diet"
+                            id="diet"
+                            class="form-select">
 
-            <div class="col-md-4">
+                            <option value="">
+                                Select
+                            </option>
 
-                <label
-                    for="is_smoking"
-                    class="form-label">
+                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
 
-                    Smoking
+                            <option
+                                value="{{ $value }}"
+                                @selected(old('diet')==$value)>
 
-                </label>
+                                {{ $value }}
 
+                            </option>
 
-                <select
-                    name="is_smoking"
-                    id="is_smoking"
-                    class="form-select">
+                            @endforeach
 
-                    <option value="">
-                        Select
-                    </option>
+                        </select>
 
-                    @foreach([
-                    'Yes',
-                    'No',
-                    'Occasionally'
-                    ] as $value)
-
-                    <option
-                        value="{{ $value }}"
-                        @selected(
-                        old('is_smoking')==$value
-                        )>
-
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
+                    </div>
 
 
-            {{-- Disability --}}
+                    {{-- Drinking --}}
 
-            <div class="col-md-4">
+                    <div class="col-md-4">
 
-                <label
-                    for="any_disability"
-                    class="form-label">
+                        <label
+                            for="is_drinking"
+                            class="form-label">
 
-                    Any Disability
+                            Drinking
 
-                </label>
-
-
-                <select
-                    name="any_disability"
-                    id="any_disability"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('any_disability')=='No'
-                        )>
-
-                        No
-
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('any_disability')=='Yes'
-                        )>
-
-                        Yes
-
-                    </option>
-
-                </select>
-
-            </div>
+                        </label>
 
 
-            <div class="col-md-8 {{ old('any_disability') === 'Yes' ? '' : 'd-none' }}" id="disability_description_group">
-                <label for="health_info" class="form-label">Describe Disability</label>
-                <textarea name="health_info" id="health_info" class="form-control" rows="3"
-                    maxlength="255">{{ old('health_info') }}</textarea>
-            </div>
+                        <select
+                            name="is_drinking"
+                            id="is_drinking"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                            'Yes',
+                            'No',
+                            'Occasionally'
+                            ] as $value)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(
+                                old('is_drinking')==$value
+                                )>
+
+                                {{ $value }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
 
 
-            {{-- About Me --}}
+                    {{-- Smoking --}}
 
-            <div class="col-md-8">
+                    <div class="col-md-4">
 
-                <label
-                    for="about_me"
-                    class="form-label">
+                        <label
+                            for="is_smoking"
+                            class="form-label">
 
-                    About Me
+                            Smoking
 
-                </label>
+                        </label>
 
 
-                <textarea
-                    name="about_me"
-                    id="about_me"
-                    class="form-control"
-                    rows="4">{{ old('about_me') }}</textarea>
+                        <select
+                            name="is_smoking"
+                            id="is_smoking"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                            'Yes',
+                            'No',
+                            'Occasionally'
+                            ] as $value)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(
+                                old('is_smoking')==$value
+                                )>
+
+                                {{ $value }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Disability --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="any_disability"
+                            class="form-label">
+
+                            Any Disability
+
+                        </label>
+
+
+                        <select
+                            name="any_disability"
+                            id="any_disability"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('any_disability')=='No'
+                                )>
+
+                                No
+
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('any_disability')=='Yes'
+                                )>
+
+                                Yes
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-8 {{ old('any_disability') === 'Yes' ? '' : 'd-none' }}" id="disability_description_group">
+                        <label for="health_info" class="form-label">Describe Disability</label>
+                        <textarea name="health_info" id="health_info" class="form-control" rows="3"
+                            maxlength="255">{{ old('health_info') }}</textarea>
+                    </div>
+
+
+                    {{-- About Me --}}
+
+                    <div class="col-md-8">
+
+                        <label
+                            for="about_me"
+                            class="form-label">
+
+                            About Me
+
+                        </label>
+
+
+                        <textarea
+                            name="about_me"
+                            id="about_me"
+                            class="form-control"
+                            rows="4">{{ old('about_me') }}</textarea>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
 
-</div>
+
+        {{-- =====================================================
+            PARTNER PREFERENCES
+        ====================================================== --}}
+
+        <div class="card border-0 shadow-sm mb-4 member-section">
+
+            <div class="card-header bg-white py-3">
+
+                <h5 class="mb-0">
+                    <i class="bi bi-person-heart me-2"></i>
+                    Partner Preferences
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+
+                {{-- =================================================
+                    BASIC PREFERENCES
+                ================================================== --}}
+
+                <h6 class="fw-semibold mb-3">
+                    Basic Preferences
+                </h6>
+
+
+                <div class="row g-3">
+
+
+                    {{-- Looking For --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="looking_for"
+                            class="form-label">
+
+                            Looking For
+
+                        </label>
+
+
+                        <select name="looking_for" id="looking_for" class="form-select">
+                            <option value="">Select Marital Status</option>
+                            @foreach($maritalStatuses as $status)
+                            <option value="{{ $status->marital_status }}" @selected(old('looking_for')==$status->marital_status)>{{ $status->marital_status }}</option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
+
+                    {{-- Age From --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_age_from"
+                            class="form-label">
+
+                            Partner Age From
+
+                        </label>
+
+
+                        <input
+                            type="number"
+                            name="partner_age_from"
+                            id="partner_age_from"
+                            class="form-control"
+                            min="18"
+                            value="{{ old('partner_age_from') }}">
+
+                    </div>
+
+
+                    {{-- Age To --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_age_to"
+                            class="form-label">
+
+                            Partner Age To
+
+                        </label>
+
+
+                        <input
+                            type="number"
+                            name="partner_age_to"
+                            id="partner_age_to"
+                            class="form-control"
+                            min="18"
+                            value="{{ old('partner_age_to') }}">
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                {{-- =================================================
+                    PARTNER RELIGION
+                ================================================== --}}
+
+                <h6 class="fw-semibold mb-3">
+                    Religion & Background
+                </h6>
+
+
+                <div class="row g-3">
+
+                    {{-- Partner Religion --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_religion"
+                            class="form-label">
+
+                            Partner Religion
+
+                        </label>
+
+
+                        <select
+                            name="partner_religion"
+                            id="partner_religion"
+                            class="form-select">
+
+                            <option value="">
+                                Select Religion
+                            </option>
+
+                            @foreach($religions as $religion)
+
+                            <option
+                                value="{{ $religion->religion }}"
+                                @selected(
+                                old('partner_religion')==$religion->religion
+                                )>
+
+                                {{ $religion->religion }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner Cast --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_cast"
+                            class="form-label">
+
+                            Partner Cast
+
+                        </label>
+
+
+                        <select
+                            name="partner_cast"
+                            id="partner_cast"
+                            class="form-select">
+
+                            <option value="">
+                                Select Cast
+                            </option>
+
+                            @foreach($casts as $cast)
+
+                            <option
+                                value="{{ $cast->cast }}"
+                                @selected(
+                                old('partner_cast')==$cast->cast
+                                )>
+
+                                {{ $cast->cast }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner Mother Tongue --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_mothertongue"
+                            class="form-label">
+
+                            Partner Mother Tongue
+
+                        </label>
+
+
+                        <select
+                            name="partner_mothertongue"
+                            id="partner_mothertongue"
+                            class="form-select">
+
+                            <option value="">
+                                Select Mother Tongue
+                            </option>
+
+                            @foreach($motherTongues as $motherTongue)
+
+                            <option
+                                value="{{ $motherTongue->mother_tongue }}"
+                                @selected(
+                                old('partner_mothertongue')==$motherTongue->mother_tongue
+                                )>
+
+                                {{ $motherTongue->mother_tongue }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner Manglik --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="is_partner_manglik"
+                            class="form-label">
+
+                            Partner Manglik
+
+                        </label>
+
+
+                        <select
+                            name="is_partner_manglik"
+                            id="is_partner_manglik"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('is_partner_manglik')=='Yes'
+                                )>
+
+                                Yes
+
+                            </option>
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('is_partner_manglik')=='No'
+                                )>
+
+                                No
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                {{-- =================================================
+                    PARTNER HEIGHT / EDUCATION / CAREER
+                ================================================== --}}
+
+                <h6 class="fw-semibold mb-3">
+                    Education & Career
+                </h6>
+
+
+                <div class="row g-3">
+
+
+                    {{-- Height From --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_height_from"
+                            class="form-label">
+
+                            Partner Height From
+
+                        </label>
+
+
+                        <select
+                            name="partner_height_from"
+                            id="partner_height_from"
+                            class="form-select">
+
+                            <option value="">
+                                Select Height
+                            </option>
+
+                            @foreach($heights as $height)
+
+                            @php
+                            $heightValue =
+                            $height->height_value
+                            ?? $height->height;
+                            @endphp
+
+                            <option
+                                value="{{ $heightValue }}"
+                                @selected(
+                                old('partner_height_from')==$heightValue
+                                )>
+
+                                {{ \App\Support\HeightFormatter::format($height->height) }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Height To --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_height_to"
+                            class="form-label">
+
+                            Partner Height To
+
+                        </label>
+
+
+                        <select
+                            name="partner_height_to"
+                            id="partner_height_to"
+                            class="form-select">
+
+                            <option value="">
+                                Select Height
+                            </option>
+
+                            @foreach($heights as $height)
+
+                            @php
+                            $heightValue =
+                            $height->height_value
+                            ?? $height->height;
+                            @endphp
+
+                            <option
+                                value="{{ $heightValue }}"
+                                @selected(
+                                old('partner_height_to')==$heightValue
+                                )>
+
+                                {{ \App\Support\HeightFormatter::format($height->height) }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Education --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_education"
+                            class="form-label">
+
+                            Partner Education
+
+                        </label>
+
+
+                        <select
+                            name="partner_education"
+                            id="partner_education"
+                            class="form-select">
+
+                            <option value="">
+                                Select Education
+                            </option>
+
+                            @foreach($educations as $education)
+
+                            <option
+                                value="{{ $education->education }}"
+                                @selected(
+                                old('partner_education')==$education->education
+                                )>
+
+                                {{ $education->education }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Occupation --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_occupation"
+                            class="form-label">
+
+                            Partner Occupation
+
+                        </label>
+
+
+                        <select
+                            name="partner_occupation"
+                            id="partner_occupation"
+                            class="form-select">
+
+                            <option value="">
+                                Select Occupation
+                            </option>
+
+                            @foreach($occupations as $occupation)
+
+                            <option
+                                value="{{ $occupation->occupation }}"
+                                @selected(
+                                old('partner_occupation')==$occupation->occupation
+                                )>
+
+                                {{ $occupation->occupation }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Income From --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_annual_income_from"
+                            class="form-label">
+
+                            Partner Annual Income From
+
+                        </label>
+
+
+                        <select
+                            name="partner_annual_income_from"
+                            id="partner_annual_income_from"
+                            class="form-select">
+
+                            <option value="">
+                                Select Income
+                            </option>
+
+                            @foreach($annualIncomes as $income)
+
+                            <option
+                                value="{{ $income->annual_income }}"
+                                @selected(
+                                old('partner_annual_income_from')==$income->annual_income
+                                )>
+
+                                {{ $income->annual_income }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Income To --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_annual_income_to"
+                            class="form-label">
+
+                            Partner Annual Income To
+
+                        </label>
+
+
+                        <select
+                            name="partner_annual_income_to"
+                            id="partner_annual_income_to"
+                            class="form-select">
+
+                            <option value="">
+                                Select Income
+                            </option>
+
+                            @foreach($annualIncomes as $income)
+
+                            <option
+                                value="{{ $income->annual_income }}"
+                                @selected(
+                                old('partner_annual_income_to')==$income->annual_income
+                                )>
+
+                                {{ $income->annual_income }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                {{-- =================================================
+                    PARTNER LOCATION
+                ================================================== --}}
+
+                <h6 class="fw-semibold mb-3">
+                    Partner Location
+                </h6>
+
+
+                <div class="row g-3">
+
+                    {{-- Partner Country --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_country"
+                            class="form-label">
+
+                            Partner Country
+
+                        </label>
+
+
+                        <select
+                            name="partner_country"
+                            id="partner_country"
+                            class="form-select">
+
+                            <option value="">
+                                Select Country
+                            </option>
+
+                            @foreach($countries as $country)
+
+                            <option
+                                value="{{ $country->name }}"
+                                data-id="{{ $country->id }}"
+                                @selected(
+                                old('partner_country')==$country->name
+                                )>
+
+                                {{ $country->name }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+                    {{-- Partner State --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="partner_state"
+                            class="form-label">
+
+                            Partner State
+
+                        </label>
+
+
+                        <select
+                            name="partner_state"
+                            id="partner_state"
+                            class="form-select">
+
+                            <option value="">
+                                Select State
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner City --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="partner_city"
+                            class="form-label">
+
+                            Partner City
+
+                        </label>
+
+
+                        <select
+                            name="partner_city"
+                            id="partner_city"
+                            class="form-select">
+
+                            <option value="">
+                                Select City
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                {{-- =================================================
+                    PARTNER LIFESTYLE
+                ================================================== --}}
+
+                <h6 class="fw-semibold mb-3">
+                    Lifestyle
+                </h6>
+
+
+                <div class="row g-3">
+
+
+                    {{-- Partner Diet --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="partner_diet"
+                            class="form-label">
+
+                            Partner Diet
+
+                        </label>
+
+
+                        <select
+                            name="partner_diet"
+                            id="partner_diet"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(
+                                old('partner_diet')==$value
+                                )>
+
+                                {{ $value }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner Smoking --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="is_partner_smoking"
+                            class="form-label">
+
+                            Partner Smoking
+
+                        </label>
+
+
+                        <select
+                            name="is_partner_smoking"
+                            id="is_partner_smoking"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                            'No',
+                            'Occasionally',
+                            'Yes'
+                            ] as $value)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(
+                                old('is_partner_smoking')==$value
+                                )>
+
+                                {{ $value }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Partner Drinking --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="is_partner_drinking"
+                            class="form-label">
+
+                            Partner Drinking
+
+                        </label>
+
+
+                        <select
+                            name="is_partner_drinking"
+                            id="is_partner_drinking"
+                            class="form-select">
+
+                            <option value="">
+                                Select
+                            </option>
+
+                            @foreach([
+                            'No',
+                            'Occasionally',
+                            'Yes'
+                            ] as $value)
+
+                            <option
+                                value="{{ $value }}"
+                                @selected(
+                                old('is_partner_drinking')==$value
+                                )>
+
+                                {{ $value }}
+
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- About Partner --}}
+
+                    <div class="col-md-12">
+
+                        <label
+                            for="about_my_partner"
+                            class="form-label">
+
+                            About My Partner
+
+                        </label>
+
+
+                        <textarea
+                            name="about_my_partner"
+                            id="about_my_partner"
+                            class="form-control"
+                            rows="4">{{ old('about_my_partner') }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
 
 
 {{-- =====================================================
-            PARTNER PREFERENCES
+            PROFILE VIEW RATES
         ====================================================== --}}
 
+@php
+    $profileRangeDefaults = [
+        ['range_from' => 1, 'range_to' => 20, 'price' => 3],
+        ['range_from' => 21, 'range_to' => 50, 'price' => 8],
+        ['range_from' => 51, 'range_to' => 100, 'price' => 15],
+        ['range_from' => 101, 'range_to' => 200, 'price' => 25],
+        ['range_from' => 201, 'range_to' => 1000, 'price' => 50],
+    ];
+    $rangeFromOptions = [1, 21, 51, 101, 201];
+    $rangeToOptions = [20, 50, 100, 200, 1000];
+@endphp
+
 <div class="card border-0 shadow-sm mb-4 member-section">
-
     <div class="card-header bg-white py-3">
-
         <h5 class="mb-0">
-            <i class="bi bi-person-heart me-2"></i>
-            Partner Preferences
+            <i class="bi bi-currency-rupee me-2"></i>
+            Profile View Rate
         </h5>
-
     </div>
-
-
     <div class="card-body">
+        <p class="text-muted small mb-3">
+            Set the price charged according to how many profiles this member has viewed.
+        </p>
 
-
-        {{-- =================================================
-                    BASIC PREFERENCES
-                ================================================== --}}
-
-        <h6 class="fw-semibold mb-3">
-            Basic Preferences
-        </h6>
-
-
-        <div class="row g-3">
-
-
-            {{-- Looking For --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="looking_for"
-                    class="form-label">
-
-                    Looking For
-
-                </label>
-
-
-                <select name="looking_for" id="looking_for" class="form-select">
-                    <option value="">Select Marital Status</option>
-                    @foreach($maritalStatuses as $status)
-                    <option value="{{ $status->marital_status }}" @selected(old('looking_for')==$status->marital_status)>{{ $status->marital_status }}</option>
-                    @endforeach
-                </select>
-
-            </div>
-
-
-            {{-- Age From --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_age_from"
-                    class="form-label">
-
-                    Partner Age From
-
-                </label>
-
-
-                <input
-                    type="number"
-                    name="partner_age_from"
-                    id="partner_age_from"
-                    class="form-control"
-                    min="18"
-                    value="{{ old('partner_age_from') }}">
-
-            </div>
-
-
-            {{-- Age To --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_age_to"
-                    class="form-label">
-
-                    Partner Age To
-
-                </label>
-
-
-                <input
-                    type="number"
-                    name="partner_age_to"
-                    id="partner_age_to"
-                    class="form-control"
-                    min="18"
-                    value="{{ old('partner_age_to') }}">
-
-            </div>
-
+        <div class="row g-2 d-none d-md-flex fw-semibold small text-muted mb-1">
+            <div class="col-md-4">From</div>
+            <div class="col-md-4">To</div>
+            <div class="col-md-4">Price</div>
         </div>
 
-
-        <hr class="my-4">
-
-
-        {{-- =================================================
-                    PARTNER RELIGION
-                ================================================== --}}
-
-        <h6 class="fw-semibold mb-3">
-            Religion & Background
-        </h6>
-
-
-        <div class="row g-3">
-
-            {{-- Partner Religion --}}
-
+        @foreach($profileRangeDefaults as $index => $range)
+        <div class="row g-2 mb-2 align-items-center">
             <div class="col-md-4">
-
-                <label
-                    for="partner_religion"
-                    class="form-label">
-
-                    Partner Religion
-
-                </label>
-
-
+                <label class="form-label d-md-none" for="profile_range_from_{{ $index }}">From</label>
                 <select
-                    name="partner_religion"
-                    id="partner_religion"
-                    class="form-select">
-
-                    <option value="">
-                        Select Religion
-                    </option>
-
-                    @foreach($religions as $religion)
-
-                    <option
-                        value="{{ $religion->religion }}"
-                        @selected(
-                        old('partner_religion')==$religion->religion
-                        )>
-
-                        {{ $religion->religion }}
-
-                    </option>
-
+                    name="profile_ranges[{{ $index }}][range_from]"
+                    id="profile_range_from_{{ $index }}"
+                    class="form-select @error('profile_ranges.'.$index.'.range_from') is-invalid @enderror"
+                    required>
+                    @foreach($rangeFromOptions as $value)
+                    <option value="{{ $value }}" @selected((int) old('profile_ranges.'.$index.'.range_from', $range['range_from']) === $value)>{{ $value }}</option>
                     @endforeach
-
                 </select>
-
             </div>
-
-
-            {{-- Partner Cast --}}
-
             <div class="col-md-4">
-
-                <label
-                    for="partner_cast"
-                    class="form-label">
-
-                    Partner Cast
-
-                </label>
-
-
+                <label class="form-label d-md-none" for="profile_range_to_{{ $index }}">To</label>
                 <select
-                    name="partner_cast"
-                    id="partner_cast"
-                    class="form-select">
-
-                    <option value="">
-                        Select Cast
-                    </option>
-
-                    @foreach($casts as $cast)
-
-                    <option
-                        value="{{ $cast->cast }}"
-                        @selected(
-                        old('partner_cast')==$cast->cast
-                        )>
-
-                        {{ $cast->cast }}
-
-                    </option>
-
+                    name="profile_ranges[{{ $index }}][range_to]"
+                    id="profile_range_to_{{ $index }}"
+                    class="form-select @error('profile_ranges.'.$index.'.range_to') is-invalid @enderror"
+                    required>
+                    @foreach($rangeToOptions as $value)
+                    <option value="{{ $value }}" @selected((int) old('profile_ranges.'.$index.'.range_to', $range['range_to']) === $value)>{{ $value }}</option>
                     @endforeach
-
                 </select>
-
             </div>
-
-
-            {{-- Partner Mother Tongue --}}
-
             <div class="col-md-4">
-
-                <label
-                    for="partner_mothertongue"
-                    class="form-label">
-
-                    Partner Mother Tongue
-
-                </label>
-
-
-                <select
-                    name="partner_mothertongue"
-                    id="partner_mothertongue"
-                    class="form-select">
-
-                    <option value="">
-                        Select Mother Tongue
-                    </option>
-
-                    @foreach($motherTongues as $motherTongue)
-
-                    <option
-                        value="{{ $motherTongue->mother_tongue }}"
-                        @selected(
-                        old('partner_mothertongue')==$motherTongue->mother_tongue
-                        )>
-
-                        {{ $motherTongue->mother_tongue }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
+                <label class="form-label d-md-none" for="profile_range_price_{{ $index }}">Price</label>
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input
+                        type="number"
+                        name="profile_ranges[{{ $index }}][price]"
+                        id="profile_range_price_{{ $index }}"
+                        class="form-control @error('profile_ranges.'.$index.'.price') is-invalid @enderror"
+                        value="{{ old('profile_ranges.'.$index.'.price', $range['price']) }}"
+                        min="0"
+                        max="1000000"
+                        step="0.01"
+                        required>
+                </div>
             </div>
-
-
-            {{-- Partner Manglik --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="is_partner_manglik"
-                    class="form-label">
-
-                    Partner Manglik
-
-                </label>
-
-
-                <select
-                    name="is_partner_manglik"
-                    id="is_partner_manglik"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('is_partner_manglik')=='Yes'
-                        )>
-
-                        Yes
-
-                    </option>
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('is_partner_manglik')=='No'
-                        )>
-
-                        No
-
-                    </option>
-
-                </select>
-
-            </div>
-
         </div>
-
-
-        <hr class="my-4">
-
-
-        {{-- =================================================
-                    PARTNER HEIGHT / EDUCATION / CAREER
-                ================================================== --}}
-
-        <h6 class="fw-semibold mb-3">
-            Education & Career
-        </h6>
-
-
-        <div class="row g-3">
-
-
-            {{-- Height From --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_height_from"
-                    class="form-label">
-
-                    Partner Height From
-
-                </label>
-
-
-                <select
-                    name="partner_height_from"
-                    id="partner_height_from"
-                    class="form-select">
-
-                    <option value="">
-                        Select Height
-                    </option>
-
-                    @foreach($heights as $height)
-
-                    @php
-                    $heightValue =
-                    $height->height_value
-                    ?? $height->height;
-                    @endphp
-
-                    <option
-                        value="{{ $heightValue }}"
-                        @selected(
-                        old('partner_height_from')==$heightValue
-                        )>
-
-                        {{ \App\Support\HeightFormatter::format($height->height) }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Height To --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_height_to"
-                    class="form-label">
-
-                    Partner Height To
-
-                </label>
-
-
-                <select
-                    name="partner_height_to"
-                    id="partner_height_to"
-                    class="form-select">
-
-                    <option value="">
-                        Select Height
-                    </option>
-
-                    @foreach($heights as $height)
-
-                    @php
-                    $heightValue =
-                    $height->height_value
-                    ?? $height->height;
-                    @endphp
-
-                    <option
-                        value="{{ $heightValue }}"
-                        @selected(
-                        old('partner_height_to')==$heightValue
-                        )>
-
-                        {{ \App\Support\HeightFormatter::format($height->height) }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Education --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_education"
-                    class="form-label">
-
-                    Partner Education
-
-                </label>
-
-
-                <select
-                    name="partner_education"
-                    id="partner_education"
-                    class="form-select">
-
-                    <option value="">
-                        Select Education
-                    </option>
-
-                    @foreach($educations as $education)
-
-                    <option
-                        value="{{ $education->education }}"
-                        @selected(
-                        old('partner_education')==$education->education
-                        )>
-
-                        {{ $education->education }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Occupation --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_occupation"
-                    class="form-label">
-
-                    Partner Occupation
-
-                </label>
-
-
-                <select
-                    name="partner_occupation"
-                    id="partner_occupation"
-                    class="form-select">
-
-                    <option value="">
-                        Select Occupation
-                    </option>
-
-                    @foreach($occupations as $occupation)
-
-                    <option
-                        value="{{ $occupation->occupation }}"
-                        @selected(
-                        old('partner_occupation')==$occupation->occupation
-                        )>
-
-                        {{ $occupation->occupation }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Income From --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_annual_income_from"
-                    class="form-label">
-
-                    Partner Annual Income From
-
-                </label>
-
-
-                <select
-                    name="partner_annual_income_from"
-                    id="partner_annual_income_from"
-                    class="form-select">
-
-                    <option value="">
-                        Select Income
-                    </option>
-
-                    @foreach($annualIncomes as $income)
-
-                    <option
-                        value="{{ $income->annual_income }}"
-                        @selected(
-                        old('partner_annual_income_from')==$income->annual_income
-                        )>
-
-                        {{ $income->annual_income }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Income To --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_annual_income_to"
-                    class="form-label">
-
-                    Partner Annual Income To
-
-                </label>
-
-
-                <select
-                    name="partner_annual_income_to"
-                    id="partner_annual_income_to"
-                    class="form-select">
-
-                    <option value="">
-                        Select Income
-                    </option>
-
-                    @foreach($annualIncomes as $income)
-
-                    <option
-                        value="{{ $income->annual_income }}"
-                        @selected(
-                        old('partner_annual_income_to')==$income->annual_income
-                        )>
-
-                        {{ $income->annual_income }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <hr class="my-4">
-
-
-        {{-- =================================================
-                    PARTNER LOCATION
-                ================================================== --}}
-
-        <h6 class="fw-semibold mb-3">
-            Partner Location
-        </h6>
-
-
-        <div class="row g-3">
-
-            {{-- Partner Country --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_country"
-                    class="form-label">
-
-                    Partner Country
-
-                </label>
-
-
-                <select
-                    name="partner_country"
-                    id="partner_country"
-                    class="form-select">
-
-                    <option value="">
-                        Select Country
-                    </option>
-
-                    @foreach($countries as $country)
-
-                    <option
-                        value="{{ $country->name }}"
-                        data-id="{{ $country->id }}"
-                        @selected(
-                        old('partner_country')==$country->name
-                        )>
-
-                        {{ $country->name }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-            {{-- Partner State --}}
-
-            <div class="col-md-6">
-
-                <label
-                    for="partner_state"
-                    class="form-label">
-
-                    Partner State
-
-                </label>
-
-
-                <select
-                    name="partner_state"
-                    id="partner_state"
-                    class="form-select">
-
-                    <option value="">
-                        Select State
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- Partner City --}}
-
-            <div class="col-md-6">
-
-                <label
-                    for="partner_city"
-                    class="form-label">
-
-                    Partner City
-
-                </label>
-
-
-                <select
-                    name="partner_city"
-                    id="partner_city"
-                    class="form-select">
-
-                    <option value="">
-                        Select City
-                    </option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <hr class="my-4">
-
-
-        {{-- =================================================
-                    PARTNER LIFESTYLE
-                ================================================== --}}
-
-        <h6 class="fw-semibold mb-3">
-            Lifestyle
-        </h6>
-
-
-        <div class="row g-3">
-
-
-            {{-- Partner Diet --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="partner_diet"
-                    class="form-label">
-
-                    Partner Diet
-
-                </label>
-
-
-                <select
-                    name="partner_diet"
-                    id="partner_diet"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
-
-                    <option
-                        value="{{ $value }}"
-                        @selected(
-                        old('partner_diet')==$value
-                        )>
-
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Partner Smoking --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="is_partner_smoking"
-                    class="form-label">
-
-                    Partner Smoking
-
-                </label>
-
-
-                <select
-                    name="is_partner_smoking"
-                    id="is_partner_smoking"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    @foreach([
-                    'No',
-                    'Occasionally',
-                    'Yes'
-                    ] as $value)
-
-                    <option
-                        value="{{ $value }}"
-                        @selected(
-                        old('is_partner_smoking')==$value
-                        )>
-
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- Partner Drinking --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="is_partner_drinking"
-                    class="form-label">
-
-                    Partner Drinking
-
-                </label>
-
-
-                <select
-                    name="is_partner_drinking"
-                    id="is_partner_drinking"
-                    class="form-select">
-
-                    <option value="">
-                        Select
-                    </option>
-
-                    @foreach([
-                    'No',
-                    'Occasionally',
-                    'Yes'
-                    ] as $value)
-
-                    <option
-                        value="{{ $value }}"
-                        @selected(
-                        old('is_partner_drinking')==$value
-                        )>
-
-                        {{ $value }}
-
-                    </option>
-
-                    @endforeach
-
-                </select>
-
-            </div>
-
-
-            {{-- About Partner --}}
-
-            <div class="col-md-12">
-
-                <label
-                    for="about_my_partner"
-                    class="form-label">
-
-                    About My Partner
-
-                </label>
-
-
-                <textarea
-                    name="about_my_partner"
-                    id="about_my_partner"
-                    class="form-control"
-                    rows="4">{{ old('about_my_partner') }}</textarea>
-
-            </div>
-
-        </div>
-
+        @endforeach
+
+        @error('profile_ranges')
+        <div class="text-danger small mt-2">{{ $message }}</div>
+        @enderror
     </div>
-
 </div>
-
-
 
 {{-- =====================================================
             ACCOUNT & ADMIN SETTINGS
         ====================================================== --}}
 
-<div class="card border-0 shadow-sm mb-4 member-section">
+        <div class="card border-0 shadow-sm mb-4 member-section">
 
-    <div class="card-header bg-white py-3">
+            <div class="card-header bg-white py-3">
 
-        <h5 class="mb-0">
-            <i class="bi bi-gear me-2"></i>
-            Account & Profile Settings
-        </h5>
+                <h5 class="mb-0">
+                    <i class="bi bi-gear me-2"></i>
+                    Account & Profile Settings
+                </h5>
 
-    </div>
-
-
-    <div class="card-body">
-
-        <div class="row g-3">
+            </div>
 
 
-            {{-- Password --}}
+            <div class="card-body">
 
-            <div class="col-md-4">
-
-                <label
-                    for="password"
-                    class="form-label">
-
-                    Password
-
-                    <span class="text-danger">*</span>
-
-                </label>
+                <div class="row g-3">
 
 
-                <div class="input-group">
-                    <input
-                        type="password"
-                        name="password"
-                        id="password"
-                        class="form-control @error('password') is-invalid @enderror"
-                        minlength="8"
-                        autocomplete="new-password"
-                        aria-describedby="passwordHelp passwordCopyStatus"
-                        required>
+                    {{-- Password --}}
 
-                    <button
-                        type="button"
-                        id="togglePassword"
-                        class="btn btn-outline-secondary"
-                        aria-label="Show password"
-                        aria-pressed="false"
-                        title="Show password">
-                        <i class="bi bi-eye" aria-hidden="true"></i>
-                    </button>
+                    <div class="col-md-4">
 
-                    <button
-                        type="button"
-                        id="copyPassword"
-                        class="btn btn-outline-secondary"
-                        aria-label="Copy password"
-                        title="Copy password">
-                        <i class="bi bi-clipboard" aria-hidden="true"></i>
-                    </button>
+                        <label
+                            for="password"
+                            class="form-label">
+
+                            Password
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <div class="input-group">
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                class="form-control @error('password') is-invalid @enderror"
+                                minlength="8"
+                                autocomplete="new-password"
+                                aria-describedby="passwordHelp passwordCopyStatus"
+                                required>
+
+                            <button
+                                type="button"
+                                id="togglePassword"
+                                class="btn btn-outline-secondary"
+                                aria-label="Show password"
+                                aria-pressed="false"
+                                title="Show password">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+
+                            <button
+                                type="button"
+                                id="copyPassword"
+                                class="btn btn-outline-secondary"
+                                aria-label="Copy password"
+                                title="Copy password">
+                                <i class="bi bi-clipboard" aria-hidden="true"></i>
+                            </button>
+                        </div>
+
+                        <div id="passwordHelp" class="form-text">
+                            Password must contain at least 8 characters.
+                        </div>
+
+                        <div
+                            id="passwordCopyStatus"
+                            class="small mt-1"
+                            role="status"
+                            aria-live="polite"></div>
+
+                        @error('password')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
+
+                    </div>
+
+
+                    {{-- Member Type --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="member_type"
+                            class="form-label">
+
+                            Member Type
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            name="member_type"
+                            id="member_type"
+                            class="form-control"
+                            value="{{ old('member_type', 'free') }}">
+
+                    </div>
+
+
+                    {{-- Active --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="active"
+                            class="form-label">
+
+                            Account Status
+
+                        </label>
+
+
+                        <select
+                            name="active"
+                            id="active"
+                            class="form-select">
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('active', 'No' )=='No'
+                                )>
+
+                                Inactive
+
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('active')=='Yes'
+                                )>
+
+                                Active
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Trusted --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="is_trusted"
+                            class="form-label">
+
+                            Trusted Profile
+
+                        </label>
+
+
+                        <select
+                            name="is_trusted"
+                            id="is_trusted"
+                            class="form-select">
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('is_trusted', 'No' )=='No'
+                                )>
+
+                                No
+
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('is_trusted')=='Yes'
+                                )>
+
+                                Yes
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Promoted --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="promoted"
+                            class="form-label">
+
+                            Promoted
+
+                        </label>
+
+
+                        <select
+                            name="promoted"
+                            id="promoted"
+                            class="form-select">
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('promoted', 'No' )=='No'
+                                )>
+
+                                No
+
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('promoted')=='Yes'
+                                )>
+
+                                Yes
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Profile Visibility --}}
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="profile_hide"
+                            class="form-label">
+
+                            Profile Visibility
+
+                        </label>
+
+
+                        <select
+                            name="profile_hide"
+                            id="profile_hide"
+                            class="form-select">
+
+                            <option
+                                value="No"
+                                @selected(
+                                old('profile_hide', 'No' )=='No'
+                                )>
+
+                                Visible
+
+                            </option>
+
+                            <option
+                                value="Yes"
+                                @selected(
+                                old('profile_hide')=='Yes'
+                                )>
+
+                                Hidden
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- Relationship Manager --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="relationship_manager"
+                            class="form-label">
+
+                            Relationship Manager
+
+                        </label>
+
+
+                        <select
+                            name="relationship_manager"
+                            id="relationship_manager"
+                            class="form-select @error('relationship_manager') is-invalid @enderror">
+
+                            <option value="">Unassigned</option>
+
+                            @foreach($relationshipManagers as $manager)
+                            <option
+                                value="{{ $manager->name }}"
+                                @selected(
+                                old('relationship_manager', $defaultRelationshipManager)===$manager->name
+                                )>
+                                {{ $manager->name }}
+                                @if($manager->profile_id)
+                                ({{ $manager->profile_id }})
+                                @endif
+                            </option>
+                            @endforeach
+
+                        </select>
+
+                        @error('relationship_manager')
+                        <div class="text-danger small mt-1">
+                            {{ $message }}
+                        </div>
+                        @enderror
+
+                    </div>
+
+
+                    {{-- Remarks --}}
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="remarks"
+                            class="form-label">
+
+                            Remarks
+
+                        </label>
+
+
+                        <textarea
+                            name="remarks"
+                            id="remarks"
+                            class="form-control"
+                            rows="3">{{ old('remarks') }}</textarea>
+
+                    </div>
+
                 </div>
-
-                <div id="passwordHelp" class="form-text">
-                    Password must contain at least 8 characters.
-                </div>
-
-                <div
-                    id="passwordCopyStatus"
-                    class="small mt-1"
-                    role="status"
-                    aria-live="polite"></div>
-
-                @error('password')
-                <div class="text-danger small mt-1">
-                    {{ $message }}
-                </div>
-                @enderror
-
-            </div>
-
-
-            {{-- Member Type --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="member_type"
-                    class="form-label">
-
-                    Member Type
-
-                </label>
-
-
-                <input
-                    type="text"
-                    name="member_type"
-                    id="member_type"
-                    class="form-control"
-                    value="{{ old('member_type', 'free') }}">
-
-            </div>
-
-
-            {{-- Active --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="active"
-                    class="form-label">
-
-                    Account Status
-
-                </label>
-
-
-                <select
-                    name="active"
-                    id="active"
-                    class="form-select">
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('active', 'No' )=='No'
-                        )>
-
-                        Inactive
-
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('active')=='Yes'
-                        )>
-
-                        Active
-
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- Trusted --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="is_trusted"
-                    class="form-label">
-
-                    Trusted Profile
-
-                </label>
-
-
-                <select
-                    name="is_trusted"
-                    id="is_trusted"
-                    class="form-select">
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('is_trusted', 'No' )=='No'
-                        )>
-
-                        No
-
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('is_trusted')=='Yes'
-                        )>
-
-                        Yes
-
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- Promoted --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="promoted"
-                    class="form-label">
-
-                    Promoted
-
-                </label>
-
-
-                <select
-                    name="promoted"
-                    id="promoted"
-                    class="form-select">
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('promoted', 'No' )=='No'
-                        )>
-
-                        No
-
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('promoted')=='Yes'
-                        )>
-
-                        Yes
-
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- Profile Visibility --}}
-
-            <div class="col-md-4">
-
-                <label
-                    for="profile_hide"
-                    class="form-label">
-
-                    Profile Visibility
-
-                </label>
-
-
-                <select
-                    name="profile_hide"
-                    id="profile_hide"
-                    class="form-select">
-
-                    <option
-                        value="No"
-                        @selected(
-                        old('profile_hide', 'No' )=='No'
-                        )>
-
-                        Visible
-
-                    </option>
-
-                    <option
-                        value="Yes"
-                        @selected(
-                        old('profile_hide')=='Yes'
-                        )>
-
-                        Hidden
-
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            {{-- Relationship Manager --}}
-
-            <div class="col-md-6">
-
-                <label
-                    for="relationship_manager"
-                    class="form-label">
-
-                    Relationship Manager
-
-                </label>
-
-
-                <select
-                    name="relationship_manager"
-                    id="relationship_manager"
-                    class="form-select @error('relationship_manager') is-invalid @enderror">
-
-                    <option value="">Unassigned</option>
-
-                    @foreach($relationshipManagers as $manager)
-                    <option
-                        value="{{ $manager->name }}"
-                        @selected(
-                        old('relationship_manager', $defaultRelationshipManager)===$manager->name
-                        )>
-                        {{ $manager->name }}
-                        @if($manager->profile_id)
-                        ({{ $manager->profile_id }})
-                        @endif
-                    </option>
-                    @endforeach
-
-                </select>
-
-                @error('relationship_manager')
-                <div class="text-danger small mt-1">
-                    {{ $message }}
-                </div>
-                @enderror
-
-            </div>
-
-
-            {{-- Remarks --}}
-
-            <div class="col-md-6">
-
-                <label
-                    for="remarks"
-                    class="form-label">
-
-                    Remarks
-
-                </label>
-
-
-                <textarea
-                    name="remarks"
-                    id="remarks"
-                    class="form-control"
-                    rows="3">{{ old('remarks') }}</textarea>
 
             </div>
 
         </div>
-
-    </div>
-
-</div>
-
 
 
 {{-- Submit Buttons --}}

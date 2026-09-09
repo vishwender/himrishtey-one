@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class MemberController extends Controller
@@ -594,6 +595,12 @@ class MemberController extends Controller
             ->limit(10)
             ->get();
 
+        $memberProfileRanges = DB::connection('site')
+            ->table('member_profile_range')
+            ->where('member_id', $member->id)
+            ->orderByRaw('CAST(range_from AS UNSIGNED)')
+            ->get();
+
         /*
         |--------------------------------------------------------------------------
         | Member Activity Overview
@@ -900,6 +907,7 @@ class MemberController extends Controller
             'contactViewsAllowed' => $contactViewsAllowed,
             'contactViewsRemaining' => $contactViewsRemaining,
             'membershipPayments' => $membershipPayments,
+            'memberProfileRanges' => $memberProfileRanges,
             'activityCounts' => $activityCounts,
             'relationshipManagers' => $relationshipManagers,
             'returnUrl' => $returnUrl,
@@ -1009,19 +1017,65 @@ class MemberController extends Controller
         $validated = $request->validate([
 
             ...array_fill_keys([
-                'blood_group', 'health_info', 'birth_place', 'sub_cast', 'gotra', 'manglik',
-                'no_of_child', 'about_my_education', 'any_other_qualifications', 'about_my_career',
-                'employed_in', 'designation', 'organization_name', 'job_location', 'annual_income',
-                'address_living_in', 'native_place', 'family_type', 'family_status', 'father_name',
-                'father_occupation', 'mother_name', 'mother_occupation', 'no_of_brothers',
-                'no_of_sisters', 'married_brothers', 'married_sisters', 'about_family',
-                'diet', 'is_drinking', 'is_smoking', 'about_me', 'any_disability', 'looking_for',
-                'partner_age_from', 'partner_age_to', 'partner_country', 'partner_religion',
-                'partner_cast', 'partner_height_from', 'partner_height_to', 'partner_education',
-                'partner_mothertongue', 'partner_annual_income_from', 'partner_annual_income_to',
-                'is_partner_manglik', 'partner_occupation', 'partner_state', 'partner_city',
-                'partner_diet', 'is_partner_smoking', 'is_partner_drinking', 'about_my_partner',
-                'horoscope_needed', 'active', 'member_type', 'is_trusted', 'profile_hide', 'promoted',
+                'blood_group',
+                'health_info',
+                'birth_place',
+                'sub_cast',
+                'gotra',
+                'manglik',
+                'no_of_child',
+                'about_my_education',
+                'any_other_qualifications',
+                'about_my_career',
+                'employed_in',
+                'designation',
+                'organization_name',
+                'job_location',
+                'annual_income',
+                'address_living_in',
+                'native_place',
+                'family_type',
+                'family_status',
+                'father_name',
+                'father_occupation',
+                'mother_name',
+                'mother_occupation',
+                'no_of_brothers',
+                'no_of_sisters',
+                'married_brothers',
+                'married_sisters',
+                'about_family',
+                'diet',
+                'is_drinking',
+                'is_smoking',
+                'about_me',
+                'any_disability',
+                'looking_for',
+                'partner_age_from',
+                'partner_age_to',
+                'partner_country',
+                'partner_religion',
+                'partner_cast',
+                'partner_height_from',
+                'partner_height_to',
+                'partner_education',
+                'partner_mothertongue',
+                'partner_annual_income_from',
+                'partner_annual_income_to',
+                'is_partner_manglik',
+                'partner_occupation',
+                'partner_state',
+                'partner_city',
+                'partner_diet',
+                'is_partner_smoking',
+                'is_partner_drinking',
+                'about_my_partner',
+                'horoscope_needed',
+                'active',
+                'member_type',
+                'is_trusted',
+                'profile_hide',
+                'promoted',
                 'remarks',
             ], ['nullable', 'string', 'max:255']),
 
@@ -1176,10 +1230,32 @@ class MemberController extends Controller
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
+
+            'profile_ranges' => ['required', 'array', 'size:5'],
+            'profile_ranges.*.range_from' => ['required', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.range_to' => ['required', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.price' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
         ], [
             'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
             'health_info.required_if' => 'Please describe the disability.',
+            'profile_ranges.size' => 'All five profile view ranges are required.',
         ]);
+
+        $profileRanges = collect($validated['profile_ranges'])
+            ->sortBy('range_from')
+            ->values();
+        $previousRangeEnd = 0;
+
+        foreach ($profileRanges as $range) {
+            if ((int) $range['range_from'] > (int) $range['range_to']
+                || (int) $range['range_from'] <= $previousRangeEnd) {
+                throw ValidationException::withMessages([
+                    'profile_ranges' => 'Profile view ranges must have a valid start and end and must not overlap.',
+                ]);
+            }
+
+            $previousRangeEnd = (int) $range['range_to'];
+        }
 
         /*
     |--------------------------------------------------------------------------
@@ -1196,6 +1272,7 @@ class MemberController extends Controller
 
             $validated,
             $relationshipManager,
+            $profileRanges,
             &$member
         ) {
 
@@ -1440,11 +1517,21 @@ class MemberController extends Controller
                 'photo',
                 'id_proof',
                 'relationship_manager',
+                'profile_ranges',
             ])->all());
 
             $member->relationship_manager = $relationshipManager;
 
             $member->save();
+
+            DB::connection('site')->table('member_profile_range')->insert(
+                $profileRanges->map(fn (array $range) => [
+                    'member_id' => $member->id,
+                    'range_from' => $range['range_from'],
+                    'range_to' => $range['range_to'],
+                    'price' => $range['price'],
+                ])->all()
+            );
         });
 
         /*
@@ -2400,6 +2487,12 @@ class MemberController extends Controller
             ->orderBy('name')
             ->get();
 
+        $memberProfileRanges = DB::connection('site')
+            ->table('member_profile_range')
+            ->where('member_id', $member->id)
+            ->orderByRaw('CAST(range_from AS UNSIGNED)')
+            ->get();
+
         return view('admin.members.edit', [
             'member' => $member,
             'galleryPhotos' => $galleryPhotos,
@@ -2416,6 +2509,7 @@ class MemberController extends Controller
             'countries' => $countries,
             'plans' => $plans,
             'relationshipManagers' => $relationshipManagers,
+            'memberProfileRanges' => $memberProfileRanges,
         ]);
     }
 
@@ -2882,10 +2976,34 @@ class MemberController extends Controller
                 'max:255',
             ],
 
+            'profile_ranges' => ['required', 'array', 'size:5'],
+            'profile_ranges.*.range_from' => ['required', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.range_to' => ['required', 'integer', 'min:1', 'max:2147483647'],
+            'profile_ranges.*.price' => ['required', 'numeric', 'min:0', 'max:1000000', 'decimal:0,2'],
+
         ], [
             'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
             'health_info.required_if' => 'Please describe the disability.',
+            'profile_ranges.size' => 'All five profile view ranges are required.',
         ]);
+
+        $profileRanges = collect($validated['profile_ranges'])
+            ->sortBy('range_from')
+            ->values();
+        $previousRangeEnd = 0;
+
+        foreach ($profileRanges as $range) {
+            if ((int) $range['range_from'] > (int) $range['range_to']
+                || (int) $range['range_from'] <= $previousRangeEnd) {
+                throw ValidationException::withMessages([
+                    'profile_ranges' => 'Profile view ranges must have a valid start and end and must not overlap.',
+                ]);
+            }
+
+            $previousRangeEnd = (int) $range['range_to'];
+        }
+
+        unset($validated['profile_ranges']);
 
         $idProof = $request->file('id_proof');
         unset($validated['id_proof']);
@@ -2945,15 +3063,50 @@ class MemberController extends Controller
                 ];
             }
         }
+
+        $oldProfileRanges = $db->table('member_profile_range')
+            ->where('member_id', $id)
+            ->orderByRaw('CAST(range_from AS UNSIGNED)')
+            ->get(['range_from', 'range_to', 'price'])
+            ->map(fn (object $range) => [
+                'range_from' => (int) $range->range_from,
+                'range_to' => (int) $range->range_to,
+                'price' => number_format((float) $range->price, 2, '.', ''),
+            ])->values()->all();
+
+        $newProfileRanges = $profileRanges->map(fn (array $range) => [
+            'range_from' => (int) $range['range_from'],
+            'range_to' => (int) $range['range_to'],
+            'price' => number_format((float) $range['price'], 2, '.', ''),
+        ])->all();
+
+        if ($oldProfileRanges !== $newProfileRanges) {
+            $changes['profile_view_rates'] = [
+                'old' => $oldProfileRanges,
+                'new' => $newProfileRanges,
+            ];
+        }
         /*
         |--------------------------------------------------------------------------
         | Update Member
         |--------------------------------------------------------------------------
         */
 
-        $db->table('members')
-            ->where('id', $id)
-            ->update($validated);
+        $db->transaction(function () use ($db, $id, $validated, $profileRanges) {
+            $db->table('members')
+                ->where('id', $id)
+                ->update($validated);
+
+            $db->table('member_profile_range')->where('member_id', $id)->delete();
+            $db->table('member_profile_range')->insert(
+                $profileRanges->map(fn (array $range) => [
+                    'member_id' => $id,
+                    'range_from' => $range['range_from'],
+                    'range_to' => $range['range_to'],
+                    'price' => $range['price'],
+                ])->all()
+            );
+        });
 
         if ($idProof) {
             $filename = 'id-proof-' . $member->id . '-' . Str::random(10) . '.' . $idProof->getClientOriginalExtension();

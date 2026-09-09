@@ -2014,6 +2014,47 @@
 </div>
 
 {{-- =========================================================
+    PROFILE VIEW RATES
+========================================================= --}}
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">
+            <i class="bi bi-currency-rupee me-2"></i>
+            Profile View Rate
+        </h5>
+    </div>
+    <div class="card-body">
+        @if($memberProfileRanges->isNotEmpty())
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Profile Views From</th>
+                        <th>Profile Views To</th>
+                        <th class="text-end">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($memberProfileRanges as $range)
+                    <tr>
+                        <td>{{ number_format((int) $range->range_from) }}</td>
+                        <td>{{ number_format((int) $range->range_to) }}</td>
+                        <td class="text-end fw-semibold">₹{{ number_format((float) $range->price, 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @else
+        <div class="text-center text-muted py-3">
+            No profile view rates configured for this member.
+        </div>
+        @endif
+    </div>
+</div>
+
+{{-- =========================================================
     MEMBERSHIP PAYMENT HISTORY
 ========================================================= --}}
 
