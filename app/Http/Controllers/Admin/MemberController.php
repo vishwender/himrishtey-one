@@ -10,6 +10,7 @@ use App\Models\Cast;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Education;
+use App\Models\Employer;
 use App\Models\FamilyStatus;
 use App\Models\Height;
 use App\Models\MaritalStatus;
@@ -2304,7 +2305,7 @@ class MemberController extends Controller
     /**
      * Edit member profile.
      */
-    public function edit($id)
+    public function edit(MemberPhotoService $photoService, $id)
     {
         $member = DB::connection('site')
             ->table('members')
@@ -2314,6 +2315,32 @@ class MemberController extends Controller
         if (! $member) {
             abort(404, 'Member not found.');
         }
+
+        $member->photo_url = $photoService->url($member->photo);
+
+        $galleryPhotos = DB::connection('site')
+            ->table('member_photos')
+            ->where('member_id', $member->id)
+            ->orderByDesc('id')
+            ->get();
+
+        foreach ($galleryPhotos as $photo) {
+            $photo->photo_url = $photoService->url($photo->photo);
+        }
+
+        $heights = Height::query()->orderBy('height_value')->get();
+        $maritalStatuses = MaritalStatus::query()->orderBy('marital_status')->get();
+        $religions = Religion::query()->orderBy('religion')->get();
+        $motherTongues = MotherTongue::query()->orderBy('mother_tongue')->get();
+        $casts = Cast::query()->orderBy('cast')->get();
+        $educations = Education::query()->orderBy('education')->get();
+        $employers = Employer::query()->orderBy('employer')->get();
+        $occupations = Occupation::query()->where('status', 1)->orderBy('occupation')->get();
+        $annualIncomes = AnnualIncome::query()->orderBy('display_order')->orderBy('annual_income')->get();
+        $countries = Country::query()
+            ->orderByRaw("CASE WHEN LOWER(name) = 'india' THEN 0 ELSE 1 END")
+            ->orderBy('name')
+            ->get();
 
         /*
     |--------------------------------------------------------------------------
@@ -2349,6 +2376,17 @@ class MemberController extends Controller
 
         return view('admin.members.edit', [
             'member' => $member,
+            'galleryPhotos' => $galleryPhotos,
+            'heights' => $heights,
+            'maritalStatuses' => $maritalStatuses,
+            'religions' => $religions,
+            'motherTongues' => $motherTongues,
+            'casts' => $casts,
+            'educations' => $educations,
+            'employers' => $employers,
+            'occupations' => $occupations,
+            'annualIncomes' => $annualIncomes,
+            'countries' => $countries,
             'plans' => $plans,
             'relationshipManagers' => $relationshipManagers,
         ]);
@@ -2421,8 +2459,8 @@ class MemberController extends Controller
 
             'birth_date_time' => [
                 'nullable',
-                'string',
-                'max:255',
+                'date',
+                'before_or_equal:'.now()->subYears(18)->toDateTimeString(),
             ],
 
             'height' => [
@@ -2469,8 +2507,7 @@ class MemberController extends Controller
 
             'manglik' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::in(['Yes', 'No']),
             ],
 
             'marital_status' => [
@@ -2589,26 +2626,29 @@ class MemberController extends Controller
 
             'diet' => [
                 'nullable',
-                'string',
-                'max:234',
+                Rule::in(['Veg', 'Veg & Non Veg', 'Non Veg']),
             ],
 
             'is_drinking' => [
                 'nullable',
-                'string',
-                'max:234',
+                Rule::in(['Yes', 'No', 'Occasionally']),
             ],
 
             'is_smoking' => [
                 'nullable',
-                'string',
-                'max:234',
+                Rule::in(['Yes', 'No', 'Occasionally']),
             ],
 
             'any_disability' => [
                 'nullable',
+                Rule::in(['Yes', 'No']),
+            ],
+
+            'health_info' => [
+                'nullable',
                 'string',
                 'max:255',
+                'required_if:any_disability,Yes',
             ],
 
             'about_me' => [
@@ -2671,11 +2711,25 @@ class MemberController extends Controller
 
             'partner_age_from' => [
                 'nullable',
+                'integer',
+                'min:18',
+                'max:100',
+            ],
+
+            'partner_age_to' => [
+                'nullable',
+                'integer',
+                'min:18',
+                'max:100',
+            ],
+
+            'partner_height_from' => [
+                'nullable',
                 'string',
                 'max:255',
             ],
 
-            'partner_age_to' => [
+            'partner_height_to' => [
                 'nullable',
                 'string',
                 'max:255',
@@ -2725,8 +2779,7 @@ class MemberController extends Controller
 
             'is_partner_manglik' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::in(['Yes', 'No']),
             ],
 
             'partner_occupation' => [
@@ -2749,20 +2802,17 @@ class MemberController extends Controller
 
             'partner_diet' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::in(['Veg', 'Veg & Non Veg', 'Non Veg']),
             ],
 
             'is_partner_smoking' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::in(['Yes', 'No', 'Occasionally']),
             ],
 
             'is_partner_drinking' => [
                 'nullable',
-                'string',
-                'max:255',
+                Rule::in(['Yes', 'No', 'Occasionally']),
             ],
 
             'about_my_partner' => [
@@ -2771,52 +2821,10 @@ class MemberController extends Controller
                 'max:255',
             ],
 
+        ], [
+            'birth_date_time.before_or_equal' => 'The member must be at least 18 years old.',
+            'health_info.required_if' => 'Please describe the disability.',
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Partner Height From
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $request->filled('partner_height_from_feet') &&
-            $request->filled('partner_height_from_inches')
-        ) {
-            $feet = (int) $request->partner_height_from_feet;
-            $inches = (int) $request->partner_height_from_inches;
-
-            $validated['partner_height_from'] =
-                round($feet + ($inches / 12), 2);
-        } else {
-            $validated['partner_height_from'] = 0;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Partner Height To
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $request->filled('partner_height_to_feet') &&
-            $request->filled('partner_height_to_inches')
-        ) {
-            $feet = (int) $request->partner_height_to_feet;
-            $inches = (int) $request->partner_height_to_inches;
-
-            $validated['partner_height_to'] =
-                round($feet + ($inches / 12), 2);
-        } else {
-            $validated['partner_height_to'] = 0;
-        }
-
-        unset(
-            $validated['partner_height_from_feet'],
-            $validated['partner_height_from_inches'],
-            $validated['partner_height_to_feet'],
-            $validated['partner_height_to_inches']
-        );
 
         if (app(RelationshipManagerAccess::class)->isRestricted()) {
             unset($validated['relationship_manager']);
