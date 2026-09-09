@@ -1759,16 +1759,37 @@
 
 <div id="identity-proof" class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white">
-        <h5 class="mb-0">Identity Proof</h5>
+        <h5 class="mb-0">
+            <i class="bi bi-person-vcard me-2"></i>
+            Identity Proof
+        </h5>
     </div>
     <div class="card-body">
         @php
         $proofPath = 'id_proofs/' . basename((string) $member->id_proof);
         @endphp
         @if($member->id_proof && \Illuminate\Support\Facades\Storage::disk('public')->exists($proofPath))
-        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($proofPath) }}" target="_blank" rel="noopener" class="btn btn-outline-primary">View Identity Proof</a>
+        @php($proofUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($proofPath))
+        <div class="row g-3 align-items-start">
+            <div class="col-md-5 col-lg-4">
+                <a href="{{ $proofUrl }}" target="_blank" rel="noopener">
+                    <img src="{{ $proofUrl }}" alt="{{ $member->full_name }} identity proof"
+                        class="img-fluid rounded border bg-light w-100"
+                        style="max-height:360px;object-fit:contain;" loading="lazy">
+                </a>
+            </div>
+            <div class="col-md-7 col-lg-8">
+                <p class="text-muted">Uploaded identity document for this member.</p>
+                <a href="{{ $proofUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right me-1"></i>Open Full Size
+                </a>
+            </div>
+        </div>
         @else
-        <p class="text-muted mb-0">No identity proof file available.</p>
+        <div class="text-center text-muted py-4">
+            <i class="bi bi-file-earmark-person fs-1"></i>
+            <p class="mt-2 mb-0">No identity proof file available.</p>
+        </div>
         @endif
     </div>
 </div>

@@ -78,6 +78,7 @@
         id="member-edit-form"
         action="{{ route('admin.members.update', $member->id) }}"
         method="POST"
+        enctype="multipart/form-data"
         data-states-url="{{ route('admin.members.location.states', ['countryId' => '__ID__']) }}"
         data-cities-url="{{ route('admin.members.location.cities', ['stateId' => '__ID__']) }}">
 
@@ -225,8 +226,7 @@
                         <select name="height" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                @php($heightValue = $height->height_value ?? $height->height)
-                                <option value="{{ $heightValue }}" @selected(old('height', $member->height) == $heightValue)>{{ $height->height }}</option>
+                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('height', $member->height) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -1214,8 +1214,7 @@
                         <select name="partner_height_from" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                @php($heightValue = $height->height_value ?? $height->height)
-                                <option value="{{ $heightValue }}" @selected(old('partner_height_from', $member->partner_height_from) == $heightValue)>{{ $height->height }}</option>
+                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_from', $member->partner_height_from) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -1231,8 +1230,7 @@
                         <select name="partner_height_to" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                                @php($heightValue = $height->height_value ?? $height->height)
-                                <option value="{{ $heightValue }}" @selected(old('partner_height_to', $member->partner_height_to) == $heightValue)>{{ $height->height }}</option>
+                                <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_to', $member->partner_height_to) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
                             @endforeach
                         </select>
 
@@ -1613,6 +1611,8 @@
 
     @include('admin.members.partials.photo-management')
 
+    @include('admin.members.partials.identity-proof')
+
     {{-- Save Buttons --}}
     <div class="d-flex justify-content-end gap-2 mb-5">
         <a
@@ -1679,6 +1679,10 @@
         const disability = document.getElementById('any_disability');
         const disabilityGroup = document.getElementById('disability_description_group');
         const disabilityDescription = document.getElementById('health_info');
+        const idProofInput = document.getElementById('id_proof');
+        const idProofPreview = document.getElementById('idProofPreview');
+        const idProofPreviewContainer = document.getElementById('idProofPreviewContainer');
+        const idProofEmpty = document.getElementById('idProofEmpty');
 
         const selectedId = select => select?.selectedOptions?.[0]?.dataset?.id || '';
         const option = item => {
@@ -1808,6 +1812,15 @@
 
         disability?.addEventListener('change', () => toggleDisabilityDescription(true));
         toggleDisabilityDescription();
+
+        idProofInput?.addEventListener('change', function () {
+            const file = this.files?.[0];
+            if (!file) return;
+
+            idProofPreview.src = URL.createObjectURL(file);
+            idProofPreviewContainer?.classList.remove('d-none');
+            idProofEmpty?.classList.add('d-none');
+        });
     });
 </script>
 @endpush

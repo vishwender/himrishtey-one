@@ -32,6 +32,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -1411,33 +1412,6 @@ class MemberController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | ID Proof
-        |--------------------------------------------------------------------------
-        */
-
-        if ($request->hasFile('id_proof')) {
-
-            $file = $request->file('id_proof');
-
-            $filename =
-                'idproof-'.
-                $member->id.
-                '.'.
-                $file->getClientOriginalExtension();
-
-            $file->storeAs(
-                'id_proofs',
-                $filename,
-                'public'
-            );
-
-            $member->update([
-                'id_proof' => $filename,
-            ]);
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | ID Proof / Document
         |--------------------------------------------------------------------------
         */
@@ -2653,6 +2627,13 @@ class MemberController extends Controller
                 'required_if:any_disability,Yes',
             ],
 
+            'id_proof' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
+
             'about_me' => [
                 'nullable',
                 'string',
@@ -2828,6 +2809,9 @@ class MemberController extends Controller
             'health_info.required_if' => 'Please describe the disability.',
         ]);
 
+        $idProof = $request->file('id_proof');
+        unset($validated['id_proof']);
+
         if (app(RelationshipManagerAccess::class)->isRestricted()) {
             unset($validated['relationship_manager']);
         }
@@ -2892,6 +2876,23 @@ class MemberController extends Controller
         $db->table('members')
             ->where('id', $id)
             ->update($validated);
+
+        if ($idProof) {
+            $filename = 'id-proof-'.$member->id.'-'.Str::random(10).'.'.$idProof->getClientOriginalExtension();
+            $idProof->storeAs('id_proofs', $filename, 'public');
+
+            $db->table('members')->where('id', $id)->update(['id_proof' => $filename]);
+
+            $oldProof = basename((string) $member->id_proof);
+            if ($oldProof !== '' && $oldProof !== $filename) {
+                Storage::disk('public')->delete('id_proofs/'.$oldProof);
+            }
+
+            $changes['id_proof'] = [
+                'old' => $member->id_proof,
+                'new' => $filename,
+            ];
+        }
 
         /*
         |--------------------------------------------------------------------------
