@@ -2337,6 +2337,7 @@ class MemberController extends Controller
         $employers = Employer::query()->orderBy('employer')->get();
         $occupations = Occupation::query()->where('status', 1)->orderBy('occupation')->get();
         $annualIncomes = AnnualIncome::query()->orderBy('display_order')->orderBy('annual_income')->get();
+        $familyStatuses = FamilyStatus::query()->orderBy('value')->get();
         $countries = Country::query()
             ->orderByRaw("CASE WHEN LOWER(name) = 'india' THEN 0 ELSE 1 END")
             ->orderBy('name')
@@ -2386,6 +2387,7 @@ class MemberController extends Controller
             'employers' => $employers,
             'occupations' => $occupations,
             'annualIncomes' => $annualIncomes,
+            'familyStatuses' => $familyStatuses,
             'countries' => $countries,
             'plans' => $plans,
             'relationshipManagers' => $relationshipManagers,

@@ -733,11 +733,12 @@
                             Family Status
                         </label>
 
-                        <input
-                            type="text"
-                            name="family_status"
-                            class="form-control"
-                            value="{{ old('family_status', $member->family_status) }}">
+                        <select name="family_status" class="form-select">
+                            <option value="">Select Family Status</option>
+                            @foreach($familyStatuses as $status)
+                                <option value="{{ $status->value }}" @selected(old('family_status', $member->family_status) == $status->value)>{{ $status->value }}</option>
+                            @endforeach
+                        </select>
 
                     </div>
 
@@ -1153,13 +1154,12 @@
                             Looking For
                         </label>
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            id="looking_for"
-                            name="looking_for"
-                            value="{{ old('looking_for', $member->looking_for) }}"
-                            placeholder="Example: Marriage">
+                        <select name="looking_for" id="looking_for" class="form-select">
+                            <option value="">Select Marital Status</option>
+                            @foreach($maritalStatuses as $status)
+                                <option value="{{ $status->marital_status }}" @selected(old('looking_for', $member->looking_for) == $status->marital_status)>{{ $status->marital_status }}</option>
+                            @endforeach
+                        </select>
 
                     </div>
 
