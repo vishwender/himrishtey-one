@@ -42,7 +42,7 @@
 $currentSite = app(\App\Services\SiteManager::class)->current();
 $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::class)->isRestricted();
 $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
-    && ! auth('admin')->user()?->hasRole('super-admin');
+&& ! auth('admin')->user()?->hasRole('super-admin');
 @endphp
 
 <body>
@@ -114,6 +114,7 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                             <i class="bi bi-clock-history me-2"></i>
                             Member Activity
                         </a>
+
 
                         @if(auth('admin')->user()?->hasAnyPermission(['add-rotations', 'edit-rotations']))
 
@@ -449,6 +450,15 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                             Advanced Search
 
                         </a>
+
+                        @if(auth('admin')->user()?->hasRole('super-admin') || ! $contentManagerRestricted)
+                        <a
+                            href="{{ route('admin.activities.index') }}"
+                            class="nav-dropdown-item {{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Member Activity
+                        </a>
+                        @endif
 
                         {{-- Rotations --}}
                         <a
