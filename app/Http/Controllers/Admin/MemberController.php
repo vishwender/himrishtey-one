@@ -1067,6 +1067,11 @@ class MemberController extends Controller
                 'before_or_equal:' . now()->subYears(18)->toDateTimeString(),
             ],
 
+            'no_of_brothers' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'married_brothers' => ['nullable', 'integer', 'min:0', 'max:100', 'lte:no_of_brothers'],
+            'no_of_sisters' => ['nullable', 'integer', 'min:0', 'max:100'],
+            'married_sisters' => ['nullable', 'integer', 'min:0', 'max:100', 'lte:no_of_sisters'],
+
             'gender' => [
                 'required',
                 'string',
@@ -2657,6 +2662,7 @@ class MemberController extends Controller
                 'integer',
                 'min:0',
                 'max:100',
+                'lte:no_of_brothers',
             ],
             'no_of_sisters' => [
                 'nullable',
@@ -2669,6 +2675,7 @@ class MemberController extends Controller
                 'integer',
                 'min:0',
                 'max:100',
+                'lte:no_of_sisters',
             ],
 
             'diet' => [

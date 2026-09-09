@@ -226,7 +226,7 @@
                         <select name="height" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('height', $member->height) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('height', $member->height) == ($height->height_value ?? $height->height))>{{ \App\Support\HeightFormatter::format($height->height) }}</option>
                             @endforeach
                         </select>
 
@@ -830,7 +830,7 @@
                             Brother
                         </label>
 
-                        <select name="no_of_brothers" class="form-select">
+                        <select name="no_of_brothers" id="no_of_brothers" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
                             <option value="{{ $number }}" @selected(old('no_of_brothers', $member->no_of_brothers) == $number)>{{ $number }}</option>
@@ -845,12 +845,13 @@
                             Married Brother
                         </label>
 
-                        <select name="married_brothers" class="form-select">
+                        <select name="married_brothers" id="married_brothers" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
                             <option value="{{ $number }}" @selected(old('married_brothers', $member->married_brothers) == $number)>{{ $number }}</option>
                             @endforeach
                         </select>
+                        <input type="hidden" id="married_brothers_zero" value="0" disabled>
 
                     </div>
 
@@ -860,7 +861,7 @@
                             Sister
                         </label>
 
-                        <select name="no_of_sisters" class="form-select">
+                        <select name="no_of_sisters" id="no_of_sisters" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
                             <option value="{{ $number }}" @selected(old('no_of_sisters', $member->no_of_sisters) == $number)>{{ $number }}</option>
@@ -875,12 +876,13 @@
                             Married Sister
                         </label>
 
-                        <select name="married_sisters" class="form-select">
+                        <select name="married_sisters" id="married_sisters" class="form-select">
                             <option value="">Select</option>
                             @foreach(range(0, 5) as $number)
                             <option value="{{ $number }}" @selected(old('married_sisters', $member->married_sisters) == $number)>{{ $number }}</option>
                             @endforeach
                         </select>
+                        <input type="hidden" id="married_sisters_zero" value="0" disabled>
 
                     </div>
 
@@ -1281,7 +1283,7 @@
                         <select name="partner_height_from" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_from', $member->partner_height_from) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_from', $member->partner_height_from) == ($height->height_value ?? $height->height))>{{ \App\Support\HeightFormatter::format($height->height) }}</option>
                             @endforeach
                         </select>
 
@@ -1297,7 +1299,7 @@
                         <select name="partner_height_to" class="form-select">
                             <option value="">Select Height</option>
                             @foreach($heights as $height)
-                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_to', $member->partner_height_to) == ($height->height_value ?? $height->height))>{{ $height->height }}</option>
+                            <option value="{{ $height->height_value ?? $height->height }}" @selected(old('partner_height_to', $member->partner_height_to) == ($height->height_value ?? $height->height))>{{ \App\Support\HeightFormatter::format($height->height) }}</option>
                             @endforeach
                         </select>
 
@@ -1750,6 +1752,44 @@
         const idProofPreview = document.getElementById('idProofPreview');
         const idProofPreviewContainer = document.getElementById('idProofPreviewContainer');
         const idProofEmpty = document.getElementById('idProofEmpty');
+        const brothersSelect = document.getElementById('no_of_brothers');
+        const marriedBrothersSelect = document.getElementById('married_brothers');
+        const marriedBrothersZero = document.getElementById('married_brothers_zero');
+        const sistersSelect = document.getElementById('no_of_sisters');
+        const marriedSistersSelect = document.getElementById('married_sisters');
+        const marriedSistersZero = document.getElementById('married_sisters_zero');
+
+        function syncMarriedSiblingCount(totalSelect, marriedSelect, zeroInput) {
+            if (!totalSelect || !marriedSelect || !zeroInput) return;
+
+            const total = Number.parseInt(totalSelect.value, 10);
+            const hasTotal = Number.isInteger(total);
+            const hasNoSiblings = hasTotal && total === 0;
+
+            marriedSelect.disabled = hasNoSiblings;
+            zeroInput.disabled = !hasNoSiblings;
+            zeroInput.name = hasNoSiblings ? marriedSelect.name : '';
+
+            Array.from(marriedSelect.options).forEach(option => {
+                if (option.value === '') return;
+                option.disabled = hasTotal && Number(option.value) > total;
+            });
+
+            if (hasNoSiblings) {
+                marriedSelect.value = '0';
+            } else if (hasTotal && Number(marriedSelect.value) > total) {
+                marriedSelect.value = String(total);
+            }
+        }
+
+        brothersSelect?.addEventListener('change', () =>
+            syncMarriedSiblingCount(brothersSelect, marriedBrothersSelect, marriedBrothersZero)
+        );
+        sistersSelect?.addEventListener('change', () =>
+            syncMarriedSiblingCount(sistersSelect, marriedSistersSelect, marriedSistersZero)
+        );
+        syncMarriedSiblingCount(brothersSelect, marriedBrothersSelect, marriedBrothersZero);
+        syncMarriedSiblingCount(sistersSelect, marriedSistersSelect, marriedSistersZero);
 
         const selectedId = select => select?.selectedOptions?.[0]?.dataset?.id || '';
         const option = item => {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Support\HeightFormatter;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,6 +22,7 @@ class MemberResource extends JsonResource
 
             'gender' => $this->gender,
             'height' => $this->height,
+            'height_formatted' => HeightFormatter::format($this->height),
 
             'religion' => $this->religion,
             'mother_tongue' => $this->mother_tongue,

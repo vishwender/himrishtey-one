@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\RelationshipManagerAccess;
+use App\Support\HeightFormatter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,32 +30,14 @@ class SiteMember extends Model
      *
      * Examples:
      *
-     * 5.7  => 5ft 7in
-     * 5.10 => 5ft 10in
-     * 5.11 => 5ft 11in
-     * 6    => 6ft 0in
+     * 5.7  => 5 ft 7 in
+     * 5.10 => 5 ft 10 in
+     * 5.11 => 5 ft 11 in
+     * 6    => 6 ft 0 in
      */
     public function formatHeight($height): string
     {
-        if ($height === null || $height === '') {
-            return '-';
-        }
-
-        $height = trim((string) $height);
-
-        if ($height === '') {
-            return '-';
-        }
-
-        $parts = explode('.', $height, 2);
-
-        $feet = (int) $parts[0];
-
-        $inches = isset($parts[1])
-            ? (int) $parts[1]
-            : 0;
-
-        return "{$feet}ft {$inches}in";
+        return HeightFormatter::format($height);
     }
 
     /**

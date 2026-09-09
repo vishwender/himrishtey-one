@@ -587,7 +587,7 @@
                                 old('height')==$heightValue
                                 )>
 
-                                {{ $height->height }}
+                                {{ \App\Support\HeightFormatter::format($height->height) }}
 
                             </option>
 
@@ -1719,122 +1719,67 @@
                     </div>
 
 
-                    {{-- Brothers --}}
+                    <div class="col-md-6">
+                        <label for="no_of_brothers" class="form-label">Brother</label>
+                        <select name="no_of_brothers" id="no_of_brothers" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected((string) old('no_of_brothers') === (string) $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-6">
+                        <label for="married_brothers" class="form-label">Married Brother</label>
+                        <select name="married_brothers" id="married_brothers" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected((string) old('married_brothers') === (string) $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" id="married_brothers_zero" value="0" disabled>
+                    </div>
 
-                        <label
-                            for="no_of_brothers"
-                            class="form-label">
+                    <div class="col-md-6">
+                        <label for="no_of_sisters" class="form-label">Sister</label>
+                        <select name="no_of_sisters" id="no_of_sisters" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected((string) old('no_of_sisters') === (string) $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                            No. of Brothers
-
-                        </label>
-
-
-                        <input
-                            type="number"
-                            name="no_of_brothers"
-                            id="no_of_brothers"
-                            class="form-control"
-                            min="0"
-                            value="{{ old('no_of_brothers', 0) }}">
-
+                    <div class="col-md-6">
+                        <label for="married_sisters" class="form-label">Married Sister</label>
+                        <select name="married_sisters" id="married_sisters" class="form-select">
+                            <option value="">Select</option>
+                            @foreach(range(0, 5) as $number)
+                            <option value="{{ $number }}" @selected((string) old('married_sisters') === (string) $number)>{{ $number }}</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" id="married_sisters_zero" value="0" disabled>
                     </div>
 
 
-                    {{-- Sisters --}}
+                {{-- About Family --}}
 
-                    <div class="col-md-3">
+                <div class="col-12">
 
-                        <label
-                            for="no_of_sisters"
-                            class="form-label">
+                    <label
+                        for="about_family"
+                        class="form-label">
 
-                            No. of Sisters
+                        About Family
 
-                        </label>
-
-
-                        <input
-                            type="number"
-                            name="no_of_sisters"
-                            id="no_of_sisters"
-                            class="form-control"
-                            min="0"
-                            value="{{ old('no_of_sisters', 0) }}">
-
-                    </div>
+                    </label>
 
 
-                    {{-- Married Brothers --}}
-
-                    <div class="col-md-3">
-
-                        <label
-                            for="married_brothers"
-                            class="form-label">
-
-                            Married Brothers
-
-                        </label>
-
-
-                        <input
-                            type="number"
-                            name="married_brothers"
-                            id="married_brothers"
-                            class="form-control"
-                            min="0"
-                            value="{{ old('married_brothers', 0) }}">
-
-                    </div>
-
-
-                    {{-- Married Sisters --}}
-
-                    <div class="col-md-3">
-
-                        <label
-                            for="married_sisters"
-                            class="form-label">
-
-                            Married Sisters
-
-                        </label>
-
-
-                        <input
-                            type="number"
-                            name="married_sisters"
-                            id="married_sisters"
-                            class="form-control"
-                            min="0"
-                            value="{{ old('married_sisters', 0) }}">
-
-                    </div>
-
-
-                    {{-- About Family --}}
-
-                    <div class="col-md-12">
-
-                        <label
-                            for="about_family"
-                            class="form-label">
-
-                            About Family
-
-                        </label>
-
-
-                        <textarea
-                            name="about_family"
-                            id="about_family"
-                            class="form-control"
-                            rows="4">{{ old('about_family') }}</textarea>
-
-                    </div>
+                    <textarea
+                        name="about_family"
+                        id="about_family"
+                        class="form-control"
+                        rows="4">{{ old('about_family') }}</textarea>
 
                 </div>
 
@@ -1842,1458 +1787,1460 @@
 
         </div>
 
+</div>
 
 
-        {{-- =====================================================
+
+{{-- =====================================================
             LIFESTYLE
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4 member-section">
+<div class="card border-0 shadow-sm mb-4 member-section">
 
-            <div class="card-header bg-white py-3">
+    <div class="card-header bg-white py-3">
 
-                <h5 class="mb-0">
-                    <i class="bi bi-heart me-2"></i>
-                    Lifestyle & About Me
-                </h5>
+        <h5 class="mb-0">
+            <i class="bi bi-heart me-2"></i>
+            Lifestyle & About Me
+        </h5>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+
+            {{-- Diet --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="diet"
+                    class="form-label">
+
+                    Diet
+
+                </label>
+
+
+                <select
+                    name="diet"
+                    id="diet"
+                    class="form-select">
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
+
+                    <option
+                        value="{{ $value }}"
+                        @selected(old('diet')==$value)>
+
+                        {{ $value }}
+
+                    </option>
+
+                    @endforeach
+
+                </select>
 
             </div>
 
 
-            <div class="card-body">
+            {{-- Drinking --}}
 
-                <div class="row g-3">
+            <div class="col-md-4">
 
+                <label
+                    for="is_drinking"
+                    class="form-label">
 
-                    {{-- Diet --}}
+                    Drinking
 
-                    <div class="col-md-4">
+                </label>
 
-                        <label
-                            for="diet"
-                            class="form-label">
 
-                            Diet
+                <select
+                    name="is_drinking"
+                    id="is_drinking"
+                    class="form-select">
 
-                        </label>
+                    <option value="">
+                        Select
+                    </option>
 
+                    @foreach([
+                    'Yes',
+                    'No',
+                    'Occasionally'
+                    ] as $value)
 
-                        <select
-                            name="diet"
-                            id="diet"
-                            class="form-select">
+                    <option
+                        value="{{ $value }}"
+                        @selected(
+                        old('is_drinking')==$value
+                        )>
 
-                            <option value="">
-                                Select
-                            </option>
+                        {{ $value }}
 
-                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
+                    </option>
 
-                            <option
-                                value="{{ $value }}"
-                                @selected(old('diet')==$value)>
+                    @endforeach
 
-                                {{ $value }}
+                </select>
 
-                            </option>
+            </div>
 
-                            @endforeach
 
-                        </select>
+            {{-- Smoking --}}
 
-                    </div>
+            <div class="col-md-4">
 
+                <label
+                    for="is_smoking"
+                    class="form-label">
 
-                    {{-- Drinking --}}
+                    Smoking
 
-                    <div class="col-md-4">
+                </label>
 
-                        <label
-                            for="is_drinking"
-                            class="form-label">
 
-                            Drinking
+                <select
+                    name="is_smoking"
+                    id="is_smoking"
+                    class="form-select">
 
-                        </label>
+                    <option value="">
+                        Select
+                    </option>
 
+                    @foreach([
+                    'Yes',
+                    'No',
+                    'Occasionally'
+                    ] as $value)
 
-                        <select
-                            name="is_drinking"
-                            id="is_drinking"
-                            class="form-select">
+                    <option
+                        value="{{ $value }}"
+                        @selected(
+                        old('is_smoking')==$value
+                        )>
 
-                            <option value="">
-                                Select
-                            </option>
+                        {{ $value }}
 
-                            @foreach([
-                            'No',
-                            'Occasionally',
-                            'Yes'
-                            ] as $value)
+                    </option>
 
-                            <option
-                                value="{{ $value }}"
-                                @selected(
-                                old('is_drinking')==$value
-                                )>
+                    @endforeach
 
-                                {{ $value }}
+                </select>
 
-                            </option>
+            </div>
 
-                            @endforeach
 
-                        </select>
+            {{-- Disability --}}
 
-                    </div>
+            <div class="col-md-4">
 
+                <label
+                    for="any_disability"
+                    class="form-label">
 
-                    {{-- Smoking --}}
+                    Any Disability
 
-                    <div class="col-md-4">
+                </label>
 
-                        <label
-                            for="is_smoking"
-                            class="form-label">
 
-                            Smoking
+                <select
+                    name="any_disability"
+                    id="any_disability"
+                    class="form-select">
 
-                        </label>
+                    <option value="">
+                        Select
+                    </option>
 
+                    <option
+                        value="No"
+                        @selected(
+                        old('any_disability')=='No'
+                        )>
 
-                        <select
-                            name="is_smoking"
-                            id="is_smoking"
-                            class="form-select">
+                        No
 
-                            <option value="">
-                                Select
-                            </option>
+                    </option>
 
-                            @foreach([
-                            'No',
-                            'Occasionally',
-                            'Yes'
-                            ] as $value)
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('any_disability')=='Yes'
+                        )>
 
-                            <option
-                                value="{{ $value }}"
-                                @selected(
-                                old('is_smoking')==$value
-                                )>
+                        Yes
 
-                                {{ $value }}
+                    </option>
 
-                            </option>
+                </select>
 
-                            @endforeach
+            </div>
 
-                        </select>
 
-                    </div>
+            <div class="col-md-8 {{ old('any_disability') === 'Yes' ? '' : 'd-none' }}" id="disability_description_group">
+                <label for="health_info" class="form-label">Describe Disability</label>
+                <textarea name="health_info" id="health_info" class="form-control" rows="3"
+                    maxlength="255">{{ old('health_info') }}</textarea>
+            </div>
 
 
-                    {{-- Disability --}}
+            {{-- About Me --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-8">
 
-                        <label
-                            for="any_disability"
-                            class="form-label">
+                <label
+                    for="about_me"
+                    class="form-label">
 
-                            Any Disability
+                    About Me
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="any_disability"
-                            id="any_disability"
-                            class="form-select">
-
-                            <option value="">
-                                Select
-                            </option>
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('any_disability')=='No'
-                                )>
-
-                                No
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('any_disability')=='Yes'
-                                )>
-
-                                Yes
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="col-md-8 {{ old('any_disability') === 'Yes' ? '' : 'd-none' }}" id="disability_description_group">
-                        <label for="health_info" class="form-label">Describe Disability</label>
-                        <textarea name="health_info" id="health_info" class="form-control" rows="3"
-                            maxlength="255">{{ old('health_info') }}</textarea>
-                    </div>
-
-
-                    {{-- About Me --}}
-
-                    <div class="col-md-8">
-
-                        <label
-                            for="about_me"
-                            class="form-label">
-
-                            About Me
-
-                        </label>
-
-
-                        <textarea
-                            name="about_me"
-                            id="about_me"
-                            class="form-control"
-                            rows="4">{{ old('about_me') }}</textarea>
-
-                    </div>
-
-                </div>
+                <textarea
+                    name="about_me"
+                    id="about_me"
+                    class="form-control"
+                    rows="4">{{ old('about_me') }}</textarea>
 
             </div>
 
         </div>
 
+    </div>
+
+</div>
 
 
-        {{-- =====================================================
+
+{{-- =====================================================
             PARTNER PREFERENCES
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4 member-section">
+<div class="card border-0 shadow-sm mb-4 member-section">
 
-            <div class="card-header bg-white py-3">
+    <div class="card-header bg-white py-3">
 
-                <h5 class="mb-0">
-                    <i class="bi bi-person-heart me-2"></i>
-                    Partner Preferences
-                </h5>
+        <h5 class="mb-0">
+            <i class="bi bi-person-heart me-2"></i>
+            Partner Preferences
+        </h5>
 
-            </div>
-
-
-            <div class="card-body">
+    </div>
 
 
-                {{-- =================================================
+    <div class="card-body">
+
+
+        {{-- =================================================
                     BASIC PREFERENCES
                 ================================================== --}}
 
-                <h6 class="fw-semibold mb-3">
-                    Basic Preferences
-                </h6>
+        <h6 class="fw-semibold mb-3">
+            Basic Preferences
+        </h6>
 
 
-                <div class="row g-3">
+        <div class="row g-3">
 
 
-                    {{-- Looking For --}}
+            {{-- Looking For --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="looking_for"
-                            class="form-label">
+                <label
+                    for="looking_for"
+                    class="form-label">
 
-                            Looking For
+                    Looking For
 
-                        </label>
-
-
-                        <select name="looking_for" id="looking_for" class="form-select">
-                            <option value="">Select Marital Status</option>
-                            @foreach($maritalStatuses as $status)
-                            <option value="{{ $status->marital_status }}" @selected(old('looking_for')==$status->marital_status)>{{ $status->marital_status }}</option>
-                            @endforeach
-                        </select>
-
-                    </div>
+                </label>
 
 
-                    {{-- Age From --}}
+                <select name="looking_for" id="looking_for" class="form-select">
+                    <option value="">Select Marital Status</option>
+                    @foreach($maritalStatuses as $status)
+                    <option value="{{ $status->marital_status }}" @selected(old('looking_for')==$status->marital_status)>{{ $status->marital_status }}</option>
+                    @endforeach
+                </select>
 
-                    <div class="col-md-4">
-
-                        <label
-                            for="partner_age_from"
-                            class="form-label">
-
-                            Partner Age From
-
-                        </label>
+            </div>
 
 
-                        <input
-                            type="number"
-                            name="partner_age_from"
-                            id="partner_age_from"
-                            class="form-control"
-                            min="18"
-                            value="{{ old('partner_age_from') }}">
+            {{-- Age From --}}
 
-                    </div>
+            <div class="col-md-4">
 
+                <label
+                    for="partner_age_from"
+                    class="form-label">
 
-                    {{-- Age To --}}
+                    Partner Age From
 
-                    <div class="col-md-4">
-
-                        <label
-                            for="partner_age_to"
-                            class="form-label">
-
-                            Partner Age To
-
-                        </label>
+                </label>
 
 
-                        <input
-                            type="number"
-                            name="partner_age_to"
-                            id="partner_age_to"
-                            class="form-control"
-                            min="18"
-                            value="{{ old('partner_age_to') }}">
+                <input
+                    type="number"
+                    name="partner_age_from"
+                    id="partner_age_from"
+                    class="form-control"
+                    min="18"
+                    value="{{ old('partner_age_from') }}">
 
-                    </div>
-
-                </div>
+            </div>
 
 
-                <hr class="my-4">
+            {{-- Age To --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="partner_age_to"
+                    class="form-label">
+
+                    Partner Age To
+
+                </label>
 
 
-                {{-- =================================================
+                <input
+                    type="number"
+                    name="partner_age_to"
+                    id="partner_age_to"
+                    class="form-control"
+                    min="18"
+                    value="{{ old('partner_age_to') }}">
+
+            </div>
+
+        </div>
+
+
+        <hr class="my-4">
+
+
+        {{-- =================================================
                     PARTNER RELIGION
                 ================================================== --}}
 
-                <h6 class="fw-semibold mb-3">
-                    Religion & Background
-                </h6>
+        <h6 class="fw-semibold mb-3">
+            Religion & Background
+        </h6>
 
 
-                <div class="row g-3">
+        <div class="row g-3">
 
-                    {{-- Partner Religion --}}
+            {{-- Partner Religion --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_religion"
-                            class="form-label">
+                <label
+                    for="partner_religion"
+                    class="form-label">
 
-                            Partner Religion
+                    Partner Religion
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_religion"
-                            id="partner_religion"
-                            class="form-select">
+                <select
+                    name="partner_religion"
+                    id="partner_religion"
+                    class="form-select">
 
-                            <option value="">
-                                Select Religion
-                            </option>
+                    <option value="">
+                        Select Religion
+                    </option>
 
-                            @foreach($religions as $religion)
+                    @foreach($religions as $religion)
 
-                            <option
-                                value="{{ $religion->religion }}"
-                                @selected(
-                                old('partner_religion')==$religion->religion
-                                )>
+                    <option
+                        value="{{ $religion->religion }}"
+                        @selected(
+                        old('partner_religion')==$religion->religion
+                        )>
 
-                                {{ $religion->religion }}
+                        {{ $religion->religion }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Partner Cast --}}
+            {{-- Partner Cast --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_cast"
-                            class="form-label">
+                <label
+                    for="partner_cast"
+                    class="form-label">
 
-                            Partner Cast
+                    Partner Cast
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_cast"
-                            id="partner_cast"
-                            class="form-select">
+                <select
+                    name="partner_cast"
+                    id="partner_cast"
+                    class="form-select">
 
-                            <option value="">
-                                Select Cast
-                            </option>
+                    <option value="">
+                        Select Cast
+                    </option>
 
-                            @foreach($casts as $cast)
+                    @foreach($casts as $cast)
 
-                            <option
-                                value="{{ $cast->cast }}"
-                                @selected(
-                                old('partner_cast')==$cast->cast
-                                )>
+                    <option
+                        value="{{ $cast->cast }}"
+                        @selected(
+                        old('partner_cast')==$cast->cast
+                        )>
 
-                                {{ $cast->cast }}
+                        {{ $cast->cast }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Partner Mother Tongue --}}
+            {{-- Partner Mother Tongue --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_mothertongue"
-                            class="form-label">
+                <label
+                    for="partner_mothertongue"
+                    class="form-label">
 
-                            Partner Mother Tongue
+                    Partner Mother Tongue
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_mothertongue"
-                            id="partner_mothertongue"
-                            class="form-select">
+                <select
+                    name="partner_mothertongue"
+                    id="partner_mothertongue"
+                    class="form-select">
 
-                            <option value="">
-                                Select Mother Tongue
-                            </option>
+                    <option value="">
+                        Select Mother Tongue
+                    </option>
 
-                            @foreach($motherTongues as $motherTongue)
+                    @foreach($motherTongues as $motherTongue)
 
-                            <option
-                                value="{{ $motherTongue->mother_tongue }}"
-                                @selected(
-                                old('partner_mothertongue')==$motherTongue->mother_tongue
-                                )>
+                    <option
+                        value="{{ $motherTongue->mother_tongue }}"
+                        @selected(
+                        old('partner_mothertongue')==$motherTongue->mother_tongue
+                        )>
 
-                                {{ $motherTongue->mother_tongue }}
+                        {{ $motherTongue->mother_tongue }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Partner Manglik --}}
+            {{-- Partner Manglik --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="is_partner_manglik"
-                            class="form-label">
+                <label
+                    for="is_partner_manglik"
+                    class="form-label">
 
-                            Partner Manglik
+                    Partner Manglik
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="is_partner_manglik"
-                            id="is_partner_manglik"
-                            class="form-select">
+                <select
+                    name="is_partner_manglik"
+                    id="is_partner_manglik"
+                    class="form-select">
 
-                            <option value="">
-                                Select
-                            </option>
+                    <option value="">
+                        Select
+                    </option>
 
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('is_partner_manglik')=='Yes'
-                                )>
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('is_partner_manglik')=='Yes'
+                        )>
 
-                                Yes
+                        Yes
 
-                            </option>
+                    </option>
 
-                            <option
-                                value="No"
-                                @selected(
-                                old('is_partner_manglik')=='No'
-                                )>
+                    <option
+                        value="No"
+                        @selected(
+                        old('is_partner_manglik')=='No'
+                        )>
 
-                                No
+                        No
 
-                            </option>
+                    </option>
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
-                </div>
+        </div>
 
 
-                <hr class="my-4">
+        <hr class="my-4">
 
 
-                {{-- =================================================
+        {{-- =================================================
                     PARTNER HEIGHT / EDUCATION / CAREER
                 ================================================== --}}
 
-                <h6 class="fw-semibold mb-3">
-                    Education & Career
-                </h6>
+        <h6 class="fw-semibold mb-3">
+            Education & Career
+        </h6>
 
 
-                <div class="row g-3">
+        <div class="row g-3">
 
 
-                    {{-- Height From --}}
+            {{-- Height From --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_height_from"
-                            class="form-label">
+                <label
+                    for="partner_height_from"
+                    class="form-label">
 
-                            Partner Height From
+                    Partner Height From
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_height_from"
-                            id="partner_height_from"
-                            class="form-select">
+                <select
+                    name="partner_height_from"
+                    id="partner_height_from"
+                    class="form-select">
 
-                            <option value="">
-                                Select Height
-                            </option>
+                    <option value="">
+                        Select Height
+                    </option>
 
-                            @foreach($heights as $height)
+                    @foreach($heights as $height)
 
-                            @php
-                            $heightValue =
-                            $height->height_value
-                            ?? $height->height;
-                            @endphp
+                    @php
+                    $heightValue =
+                    $height->height_value
+                    ?? $height->height;
+                    @endphp
 
-                            <option
-                                value="{{ $heightValue }}"
-                                @selected(
-                                old('partner_height_from')==$heightValue
-                                )>
+                    <option
+                        value="{{ $heightValue }}"
+                        @selected(
+                        old('partner_height_from')==$heightValue
+                        )>
 
-                                {{ $height->height }}
+                        {{ \App\Support\HeightFormatter::format($height->height) }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Height To --}}
+            {{-- Height To --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_height_to"
-                            class="form-label">
+                <label
+                    for="partner_height_to"
+                    class="form-label">
 
-                            Partner Height To
+                    Partner Height To
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_height_to"
-                            id="partner_height_to"
-                            class="form-select">
+                <select
+                    name="partner_height_to"
+                    id="partner_height_to"
+                    class="form-select">
 
-                            <option value="">
-                                Select Height
-                            </option>
+                    <option value="">
+                        Select Height
+                    </option>
 
-                            @foreach($heights as $height)
+                    @foreach($heights as $height)
 
-                            @php
-                            $heightValue =
-                            $height->height_value
-                            ?? $height->height;
-                            @endphp
+                    @php
+                    $heightValue =
+                    $height->height_value
+                    ?? $height->height;
+                    @endphp
 
-                            <option
-                                value="{{ $heightValue }}"
-                                @selected(
-                                old('partner_height_to')==$heightValue
-                                )>
+                    <option
+                        value="{{ $heightValue }}"
+                        @selected(
+                        old('partner_height_to')==$heightValue
+                        )>
 
-                                {{ $height->height }}
+                        {{ \App\Support\HeightFormatter::format($height->height) }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Education --}}
+            {{-- Education --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_education"
-                            class="form-label">
+                <label
+                    for="partner_education"
+                    class="form-label">
 
-                            Partner Education
+                    Partner Education
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_education"
-                            id="partner_education"
-                            class="form-select">
+                <select
+                    name="partner_education"
+                    id="partner_education"
+                    class="form-select">
 
-                            <option value="">
-                                Select Education
-                            </option>
+                    <option value="">
+                        Select Education
+                    </option>
 
-                            @foreach($educations as $education)
+                    @foreach($educations as $education)
 
-                            <option
-                                value="{{ $education->education }}"
-                                @selected(
-                                old('partner_education')==$education->education
-                                )>
+                    <option
+                        value="{{ $education->education }}"
+                        @selected(
+                        old('partner_education')==$education->education
+                        )>
 
-                                {{ $education->education }}
+                        {{ $education->education }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Occupation --}}
+            {{-- Occupation --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_occupation"
-                            class="form-label">
+                <label
+                    for="partner_occupation"
+                    class="form-label">
 
-                            Partner Occupation
+                    Partner Occupation
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_occupation"
-                            id="partner_occupation"
-                            class="form-select">
+                <select
+                    name="partner_occupation"
+                    id="partner_occupation"
+                    class="form-select">
 
-                            <option value="">
-                                Select Occupation
-                            </option>
+                    <option value="">
+                        Select Occupation
+                    </option>
 
-                            @foreach($occupations as $occupation)
+                    @foreach($occupations as $occupation)
 
-                            <option
-                                value="{{ $occupation->occupation }}"
-                                @selected(
-                                old('partner_occupation')==$occupation->occupation
-                                )>
+                    <option
+                        value="{{ $occupation->occupation }}"
+                        @selected(
+                        old('partner_occupation')==$occupation->occupation
+                        )>
 
-                                {{ $occupation->occupation }}
+                        {{ $occupation->occupation }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Income From --}}
+            {{-- Income From --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_annual_income_from"
-                            class="form-label">
+                <label
+                    for="partner_annual_income_from"
+                    class="form-label">
 
-                            Partner Annual Income From
+                    Partner Annual Income From
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_annual_income_from"
-                            id="partner_annual_income_from"
-                            class="form-select">
+                <select
+                    name="partner_annual_income_from"
+                    id="partner_annual_income_from"
+                    class="form-select">
 
-                            <option value="">
-                                Select Income
-                            </option>
+                    <option value="">
+                        Select Income
+                    </option>
 
-                            @foreach($annualIncomes as $income)
+                    @foreach($annualIncomes as $income)
 
-                            <option
-                                value="{{ $income->annual_income }}"
-                                @selected(
-                                old('partner_annual_income_from')==$income->annual_income
-                                )>
+                    <option
+                        value="{{ $income->annual_income }}"
+                        @selected(
+                        old('partner_annual_income_from')==$income->annual_income
+                        )>
 
-                                {{ $income->annual_income }}
+                        {{ $income->annual_income }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
 
-                    {{-- Income To --}}
+            {{-- Income To --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_annual_income_to"
-                            class="form-label">
+                <label
+                    for="partner_annual_income_to"
+                    class="form-label">
 
-                            Partner Annual Income To
+                    Partner Annual Income To
 
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_annual_income_to"
-                            id="partner_annual_income_to"
-                            class="form-select">
+                <select
+                    name="partner_annual_income_to"
+                    id="partner_annual_income_to"
+                    class="form-select">
 
-                            <option value="">
-                                Select Income
-                            </option>
+                    <option value="">
+                        Select Income
+                    </option>
 
-                            @foreach($annualIncomes as $income)
+                    @foreach($annualIncomes as $income)
 
-                            <option
-                                value="{{ $income->annual_income }}"
-                                @selected(
-                                old('partner_annual_income_to')==$income->annual_income
-                                )>
+                    <option
+                        value="{{ $income->annual_income }}"
+                        @selected(
+                        old('partner_annual_income_to')==$income->annual_income
+                        )>
 
-                                {{ $income->annual_income }}
+                        {{ $income->annual_income }}
 
-                            </option>
+                    </option>
 
-                            @endforeach
+                    @endforeach
 
-                        </select>
+                </select>
 
-                    </div>
+            </div>
 
-                </div>
+        </div>
 
 
-                <hr class="my-4">
+        <hr class="my-4">
 
 
-                {{-- =================================================
+        {{-- =================================================
                     PARTNER LOCATION
                 ================================================== --}}
 
-                <h6 class="fw-semibold mb-3">
-                    Partner Location
-                </h6>
+        <h6 class="fw-semibold mb-3">
+            Partner Location
+        </h6>
 
 
-                <div class="row g-3">
+        <div class="row g-3">
 
-                    {{-- Partner Country --}}
+            {{-- Partner Country --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_country"
-                            class="form-label">
+                <label
+                    for="partner_country"
+                    class="form-label">
 
-                            Partner Country
+                    Partner Country
 
-                        </label>
-
-
-                        <select
-                            name="partner_country"
-                            id="partner_country"
-                            class="form-select">
-
-                            <option value="">
-                                Select Country
-                            </option>
-
-                            @foreach($countries as $country)
-
-                            <option
-                                value="{{ $country->name }}"
-                                data-id="{{ $country->id }}"
-                                @selected(
-                                old('partner_country')==$country->name
-                                )>
-
-                                {{ $country->name }}
-
-                            </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
-                    {{-- Partner State --}}
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="partner_state"
-                            class="form-label">
-
-                            Partner State
-
-                        </label>
+                </label>
 
 
-                        <select
-                            name="partner_state"
-                            id="partner_state"
-                            class="form-select">
+                <select
+                    name="partner_country"
+                    id="partner_country"
+                    class="form-select">
 
-                            <option value="">
-                                Select State
-                            </option>
+                    <option value="">
+                        Select Country
+                    </option>
 
-                        </select>
+                    @foreach($countries as $country)
 
-                    </div>
+                    <option
+                        value="{{ $country->name }}"
+                        data-id="{{ $country->id }}"
+                        @selected(
+                        old('partner_country')==$country->name
+                        )>
 
+                        {{ $country->name }}
 
-                    {{-- Partner City --}}
+                    </option>
 
-                    <div class="col-md-6">
+                    @endforeach
 
-                        <label
-                            for="partner_city"
-                            class="form-label">
+                </select>
 
-                            Partner City
+            </div>
+            {{-- Partner State --}}
 
-                        </label>
+            <div class="col-md-6">
 
+                <label
+                    for="partner_state"
+                    class="form-label">
 
-                        <select
-                            name="partner_city"
-                            id="partner_city"
-                            class="form-select">
+                    Partner State
 
-                            <option value="">
-                                Select City
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
+                </label>
 
 
-                <hr class="my-4">
+                <select
+                    name="partner_state"
+                    id="partner_state"
+                    class="form-select">
+
+                    <option value="">
+                        Select State
+                    </option>
+
+                </select>
+
+            </div>
 
 
-                {{-- =================================================
+            {{-- Partner City --}}
+
+            <div class="col-md-6">
+
+                <label
+                    for="partner_city"
+                    class="form-label">
+
+                    Partner City
+
+                </label>
+
+
+                <select
+                    name="partner_city"
+                    id="partner_city"
+                    class="form-select">
+
+                    <option value="">
+                        Select City
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <hr class="my-4">
+
+
+        {{-- =================================================
                     PARTNER LIFESTYLE
                 ================================================== --}}
 
-                <h6 class="fw-semibold mb-3">
-                    Lifestyle
-                </h6>
+        <h6 class="fw-semibold mb-3">
+            Lifestyle
+        </h6>
 
 
-                <div class="row g-3">
+        <div class="row g-3">
 
 
-                    {{-- Partner Diet --}}
+            {{-- Partner Diet --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="partner_diet"
-                            class="form-label">
+                <label
+                    for="partner_diet"
+                    class="form-label">
 
-                            Partner Diet
+                    Partner Diet
 
-                        </label>
-
-
-                        <select
-                            name="partner_diet"
-                            id="partner_diet"
-                            class="form-select">
-
-                            <option value="">
-                                Select
-                            </option>
-
-                            @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
-
-                            <option
-                                value="{{ $value }}"
-                                @selected(
-                                old('partner_diet')==$value
-                                )>
-
-                                {{ $value }}
-
-                            </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
+                </label>
 
 
-                    {{-- Partner Smoking --}}
+                <select
+                    name="partner_diet"
+                    id="partner_diet"
+                    class="form-select">
 
-                    <div class="col-md-4">
+                    <option value="">
+                        Select
+                    </option>
 
-                        <label
-                            for="is_partner_smoking"
-                            class="form-label">
+                    @foreach(['Veg', 'Veg & Non Veg', 'Non Veg'] as $value)
 
-                            Partner Smoking
+                    <option
+                        value="{{ $value }}"
+                        @selected(
+                        old('partner_diet')==$value
+                        )>
 
-                        </label>
+                        {{ $value }}
 
+                    </option>
 
-                        <select
-                            name="is_partner_smoking"
-                            id="is_partner_smoking"
-                            class="form-select">
+                    @endforeach
 
-                            <option value="">
-                                Select
-                            </option>
+                </select>
 
-                            @foreach([
-                            'No',
-                            'Occasionally',
-                            'Yes'
-                            ] as $value)
-
-                            <option
-                                value="{{ $value }}"
-                                @selected(
-                                old('is_partner_smoking')==$value
-                                )>
-
-                                {{ $value }}
-
-                            </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
+            </div>
 
 
-                    {{-- Partner Drinking --}}
+            {{-- Partner Smoking --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="is_partner_drinking"
-                            class="form-label">
+                <label
+                    for="is_partner_smoking"
+                    class="form-label">
 
-                            Partner Drinking
+                    Partner Smoking
 
-                        </label>
-
-
-                        <select
-                            name="is_partner_drinking"
-                            id="is_partner_drinking"
-                            class="form-select">
-
-                            <option value="">
-                                Select
-                            </option>
-
-                            @foreach([
-                            'No',
-                            'Occasionally',
-                            'Yes'
-                            ] as $value)
-
-                            <option
-                                value="{{ $value }}"
-                                @selected(
-                                old('is_partner_drinking')==$value
-                                )>
-
-                                {{ $value }}
-
-                            </option>
-
-                            @endforeach
-
-                        </select>
-
-                    </div>
+                </label>
 
 
-                    {{-- About Partner --}}
+                <select
+                    name="is_partner_smoking"
+                    id="is_partner_smoking"
+                    class="form-select">
 
-                    <div class="col-md-12">
+                    <option value="">
+                        Select
+                    </option>
 
-                        <label
-                            for="about_my_partner"
-                            class="form-label">
+                    @foreach([
+                    'No',
+                    'Occasionally',
+                    'Yes'
+                    ] as $value)
 
-                            About My Partner
+                    <option
+                        value="{{ $value }}"
+                        @selected(
+                        old('is_partner_smoking')==$value
+                        )>
 
-                        </label>
+                        {{ $value }}
+
+                    </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
 
 
-                        <textarea
-                            name="about_my_partner"
-                            id="about_my_partner"
-                            class="form-control"
-                            rows="4">{{ old('about_my_partner') }}</textarea>
+            {{-- Partner Drinking --}}
 
-                    </div>
+            <div class="col-md-4">
 
-                </div>
+                <label
+                    for="is_partner_drinking"
+                    class="form-label">
+
+                    Partner Drinking
+
+                </label>
+
+
+                <select
+                    name="is_partner_drinking"
+                    id="is_partner_drinking"
+                    class="form-select">
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    @foreach([
+                    'No',
+                    'Occasionally',
+                    'Yes'
+                    ] as $value)
+
+                    <option
+                        value="{{ $value }}"
+                        @selected(
+                        old('is_partner_drinking')==$value
+                        )>
+
+                        {{ $value }}
+
+                    </option>
+
+                    @endforeach
+
+                </select>
+
+            </div>
+
+
+            {{-- About Partner --}}
+
+            <div class="col-md-12">
+
+                <label
+                    for="about_my_partner"
+                    class="form-label">
+
+                    About My Partner
+
+                </label>
+
+
+                <textarea
+                    name="about_my_partner"
+                    id="about_my_partner"
+                    class="form-control"
+                    rows="4">{{ old('about_my_partner') }}</textarea>
 
             </div>
 
         </div>
 
+    </div>
+
+</div>
 
 
-        {{-- =====================================================
+
+{{-- =====================================================
             ACCOUNT & ADMIN SETTINGS
         ====================================================== --}}
 
-        <div class="card border-0 shadow-sm mb-4 member-section">
+<div class="card border-0 shadow-sm mb-4 member-section">
 
-            <div class="card-header bg-white py-3">
+    <div class="card-header bg-white py-3">
 
-                <h5 class="mb-0">
-                    <i class="bi bi-gear me-2"></i>
-                    Account & Profile Settings
-                </h5>
+        <h5 class="mb-0">
+            <i class="bi bi-gear me-2"></i>
+            Account & Profile Settings
+        </h5>
 
-            </div>
+    </div>
 
 
-            <div class="card-body">
+    <div class="card-body">
 
-                <div class="row g-3">
+        <div class="row g-3">
 
 
-                    {{-- Password --}}
+            {{-- Password --}}
 
-                    <div class="col-md-4">
+            <div class="col-md-4">
 
-                        <label
-                            for="password"
-                            class="form-label">
+                <label
+                    for="password"
+                    class="form-label">
 
-                            Password
+                    Password
 
-                            <span class="text-danger">*</span>
+                    <span class="text-danger">*</span>
 
-                        </label>
+                </label>
 
 
-                        <div class="input-group">
-                            <input
-                                type="password"
-                                name="password"
-                                id="password"
-                                class="form-control @error('password') is-invalid @enderror"
-                                minlength="8"
-                                autocomplete="new-password"
-                                aria-describedby="passwordHelp passwordCopyStatus"
-                                required>
+                <div class="input-group">
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        class="form-control @error('password') is-invalid @enderror"
+                        minlength="8"
+                        autocomplete="new-password"
+                        aria-describedby="passwordHelp passwordCopyStatus"
+                        required>
 
-                            <button
-                                type="button"
-                                id="togglePassword"
-                                class="btn btn-outline-secondary"
-                                aria-label="Show password"
-                                aria-pressed="false"
-                                title="Show password">
-                                <i class="bi bi-eye" aria-hidden="true"></i>
-                            </button>
+                    <button
+                        type="button"
+                        id="togglePassword"
+                        class="btn btn-outline-secondary"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                        title="Show password">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
 
-                            <button
-                                type="button"
-                                id="copyPassword"
-                                class="btn btn-outline-secondary"
-                                aria-label="Copy password"
-                                title="Copy password">
-                                <i class="bi bi-clipboard" aria-hidden="true"></i>
-                            </button>
-                        </div>
-
-                        <div id="passwordHelp" class="form-text">
-                            Password must contain at least 8 characters.
-                        </div>
-
-                        <div
-                            id="passwordCopyStatus"
-                            class="small mt-1"
-                            role="status"
-                            aria-live="polite"></div>
-
-                        @error('password')
-                        <div class="text-danger small mt-1">
-                            {{ $message }}
-                        </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Member Type --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="member_type"
-                            class="form-label">
-
-                            Member Type
-
-                        </label>
-
-
-                        <input
-                            type="text"
-                            name="member_type"
-                            id="member_type"
-                            class="form-control"
-                            value="{{ old('member_type', 'free') }}">
-
-                    </div>
-
-
-                    {{-- Active --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="active"
-                            class="form-label">
-
-                            Account Status
-
-                        </label>
-
-
-                        <select
-                            name="active"
-                            id="active"
-                            class="form-select">
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('active', 'No' )=='No'
-                                )>
-
-                                Inactive
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('active')=='Yes'
-                                )>
-
-                                Active
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    {{-- Trusted --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="is_trusted"
-                            class="form-label">
-
-                            Trusted Profile
-
-                        </label>
-
-
-                        <select
-                            name="is_trusted"
-                            id="is_trusted"
-                            class="form-select">
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('is_trusted', 'No' )=='No'
-                                )>
-
-                                No
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('is_trusted')=='Yes'
-                                )>
-
-                                Yes
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    {{-- Promoted --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="promoted"
-                            class="form-label">
-
-                            Promoted
-
-                        </label>
-
-
-                        <select
-                            name="promoted"
-                            id="promoted"
-                            class="form-select">
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('promoted', 'No' )=='No'
-                                )>
-
-                                No
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('promoted')=='Yes'
-                                )>
-
-                                Yes
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    {{-- Profile Visibility --}}
-
-                    <div class="col-md-4">
-
-                        <label
-                            for="profile_hide"
-                            class="form-label">
-
-                            Profile Visibility
-
-                        </label>
-
-
-                        <select
-                            name="profile_hide"
-                            id="profile_hide"
-                            class="form-select">
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('profile_hide', 'No' )=='No'
-                                )>
-
-                                Visible
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('profile_hide')=='Yes'
-                                )>
-
-                                Hidden
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    {{-- Relationship Manager --}}
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="relationship_manager"
-                            class="form-label">
-
-                            Relationship Manager
-
-                        </label>
-
-
-                        <select
-                            name="relationship_manager"
-                            id="relationship_manager"
-                            class="form-select @error('relationship_manager') is-invalid @enderror">
-
-                            <option value="">Unassigned</option>
-
-                            @foreach($relationshipManagers as $manager)
-                            <option
-                                value="{{ $manager->name }}"
-                                @selected(
-                                old('relationship_manager', $defaultRelationshipManager)===$manager->name
-                                )>
-                                {{ $manager->name }}
-                                @if($manager->profile_id)
-                                ({{ $manager->profile_id }})
-                                @endif
-                            </option>
-                            @endforeach
-
-                        </select>
-
-                        @error('relationship_manager')
-                        <div class="text-danger small mt-1">
-                            {{ $message }}
-                        </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- Remarks --}}
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="remarks"
-                            class="form-label">
-
-                            Remarks
-
-                        </label>
-
-
-                        <textarea
-                            name="remarks"
-                            id="remarks"
-                            class="form-control"
-                            rows="3">{{ old('remarks') }}</textarea>
-
-                    </div>
-
+                    <button
+                        type="button"
+                        id="copyPassword"
+                        class="btn btn-outline-secondary"
+                        aria-label="Copy password"
+                        title="Copy password">
+                        <i class="bi bi-clipboard" aria-hidden="true"></i>
+                    </button>
                 </div>
 
+                <div id="passwordHelp" class="form-text">
+                    Password must contain at least 8 characters.
+                </div>
+
+                <div
+                    id="passwordCopyStatus"
+                    class="small mt-1"
+                    role="status"
+                    aria-live="polite"></div>
+
+                @error('password')
+                <div class="text-danger small mt-1">
+                    {{ $message }}
+                </div>
+                @enderror
+
+            </div>
+
+
+            {{-- Member Type --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="member_type"
+                    class="form-label">
+
+                    Member Type
+
+                </label>
+
+
+                <input
+                    type="text"
+                    name="member_type"
+                    id="member_type"
+                    class="form-control"
+                    value="{{ old('member_type', 'free') }}">
+
+            </div>
+
+
+            {{-- Active --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="active"
+                    class="form-label">
+
+                    Account Status
+
+                </label>
+
+
+                <select
+                    name="active"
+                    id="active"
+                    class="form-select">
+
+                    <option
+                        value="No"
+                        @selected(
+                        old('active', 'No' )=='No'
+                        )>
+
+                        Inactive
+
+                    </option>
+
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('active')=='Yes'
+                        )>
+
+                        Active
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- Trusted --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="is_trusted"
+                    class="form-label">
+
+                    Trusted Profile
+
+                </label>
+
+
+                <select
+                    name="is_trusted"
+                    id="is_trusted"
+                    class="form-select">
+
+                    <option
+                        value="No"
+                        @selected(
+                        old('is_trusted', 'No' )=='No'
+                        )>
+
+                        No
+
+                    </option>
+
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('is_trusted')=='Yes'
+                        )>
+
+                        Yes
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- Promoted --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="promoted"
+                    class="form-label">
+
+                    Promoted
+
+                </label>
+
+
+                <select
+                    name="promoted"
+                    id="promoted"
+                    class="form-select">
+
+                    <option
+                        value="No"
+                        @selected(
+                        old('promoted', 'No' )=='No'
+                        )>
+
+                        No
+
+                    </option>
+
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('promoted')=='Yes'
+                        )>
+
+                        Yes
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- Profile Visibility --}}
+
+            <div class="col-md-4">
+
+                <label
+                    for="profile_hide"
+                    class="form-label">
+
+                    Profile Visibility
+
+                </label>
+
+
+                <select
+                    name="profile_hide"
+                    id="profile_hide"
+                    class="form-select">
+
+                    <option
+                        value="No"
+                        @selected(
+                        old('profile_hide', 'No' )=='No'
+                        )>
+
+                        Visible
+
+                    </option>
+
+                    <option
+                        value="Yes"
+                        @selected(
+                        old('profile_hide')=='Yes'
+                        )>
+
+                        Hidden
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            {{-- Relationship Manager --}}
+
+            <div class="col-md-6">
+
+                <label
+                    for="relationship_manager"
+                    class="form-label">
+
+                    Relationship Manager
+
+                </label>
+
+
+                <select
+                    name="relationship_manager"
+                    id="relationship_manager"
+                    class="form-select @error('relationship_manager') is-invalid @enderror">
+
+                    <option value="">Unassigned</option>
+
+                    @foreach($relationshipManagers as $manager)
+                    <option
+                        value="{{ $manager->name }}"
+                        @selected(
+                        old('relationship_manager', $defaultRelationshipManager)===$manager->name
+                        )>
+                        {{ $manager->name }}
+                        @if($manager->profile_id)
+                        ({{ $manager->profile_id }})
+                        @endif
+                    </option>
+                    @endforeach
+
+                </select>
+
+                @error('relationship_manager')
+                <div class="text-danger small mt-1">
+                    {{ $message }}
+                </div>
+                @enderror
+
+            </div>
+
+
+            {{-- Remarks --}}
+
+            <div class="col-md-6">
+
+                <label
+                    for="remarks"
+                    class="form-label">
+
+                    Remarks
+
+                </label>
+
+
+                <textarea
+                    name="remarks"
+                    id="remarks"
+                    class="form-control"
+                    rows="3">{{ old('remarks') }}</textarea>
+
             </div>
 
         </div>
 
+    </div>
+
+</div>
 
 
-        {{-- Submit Buttons --}}
-        <div class="d-flex justify-content-end gap-2 mb-5">
-            <a href="{{ route('admin.members.index') }}" class="btn btn-light">
-                Cancel
-            </a>
-            <button type="submit" class="btn btn-primary">
-                <i class="bi bi-person-plus me-1"></i>
-                Create Member
-            </button>
-        </div>
+
+{{-- Submit Buttons --}}
+<div class="d-flex justify-content-end gap-2 mb-5">
+    <a href="{{ route('admin.members.index') }}" class="btn btn-light">
+        Cancel
+    </a>
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i>
+        Create Member
+    </button>
+</div>
 
 
-    </form>
+</form>
 
 </div>
 

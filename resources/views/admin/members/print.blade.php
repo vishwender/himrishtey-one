@@ -19,7 +19,7 @@
     <table>
         @foreach(['gender' => 'Gender', 'date_of_birth' => 'Date of birth', 'mobile_number' => 'Mobile', 'email' => 'Email', 'registration_date' => 'Registration date', 'marital_status' => 'Marital status', 'height' => 'Height', 'religion' => 'Religion', 'cast' => 'Caste', 'education' => 'Education', 'occupation' => 'Occupation', 'annual_income' => 'Annual income', 'city' => 'City', 'state' => 'State', 'country' => 'Country', 'about_me' => 'About me'] as $field => $label)
         @if(filled($member->{$field}))
-        <tr><th>{{ $label }}</th><td>{{ $member->{$field} }}</td></tr>
+        <tr><th>{{ $label }}</th><td>{{ $field === 'height' ? \App\Support\HeightFormatter::format($member->{$field}) : $member->{$field} }}</td></tr>
         @endif
         @endforeach
     </table>

@@ -167,7 +167,7 @@
                             <td>
 
                                 <span class="fw-medium">
-                                    {{ $height->height }}
+                                    {{ \App\Support\HeightFormatter::format($height->height) }}
                                 </span>
 
                                 <small class="text-muted">

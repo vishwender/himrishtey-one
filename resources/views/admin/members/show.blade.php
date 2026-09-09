@@ -364,7 +364,7 @@
                     </small>
 
                     <strong>
-                        {{ $member->height ?: '-' }}
+                        {{ \App\Support\HeightFormatter::format($member->height) }}
                     </strong>
 
                 </div>
@@ -1031,7 +1031,7 @@
                         Height From
                     </small>
                     <strong>
-                        {{ $member->partner_height_from ?: '-' }}
+                        {{ \App\Support\HeightFormatter::format($member->partner_height_from) }}
                     </strong>
                 </div>
 
@@ -1040,7 +1040,7 @@
                         Height To
                     </small>
                     <strong>
-                        {{ $member->partner_height_to ?: '-' }}
+                        {{ \App\Support\HeightFormatter::format($member->partner_height_to) }}
                     </strong>
                 </div>
 

@@ -187,7 +187,7 @@
                     'Profile Created For' => $profile->profile_created_for ?? null,
                     'Age' => $profile->age ? $profile->age . ' years' : null,
                     'Gender' => $profile->gender ?? null,
-                    'Height' => $profile->height ?? null,
+                    'Height' => \App\Support\HeightFormatter::format($profile->height ?? null, ''),
                     'Marital Status' => $profile->marital_status ?? null,
                     'Religion' => $profile->religion ?? null,
                     'Community' => $profile->cast ?? null,

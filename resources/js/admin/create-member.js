@@ -17,11 +17,49 @@ document.addEventListener('DOMContentLoaded', function () {
     const disabilitySelect = document.getElementById('any_disability');
     const disabilityGroup = document.getElementById('disability_description_group');
     const disabilityDescription = document.getElementById('health_info');
+    const brothersSelect = document.getElementById('no_of_brothers');
+    const marriedBrothersSelect = document.getElementById('married_brothers');
+    const marriedBrothersZero = document.getElementById('married_brothers_zero');
+    const sistersSelect = document.getElementById('no_of_sisters');
+    const marriedSistersSelect = document.getElementById('married_sisters');
+    const marriedSistersZero = document.getElementById('married_sisters_zero');
 
     const passwordInput = document.getElementById('password');
     const togglePasswordButton = document.getElementById('togglePassword');
     const copyPasswordButton = document.getElementById('copyPassword');
     const passwordCopyStatus = document.getElementById('passwordCopyStatus');
+
+    function syncMarriedSiblingCount(totalSelect, marriedSelect, zeroInput) {
+        if (!totalSelect || !marriedSelect || !zeroInput) return;
+
+        const total = Number.parseInt(totalSelect.value, 10);
+        const hasTotal = Number.isInteger(total);
+        const hasNoSiblings = hasTotal && total === 0;
+
+        marriedSelect.disabled = hasNoSiblings;
+        zeroInput.disabled = !hasNoSiblings;
+        zeroInput.name = hasNoSiblings ? marriedSelect.name : '';
+
+        Array.from(marriedSelect.options).forEach(option => {
+            if (option.value === '') return;
+            option.disabled = hasTotal && Number(option.value) > total;
+        });
+
+        if (hasNoSiblings) {
+            marriedSelect.value = '0';
+        } else if (hasTotal && Number(marriedSelect.value) > total) {
+            marriedSelect.value = String(total);
+        }
+    }
+
+    brothersSelect?.addEventListener('change', () =>
+        syncMarriedSiblingCount(brothersSelect, marriedBrothersSelect, marriedBrothersZero)
+    );
+    sistersSelect?.addEventListener('change', () =>
+        syncMarriedSiblingCount(sistersSelect, marriedSistersSelect, marriedSistersZero)
+    );
+    syncMarriedSiblingCount(brothersSelect, marriedBrothersSelect, marriedBrothersZero);
+    syncMarriedSiblingCount(sistersSelect, marriedSistersSelect, marriedSistersZero);
 
     togglePasswordButton?.addEventListener('click', function () {
         const passwordIsVisible = passwordInput.type === 'text';
