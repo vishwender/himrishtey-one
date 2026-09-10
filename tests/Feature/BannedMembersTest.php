@@ -12,6 +12,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class BannedMembersTest extends TestCase
@@ -80,10 +81,11 @@ class BannedMembersTest extends TestCase
         $this->assertSame([1], $this->listing()->pluck('id')->all());
     }
 
-    public function test_administrator_can_ban_and_unban_a_member(): void
+    #[DataProvider('banRoles')]
+    public function test_administrator_can_ban_and_unban_a_member(string $role): void
     {
         $admin = new Admin(['name' => 'Admin']);
-        $admin->setRelation('roles', collect([new Role(['slug' => 'super-admin'])]));
+        $admin->setRelation('roles', collect([new Role(['slug' => $role])]));
         $this->actingAs($admin, 'admin')->withoutMiddleware();
         DB::connection('site')->table('members')->insert(['id' => 1, 'active' => 'Yes']);
         $this->mock(AdminActivityLogger::class)->shouldReceive('log')->twice()->andReturnNull();
@@ -91,6 +93,11 @@ class BannedMembersTest extends TestCase
         $this->assertDatabaseHas('members', ['id' => 1, 'active' => 'Banned'], 'site');
         $this->post(route('admin.members.ban.update', 1), ['banned' => 0])->assertRedirect();
         $this->assertDatabaseHas('members', ['id' => 1, 'active' => 'Yes'], 'site');
+    }
+
+    public static function banRoles(): array
+    {
+        return [['super-admin'], ['member-manager']];
     }
 
     public function test_non_administrator_cannot_ban_or_bypass_unban_control(): void

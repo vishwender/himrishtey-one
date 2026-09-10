@@ -76,6 +76,10 @@ class SetAdminSiteConnection
         |--------------------------------------------------------------------------
         */
 
+        if ($request->user('admin')?->isMemberManager()) {
+            abort_unless($request->user('admin')->hasSiteAccess($site->id), 403, 'You do not have access to this site.');
+        }
+
         app(SiteDatabaseService::class)->connect($site);
 
         /*

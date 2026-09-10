@@ -21,7 +21,7 @@ class RelationshipManagerAccess
     {
         $admin = $this->admin();
 
-        if (! $admin || $admin->hasRole('super-admin')) {
+        if (! $admin || $admin->hasRole('super-admin') || $admin->isMemberManager()) {
             return false;
         }
 

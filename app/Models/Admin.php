@@ -78,8 +78,29 @@ class Admin extends Authenticatable
         );
     }
 
+    /** Member managers have full member operations within their assigned sites. */
+    public function isMemberManager(): bool
+    {
+        return $this->hasRole('member-manager') && ! $this->hasRole('super-admin');
+    }
+
+    public const MEMBER_MANAGER_PERMISSIONS = [
+        'view-members', 'create-members', 'edit-members', 'edit-member',
+        'view-photos', 'manage-member-photos', 'manage-member-status',
+        'manage-member-visibility', 'manage-member-trusted', 'manage-member-promoted',
+        'advanced-search-members', 'view-own-rotations', 'view-all-rotations',
+        'create-rotations', 'add-rotations', 'edit-rotations', 'complete-rotations',
+        'cancel-rotations', 'delete-rotations', 'raise-delete-request',
+        'view-delete-profile-request', 'approve-profile-delete-request',
+        'reject-profile-delete-request', 'bulk-profile-delete-requests',
+    ];
+
     public function hasPermission(string $permission): bool
     {
+        if ($this->isMemberManager()) {
+            return in_array($permission, self::MEMBER_MANAGER_PERMISSIONS, true);
+        }
+
         $this->loadMissing('roles.permissions');
 
         // Super Admin has every permission.
@@ -94,34 +115,16 @@ class Admin extends Authenticatable
 
     public function hasPermissions(array $permissions): bool
     {
-        $this->loadMissing('roles.permissions');
-
-        if ($this->roles->contains('slug', 'super-admin')) {
-            return true;
-        }
-
-        $assignedPermissions = $this->roles
-            ->flatMap->permissions
-            ->pluck('slug');
-
-        return collect($permissions)->every(
-            fn (string $permission) => $assignedPermissions->contains($permission)
-        );
+        return collect($permissions)->every(fn (string $permission) => $this->hasPermission($permission));
     }
 
     public function hasAnyPermission(array $permissions): bool
     {
-        $this->loadMissing('roles.permissions');
-
-        if ($this->roles->contains('slug', 'super-admin')) {
+        if ($this->hasRole('super-admin')) {
             return true;
         }
 
-        return $this->roles
-            ->flatMap->permissions
-            ->contains(
-                fn (Permission $permission) => in_array($permission->slug, $permissions, true)
-            );
+        return collect($permissions)->contains(fn (string $permission) => $this->hasPermission($permission));
     }
 
     public function hasSiteAccess(int $siteId): bool

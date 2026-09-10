@@ -40,6 +40,7 @@
 </head>
 @php
 $currentSite = app(\App\Services\SiteManager::class)->current();
+$memberManagerRestricted = auth('admin')->user()?->isMemberManager();
 $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::class)->isRestricted();
 $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 && ! auth('admin')->user()?->hasRole('super-admin');
@@ -59,14 +60,16 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
             <nav class="mt-3">
 
-                @if($relationshipManagerRestricted)
+                @if($relationshipManagerRestricted || $memberManagerRestricted)
 
+                @unless($memberManagerRestricted)
                 <a
                     href="{{ route('admin.dashboard') }}"
                     class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2 me-2"></i>
                     Dashboard
                 </a>
+                @endunless
 
                 <div class="nav-group {{ request()->routeIs('admin.members.*', 'admin.activities.*', 'admin.rotations.*') ? 'is-open' : '' }}">
 
@@ -82,10 +85,19 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                     <div class="nav-submenu">
                         <a
                             href="{{ route('admin.members.index') }}"
-                            class="{{ request()->routeIs('admin.members.index', 'admin.members.show', 'admin.members.edit') ? 'active' : '' }}">
+                            class="{{ request()->routeIs('admin.members.index', 'admin.members.show', 'admin.members.edit') && ! request()->filled('relationship_manager') ? 'active' : '' }}">
                             <i class="bi bi-person-lines-fill me-2"></i>
+                            {{ $memberManagerRestricted ? 'Members' : 'Assigned Members' }}
+                        </a>
+
+                        @if($memberManagerRestricted)
+                        <a
+                            href="{{ route('admin.members.index', ['relationship_manager' => auth('admin')->user()->name]) }}"
+                            class="{{ request()->routeIs('admin.members.index') && request('relationship_manager') === auth('admin')->user()->name ? 'active' : '' }}">
+                            <i class="bi bi-person-check me-2"></i>
                             Assigned Members
                         </a>
+                        @endif
 
                         <a
                             href="{{ route('admin.members.new') }}"

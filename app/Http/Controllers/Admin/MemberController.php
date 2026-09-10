@@ -25,6 +25,7 @@ use App\Models\SiteMember;
 use App\Models\State;
 use App\Services\AdminActivityLogger;
 use App\Services\MemberPhotoService;
+use App\Services\MemberProfileCompletion;
 use App\Services\RelationshipManagerAccess;
 use App\Services\SiteManager;
 use Carbon\Carbon;
@@ -46,7 +47,7 @@ class MemberController extends Controller
      */
     public function printProfile(int $id): View
     {
-        abort_unless(auth('admin')->user()?->hasRole('super-admin'), 403);
+        abort_unless(auth('admin')->user()?->hasAnyRole(['super-admin', 'member-manager']), 403);
 
         return view('admin.members.print', ['member' => SiteMember::findOrFail($id)]);
     }
@@ -332,6 +333,12 @@ class MemberController extends Controller
             ->orderByDesc('id')
             ->paginate(($newMembersOnly || $bannedMembersOnly) && in_array($request->integer('per_page', 25), [10, 25, 50, 100], true) ? $request->integer('per_page', 25) : (($newMembersOnly || $bannedMembersOnly) ? 25 : 20))
             ->withQueryString();
+
+        $members->through(function ($member) {
+            $member->profile_completed = app(MemberProfileCompletion::class)->percentage($member);
+
+            return $member;
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -741,119 +748,11 @@ class MemberController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $profileFields = [
-
-            // Basic Information
-            'full_name',
-            'email',
-            'mobile_number',
-            'alternate_number',
-            'whatsapp_number',
-            'birth_date_time',
-            'height',
-            'gender',
-            'blood_group',
-            'health_info',
-            'birth_place',
-            'religion',
-            'mother_tongue',
-            'cast',
-            'sub_cast',
-            'gotra',
-            'manglik',
-            'marital_status',
-            'no_of_child',
-
-            // Education
-            'about_my_education',
-            'education',
-            'any_other_qualifications',
-
-            // Career
-            'about_my_career',
-            'employed_in',
-            'occupation',
-            'designation',
-            'organization_name',
-            'job_location',
-            'annual_income',
-
-            // Location
-            'country_living_in',
-            'state_living_in',
-            'city_living_in',
-            'address_living_in',
-            'native_place',
-
-            // Family
-            'family_type',
-            'family_status',
-            'father_name',
-            'father_occupation',
-            'mother_name',
-            'mother_occupation',
-            'no_of_brothers',
-            'no_of_sisters',
-            'married_brothers',
-            'married_sisters',
-            'family_income',
-            'about_family',
-
-            // Lifestyle
-            'diet',
-            'is_drinking',
-            'is_smoking',
-            'about_me',
-            'any_disability',
-
-            // Partner Preferences
-            'looking_for',
-            'partner_age_from',
-            'partner_age_to',
-            'partner_country',
-            'partner_religion',
-            'partner_cast',
-            'partner_height_from',
-            'partner_height_to',
-            'partner_education',
-            'partner_mothertongue',
-            'partner_annual_income_from',
-            'partner_annual_income_to',
-            'is_partner_manglik',
-            'partner_occupation',
-            'partner_state',
-            'partner_city',
-            'partner_diet',
-            'is_partner_smoking',
-            'is_partner_drinking',
-            'about_my_partner',
-        ];
-
-        /*
-        |--------------------------------------------------------------------------
-        | Calculate Profile Completion
-        |--------------------------------------------------------------------------
-        */
-
-        $totalFields = count($profileFields);
-
-        $completedFields = 0;
-
-        foreach ($profileFields as $field) {
-
-            $value = $member->{$field} ?? null;
-
-            if (
-                $value !== null &&
-                trim((string) $value) !== ''
-            ) {
-                $completedFields++;
-            }
-        }
-
-        $profileCompletion = $totalFields > 0
-            ? round(($completedFields / $totalFields) * 100)
-            : 0;
+        [
+            'completedFields' => $completedFields,
+            'totalFields' => $totalFields,
+            'profileCompletion' => $profileCompletion,
+        ] = app(MemberProfileCompletion::class)->summary($member);
 
         /*
         |--------------------------------------------------------------------------
@@ -1475,7 +1374,7 @@ class MemberController extends Controller
 
                 'photo_approved' => '',
 
-                'active' => 'No',
+                'active' => '',
 
                 'member_type' => 'free',
 
@@ -1526,15 +1425,24 @@ class MemberController extends Controller
 
             $member->profile_id = $member->generateProfileId($member->id);
 
-            $member->fill(collect($validated)->except([
+            $memberValues = collect($validated)->except([
+                'active',
                 'password',
                 'photo',
                 'id_proof',
                 'relationship_manager',
                 'profile_ranges',
-            ])->all());
+            ])->all();
+
+            // The final fill must respect legacy NOT NULL columns too.
+            $member->fill($this->normalizeMemberValuesForSchema(
+                $memberValues,
+                $member,
+                $member->getConnection()
+            ));
 
             $member->relationship_manager = $relationshipManager;
+            $member->profile_completed = app(MemberProfileCompletion::class)->percentage($member);
 
             $member->save();
 
@@ -1600,7 +1508,7 @@ class MemberController extends Controller
         */
 
         return redirect()
-            ->route('admin.members.index')
+            ->route('admin.members.new')
             ->with(
                 'success',
                 'Member created successfully. Profile ID: ' .
@@ -1988,7 +1896,7 @@ class MemberController extends Controller
      */
     public function updateBan(Request $request, int $id): RedirectResponse
     {
-        abort_unless(auth('admin')->user()?->hasRole('super-admin'), 403);
+        abort_unless(auth('admin')->user()?->hasAnyRole(['super-admin', 'member-manager']), 403);
         $validated = $request->validate(['banned' => ['required', 'boolean']]);
         $member = SiteMember::query()->findOrFail($id);
         $oldValue = $member->active;
@@ -2835,7 +2743,13 @@ class MemberController extends Controller
             'about_my_education' => [
                 'nullable',
                 'string',
-                'max:244',
+                'max:255',
+            ],
+
+            'any_other_qualifications' => [
+                'nullable',
+                'string',
+                'max:255',
             ],
 
             'about_my_career' => [
@@ -3057,6 +2971,9 @@ class MemberController extends Controller
             $validated,
             $member,
             $db
+        );
+        $validated['profile_completed'] = app(MemberProfileCompletion::class)->percentage(
+            (object) array_replace((array) $member, $validated)
         );
 
         /*

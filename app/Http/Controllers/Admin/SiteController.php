@@ -75,6 +75,10 @@ class SiteController extends Controller
             ? 'admin.blog-posts.index'
             : 'admin.dashboard';
 
+        if ($admin->isMemberManager()) {
+            $destination = 'admin.members.index';
+        }
+
         return redirect()
             ->route($destination)
             ->with(

@@ -3076,32 +3076,13 @@
                         </label>
 
 
-                        <select
-                            name="active"
+                        <input
+                            type="text"
                             id="active"
-                            class="form-select">
-
-                            <option
-                                value="No"
-                                @selected(
-                                old('active', 'No' )=='No'
-                                )>
-
-                                Inactive
-
-                            </option>
-
-                            <option
-                                value="Yes"
-                                @selected(
-                                old('active')=='Yes'
-                                )>
-
-                                Active
-
-                            </option>
-
-                        </select>
+                            class="form-control"
+                            value="New Member"
+                            readonly>
+                        <div class="form-text">New profiles appear in New Members until activated.</div>
 
                     </div>
 

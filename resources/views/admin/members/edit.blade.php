@@ -418,6 +418,9 @@
 
                         <select name="education" class="form-select">
                             <option value="">Select Education</option>
+                            @if(old('education', $member->education) && ! $educations->contains('education', old('education', $member->education)))
+                                <option selected value="{{ old('education', $member->education) }}">{{ old('education', $member->education) }}</option>
+                            @endif
                             @foreach($educations as $education)
                             <option value="{{ $education->education }}" @selected(old('education', $member->education) == $education->education)>{{ $education->education }}</option>
                             @endforeach
@@ -636,7 +639,10 @@
                             State
                         </label>
 
-                        <select name="state_living_in" id="state_living_in" class="form-select" data-current="{{ old('state_living_in', $member->state_living_in) }}" disabled>
+                        <select name="state_living_in" id="state_living_in" class="form-select" data-current="{{ old('state_living_in', $member->state_living_in) }}">
+                            @if(old('state_living_in', $member->state_living_in))
+                                <option selected value="{{ old('state_living_in', $member->state_living_in) }}">{{ old('state_living_in', $member->state_living_in) }}</option>
+                            @endif
                             <option value="">Select Country First</option>
                         </select>
 
@@ -649,7 +655,10 @@
                             City
                         </label>
 
-                        <select name="city_living_in" id="city_living_in" class="form-select" data-current="{{ old('city_living_in', $member->city_living_in) }}" disabled>
+                        <select name="city_living_in" id="city_living_in" class="form-select" data-current="{{ old('city_living_in', $member->city_living_in) }}">
+                            @if(old('city_living_in', $member->city_living_in))
+                                <option selected value="{{ old('city_living_in', $member->city_living_in) }}">{{ old('city_living_in', $member->city_living_in) }}</option>
+                            @endif
                             <option value="">Select State First</option>
                         </select>
 
@@ -729,7 +738,7 @@
 
                             <option
                                 value="Joint"
-                                @selected(old('family_type')=='Joint' )>
+                                @selected(old('family_type', $member->family_type)=='Joint' )>
 
                                 Joint
 
@@ -737,7 +746,7 @@
 
                             <option
                                 value="Nuclear"
-                                @selected(old('family_type')=='Nuclear' )>
+                                @selected(old('family_type', $member->family_type)=='Nuclear' )>
 
                                 Nuclear
 
@@ -1347,7 +1356,10 @@
                             State
                         </label>
 
-                        <select name="partner_state" id="partner_state" class="form-select" data-current="{{ old('partner_state', $member->partner_state) }}" disabled>
+                        <select name="partner_state" id="partner_state" class="form-select" data-current="{{ old('partner_state', $member->partner_state) }}">
+                            @if(old('partner_state', $member->partner_state))
+                                <option selected value="{{ old('partner_state', $member->partner_state) }}">{{ old('partner_state', $member->partner_state) }}</option>
+                            @endif
                             <option value="">Select Country First</option>
                         </select>
 
@@ -1361,7 +1373,10 @@
                             City
                         </label>
 
-                        <select name="partner_city" id="partner_city" class="form-select" data-current="{{ old('partner_city', $member->partner_city) }}" disabled>
+                        <select name="partner_city" id="partner_city" class="form-select" data-current="{{ old('partner_city', $member->partner_city) }}">
+                            @if(old('partner_city', $member->partner_city))
+                                <option selected value="{{ old('partner_city', $member->partner_city) }}">{{ old('partner_city', $member->partner_city) }}</option>
+                            @endif
                             <option value="">Select State First</option>
                         </select>
 
@@ -1428,6 +1443,9 @@
 
                         <select name="partner_mothertongue" id="partner_mothertongue" class="form-select">
                             <option value="">Select Mother Tongue</option>
+                            @if(old('partner_mothertongue', $member->partner_mothertongue) && ! $motherTongues->contains('mother_tongue', old('partner_mothertongue', $member->partner_mothertongue)))
+                                <option selected value="{{ old('partner_mothertongue', $member->partner_mothertongue) }}">{{ old('partner_mothertongue', $member->partner_mothertongue) }}</option>
+                            @endif
                             @foreach($motherTongues as $motherTongue)
                             <option value="{{ $motherTongue->mother_tongue }}" @selected(old('partner_mothertongue', $member->partner_mothertongue) == $motherTongue->mother_tongue)>{{ $motherTongue->mother_tongue }}</option>
                             @endforeach
@@ -1495,6 +1513,9 @@
 
                         <select name="partner_education" id="partner_education" class="form-select">
                             <option value="">Select Education</option>
+                            @if(old('partner_education', $member->partner_education) && ! $educations->contains('education', old('partner_education', $member->partner_education)))
+                                <option selected value="{{ old('partner_education', $member->partner_education) }}">{{ old('partner_education', $member->partner_education) }}</option>
+                            @endif
                             @foreach($educations as $education)
                             <option value="{{ $education->education }}" @selected(old('partner_education', $member->partner_education) == $education->education)>{{ $education->education }}</option>
                             @endforeach
@@ -1913,125 +1934,92 @@
             return element;
         };
 
-        async function loadCities(stateId, selectedCity = '') {
-            city.innerHTML = '<option value="">Loading cities...</option>';
-            city.disabled = true;
-            if (!stateId) {
-                city.innerHTML = '<option value="">Select State First</option>';
-                return;
-            }
+        function setupLocation(countrySelect, stateSelect, citySelect) {
+            let stateVersion = 0;
+            let cityVersion = 0;
 
-            const response = await fetch(form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(stateId)), {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+            function populate(select, items, selected, placeholder) {
+                select.innerHTML = '';
+                select.appendChild(option({ name: '', id: '' }));
+                select.options[0].textContent = placeholder;
+                items.forEach(item => select.appendChild(option(item)));
+                if (selected && !items.some(item => item.name === selected)) {
+                    select.appendChild(option({ name: selected, id: '' }));
                 }
-            });
-            if (!response.ok) throw new Error('Unable to load cities.');
-
-            city.innerHTML = '<option value="">Select City</option>';
-            (await response.json()).forEach(item => city.appendChild(option(item)));
-            city.value = selectedCity;
-            city.disabled = false;
-        }
-
-        async function loadStates(countryId, selectedState = '', selectedCity = '') {
-            state.innerHTML = '<option value="">Loading states...</option>';
-            state.disabled = true;
-            city.innerHTML = '<option value="">Select State First</option>';
-            city.disabled = true;
-            if (!countryId) {
-                state.innerHTML = '<option value="">Select Country First</option>';
-                return;
+                select.value = selected;
+                select.disabled = false;
+                select.setCustomValidity('');
             }
 
-            try {
-                const response = await fetch(form.dataset.statesUrl.replace('__ID__', encodeURIComponent(countryId)), {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+            async function fetchOptions(select, url, selected, isCurrent, placeholder) {
+                select.dataset.loading = 'true';
+                try {
+                    const response = await fetch(url, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!response.ok) throw new Error('Unable to load locations');
+                    const items = await response.json();
+                    if (!isCurrent()) return false;
+                    populate(select, items, selected, placeholder);
+                    select.setCustomValidity('');
+                    return true;
+                } catch (error) {
+                    if (isCurrent()) {
+                        // Retain saved values when the lookup service is unavailable.
+                        populate(select, [], selected, 'Unable to load locations; reselect the parent to retry');
                     }
-                });
-                if (!response.ok) throw new Error('Unable to load states.');
-
-                state.innerHTML = '<option value="">Select State</option>';
-                (await response.json()).forEach(item => state.appendChild(option(item)));
-                state.value = selectedState;
-                state.disabled = false;
-
-                if (selectedState) await loadCities(selectedId(state), selectedCity);
-            } catch (error) {
-                state.innerHTML = '<option value="">Unable to load states</option>';
-                city.innerHTML = '<option value="">Unable to load cities</option>';
-            }
-        }
-
-        country?.addEventListener('change', () => loadStates(selectedId(country)));
-        state?.addEventListener('change', () => loadCities(selectedId(state)));
-
-        if (country?.value) {
-            loadStates(selectedId(country), state.dataset.current, city.dataset.current);
-        }
-
-        async function loadPartnerCities(stateId, selectedCity = '') {
-            partnerCity.innerHTML = '<option value="">Loading cities...</option>';
-            partnerCity.disabled = true;
-            if (!stateId) {
-                partnerCity.innerHTML = '<option value="">Select State First</option>';
-                return;
-            }
-
-            const response = await fetch(form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(stateId)), {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    return false;
+                } finally {
+                    if (isCurrent()) delete select.dataset.loading;
                 }
-            });
-            if (!response.ok) throw new Error('Unable to load partner cities.');
-
-            partnerCity.innerHTML = '<option value="">Select City</option>';
-            (await response.json()).forEach(item => partnerCity.appendChild(option(item)));
-            partnerCity.value = selectedCity;
-            partnerCity.disabled = false;
-        }
-
-        async function loadPartnerStates(countryId, selectedState = '', selectedCity = '') {
-            partnerState.innerHTML = '<option value="">Loading states...</option>';
-            partnerState.disabled = true;
-            partnerCity.innerHTML = '<option value="">Select State First</option>';
-            partnerCity.disabled = true;
-            if (!countryId) {
-                partnerState.innerHTML = '<option value="">Select Country First</option>';
-                return;
             }
 
-            try {
-                const response = await fetch(form.dataset.statesUrl.replace('__ID__', encodeURIComponent(countryId)), {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                if (!response.ok) throw new Error('Unable to load partner states.');
-
-                partnerState.innerHTML = '<option value="">Select State</option>';
-                (await response.json()).forEach(item => partnerState.appendChild(option(item)));
-                partnerState.value = selectedState;
-                partnerState.disabled = false;
-
-                if (selectedState) await loadPartnerCities(selectedId(partnerState), selectedCity);
-            } catch (error) {
-                partnerState.innerHTML = '<option value="">Unable to load states</option>';
-                partnerCity.innerHTML = '<option value="">Unable to load cities</option>';
+            async function loadCities(selected = '') {
+                const version = ++cityVersion;
+                const id = selectedId(stateSelect);
+                populate(citySelect, [], selected, 'Select City');
+                if (!id) {
+                    delete citySelect.dataset.loading;
+                    return;
+                }
+                await fetchOptions(citySelect,
+                    form.dataset.citiesUrl.replace('__ID__', encodeURIComponent(id)),
+                    selected, () => version === cityVersion, 'Select City');
             }
+
+            async function loadStates(selectedState = '', selectedCity = '') {
+                const version = ++stateVersion;
+                ++cityVersion;
+                delete citySelect.dataset.loading;
+                populate(stateSelect, [], selectedState, 'Select State');
+                populate(citySelect, [], selectedCity, 'Select City');
+                const id = selectedId(countrySelect);
+                if (!id) {
+                    delete stateSelect.dataset.loading;
+                    return;
+                }
+                const loaded = await fetchOptions(stateSelect,
+                    form.dataset.statesUrl.replace('__ID__', encodeURIComponent(id)),
+                    selectedState, () => version === stateVersion, 'Select State');
+                if (loaded && selectedState) await loadCities(selectedCity);
+            }
+
+            countrySelect.addEventListener('change', () => loadStates());
+            stateSelect.addEventListener('change', () => loadCities());
+            if (countrySelect.value) loadStates(stateSelect.dataset.current, citySelect.dataset.current);
         }
 
-        partnerCountry?.addEventListener('change', () => loadPartnerStates(selectedId(partnerCountry)));
-        partnerState?.addEventListener('change', () => loadPartnerCities(selectedId(partnerState)));
+        setupLocation(country, state, city);
+        setupLocation(partnerCountry, partnerState, partnerCity);
 
-        if (partnerCountry?.value) {
-            loadPartnerStates(selectedId(partnerCountry), partnerState.dataset.current, partnerCity.dataset.current);
-        }
+        form.addEventListener('submit', event => {
+            const loading = [state, city, partnerState, partnerCity].find(select => select.dataset.loading);
+            if (loading) {
+                event.preventDefault();
+                loading.setCustomValidity('Please wait for locations to finish loading.');
+                loading.reportValidity();
+            }
+        });
 
         function toggleDisabilityDescription(clearWhenHidden = false) {
             const visible = disability?.value === 'Yes';

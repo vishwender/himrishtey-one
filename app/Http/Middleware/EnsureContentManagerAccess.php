@@ -18,7 +18,7 @@ class EnsureContentManagerAccess
     {
         $admin = Auth::guard('admin')->user();
 
-        if (! $admin || $admin->hasRole('super-admin') || ! $admin->hasRole('content-manager')) {
+        if (! $admin || $admin->isMemberManager() || $admin->hasRole('super-admin') || ! $admin->hasRole('content-manager')) {
             return $next($request);
         }
 

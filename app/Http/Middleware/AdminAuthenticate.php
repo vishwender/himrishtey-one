@@ -33,6 +33,18 @@ class AdminAuthenticate
                 ]);
         }
 
+        if ($admin->isMemberManager()) {
+            if ($request->routeIs('admin.dashboard')) {
+                return redirect()->route('admin.members.index');
+            }
+
+            abort_unless($request->routeIs(
+                'admin.members.*', 'admin.activities.*', 'admin.rotations.*',
+                'admin.delete-profile-requests.*', 'admin.site.*',
+                'admin.settings.password.*', 'admin.logout'
+            ), 403, 'Member managers can only access member management.');
+        }
+
         return $next($request);
     }
 }

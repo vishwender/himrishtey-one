@@ -786,6 +786,12 @@ request()->filled('sort');
 </div>
 @endif
 {{-- Members Table --}}
+@php
+$hideRelationshipManagerColumn = request()->routeIs('admin.members.index')
+    && (app(\App\Services\RelationshipManagerAccess::class)->isRestricted()
+        || (auth('admin')->user()?->isMemberManager()
+            && request('relationship_manager') === auth('admin')->user()->name));
+@endphp
 <div class="card border-0 shadow-sm">
 
     <div class="card-body p-0">
@@ -827,7 +833,9 @@ request()->filled('sort');
                         <th>Source</th>
 
                         @else
+                        @unless($hideRelationshipManagerColumn)
                         <th>Relationship Manager</th>
+                        @endunless
 
                         <th>Status</th>
                         @endif
@@ -951,6 +959,7 @@ request()->filled('sort');
                         <td>{{ $member->register_through ?: '—' }}</td>
                         @else
                         {{-- Relationship Manager --}}
+                        @unless($hideRelationshipManagerColumn)
                         <td>
                             @if(!empty($member->relationship_manager))
                             <span class="badge bg-light text-dark border">
@@ -961,6 +970,7 @@ request()->filled('sort');
                             <span class="text-muted">Unassigned</span>
                             @endif
                         </td>
+                        @endunless
 
                         {{-- Status --}}
                         <td>
@@ -1017,11 +1027,7 @@ request()->filled('sort');
                                     @if($bannedMembersOnly)
                                     <li><a class="dropdown-item" href="{{ route('admin.members.show', $member->id) }}#identity-proof">Identity Proof</a></li>
                                     @endif
-                                    @if($newMembersOnly || $bannedMembersOnly)
-                                    @if(auth('admin')->user()?->hasRole('super-admin'))
-                                    <li><a class="dropdown-item" href="{{ route('admin.members.print', $member->id) }}" target="_blank" rel="noopener">Print Profile</a></li>
-                                    @endif
-                                    @endif
+
                                     {{-- Edit Profile --}}
 
                                     @if(auth('admin')->user()?->hasPermission('edit-member'))
@@ -1223,7 +1229,7 @@ request()->filled('sort');
                                     </li>
 
 
-                                    @if(auth('admin')->user()?->hasRole('super-admin'))
+                                    @if(auth('admin')->user()?->hasAnyRole(['super-admin', 'member-manager']))
                                     <li>
                                         <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" class="member-action-form" data-confirm-title="Change Ban Status" data-confirm="{{ $member->active === 'Banned' ? 'Unban and activate this member?' : 'Ban this member?' }}">
                                             @csrf
@@ -1267,7 +1273,7 @@ request()->filled('sort');
                     <tr>
 
                         <td
-                            colspan="{{ $newMembersOnly ? 10 : ($bannedMembersOnly ? 11 : 9) }}"
+                            colspan="{{ ($newMembersOnly ? 10 : ($bannedMembersOnly ? 11 : 9)) - ($hideRelationshipManagerColumn ? 1 : 0) }}"
                             class="text-center py-5 text-muted">
                             No members found.
                         </td>

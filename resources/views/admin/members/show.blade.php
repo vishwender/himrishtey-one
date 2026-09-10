@@ -2797,7 +2797,7 @@
     @endphp
     @if(auth('admin')->user()?->hasAnyPermission(['manage-member-status', 'edit-member', 'edit-members']))
     @if($member->active === 'Banned')
-    @if(auth('admin')->user()?->hasRole('super-admin'))
+    @if(auth('admin')->user()?->hasAnyRole(['super-admin', 'member-manager']))
     <form method="POST" action="{{ route('admin.members.ban.update', $member->id) }}" onsubmit="return confirm('Unban and activate this member?')">
         @csrf
         <input type="hidden" name="banned" value="0">
