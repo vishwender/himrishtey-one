@@ -74,6 +74,9 @@
         }
 
         .error { margin-bottom: 24px; padding: 12px 14px; border-radius: 10px; background: #fff2f3; color: #b42336; }
+
+        .back-button { width: auto; margin-bottom: 24px; padding: 10px 16px; background: #fff; color: #6040ed; border: 1px solid #e2dcff; box-shadow: none; }
+        .back-button:hover { background: #eeeaff; }
     </style>
 
 </head>
@@ -81,6 +84,14 @@
 <body>
 
     <div class="container">
+
+        <form method="POST" action="{{ route('admin.logout') }}">
+            @csrf
+            <button type="submit" class="back-button">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                Back to Login
+            </button>
+        </form>
 
         <div class="eyebrow">Matrimonial Admin</div>
         <h1>Select a website</h1>
