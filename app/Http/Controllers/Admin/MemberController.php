@@ -3475,7 +3475,7 @@ class MemberController extends Controller
 
             'member_id' => $member->id,
 
-            'user_id' => auth('admin')->id(),
+            'admin_id' => auth('admin')->id(),
 
             'days' => $validated['days'],
 
@@ -3547,7 +3547,7 @@ class MemberController extends Controller
         MemberRotation::create([
             'member_id' => $member->id,
 
-            'user_id' => auth('admin')->id(),
+            'admin_id' => auth('admin')->id(),
 
             'days' => $validated['days'],
 

@@ -12,8 +12,9 @@ class DashboardController extends Controller
 {
     public function index(SiteDashboardService $dashboardService)
     {
-        $stats = $dashboardService->statistics();
         $admin = Auth::guard('admin')->user();
+        $rotationsOnly = $admin?->isMemberManager() ?? false;
+        $stats = $rotationsOnly ? [] : $dashboardService->statistics();
 
         $rotationNotifications = collect();
 
@@ -63,7 +64,7 @@ class DashboardController extends Controller
             } elseif ($canViewOwn) {
 
                 $rotationQuery->where(
-                    'user_id',
+                    'admin_id',
                     $admin->id
                 );
             } else {
@@ -116,6 +117,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'stats',
+            'rotationsOnly',
             'rotationNotifications',
             'rotationTodayCount',
             'rotationTomorrowCount',

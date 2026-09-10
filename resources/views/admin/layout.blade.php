@@ -62,14 +62,12 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                 @if($relationshipManagerRestricted || $memberManagerRestricted)
 
-                @unless($memberManagerRestricted)
                 <a
                     href="{{ route('admin.dashboard') }}"
                     class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2 me-2"></i>
                     Dashboard
                 </a>
-                @endunless
 
                 <div class="nav-group {{ request()->routeIs('admin.members.*', 'admin.activities.*', 'admin.rotations.*') ? 'is-open' : '' }}">
 

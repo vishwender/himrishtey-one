@@ -47,11 +47,11 @@ class MemberRotationController extends Controller
         $query = MemberRotation::query()
             ->with('member')
             ->orderByRaw('CASE
-                WHEN DATE(next_rotation_at) = CURDATE() THEN 1
-                WHEN DATE(next_rotation_at) = DATE_ADD(CURDATE(), INTERVAL 1 DAY) THEN 2
-                WHEN DATE(next_rotation_at) > DATE_ADD(CURDATE(), INTERVAL 1 DAY) THEN 3
+                WHEN DATE(next_rotation_at) = ? THEN 1
+                WHEN DATE(next_rotation_at) = ? THEN 2
+                WHEN DATE(next_rotation_at) > ? THEN 3
                 ELSE 4
-            END')
+            END', [today()->toDateString(), now()->addDay()->toDateString(), now()->addDay()->toDateString()])
             ->orderBy('next_rotation_at', 'asc');
 
         if (app(RelationshipManagerAccess::class)->isRestricted()) {
@@ -71,7 +71,7 @@ class MemberRotationController extends Controller
         } elseif ($canViewOwn) {
 
             // Can only see rotations assigned to logged-in admin.
-            $query->where('user_id', $admin->id);
+            $query->where('admin_id', $admin->id);
         } else {
 
             // No access.
@@ -122,7 +122,7 @@ class MemberRotationController extends Controller
         } elseif ($canViewOwn) {
 
             $summaryQuery->where(
-                'user_id',
+                'admin_id',
                 $admin->id
             );
         } else {
@@ -236,6 +236,7 @@ class MemberRotationController extends Controller
 
         $validated = $request->validate([
             'user_id' => [
+                \Illuminate\Validation\Rule::exists('admins', 'id')->where('status', true),
                 'required',
                 'integer',
             ],
@@ -271,7 +272,7 @@ class MemberRotationController extends Controller
 
         MemberRotation::create([
             'member_id' => $member->id,
-            'user_id' => $validated['user_id'],
+            'admin_id' => $admin->isMemberManager() ? $admin->id : $validated['user_id'],
             'days' => $validated['days'],
             'time' => $validated['time'] ?? null,
             'next_rotation_at' => $validated['next_rotation_at'],
@@ -294,6 +295,7 @@ class MemberRotationController extends Controller
 
     public function complete(MemberRotation $rotation)
     {
+        $this->authorizeRotationOwner($rotation);
         if (! $rotation->member) {
             abort(403, 'You can only complete rotations for members assigned to you.');
         }
@@ -327,6 +329,7 @@ class MemberRotationController extends Controller
         MemberRotation $rotation,
         AdminActivityLogger $activityLogger
     ) {
+        $this->authorizeRotationOwner($rotation);
         $member = $rotation->member;
 
         if (app(RelationshipManagerAccess::class)->isRestricted() && ! $member) {
@@ -356,5 +359,13 @@ class MemberRotationController extends Controller
             'success',
             'Rotation deleted successfully.'
         );
+    }
+
+    private function authorizeRotationOwner(MemberRotation $rotation): void
+    {
+        $admin = Auth::guard('admin')->user();
+        if ($admin?->isMemberManager()) {
+            abort_unless((int) $rotation->admin_id === (int) $admin->id, 403, 'You can only manage your own rotations.');
+        }
     }
 }

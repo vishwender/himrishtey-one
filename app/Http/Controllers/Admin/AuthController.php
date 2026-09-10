@@ -46,7 +46,7 @@ class AuthController extends Controller
             }
 
             if ($admin->isMemberManager()) {
-                return redirect()->route('admin.members.index');
+                return redirect()->route('admin.dashboard');
             }
 
             if ($admin->hasRole('content-manager') && ! $admin->hasRole('super-admin')) {

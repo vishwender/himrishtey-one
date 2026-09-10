@@ -88,7 +88,7 @@ class Admin extends Authenticatable
         'view-members', 'create-members', 'edit-members', 'edit-member',
         'view-photos', 'manage-member-photos', 'manage-member-status',
         'manage-member-visibility', 'manage-member-trusted', 'manage-member-promoted',
-        'advanced-search-members', 'view-own-rotations', 'view-all-rotations',
+        'advanced-search-members', 'view-own-rotations',
         'create-rotations', 'add-rotations', 'edit-rotations', 'complete-rotations',
         'cancel-rotations', 'delete-rotations', 'raise-delete-request',
         'view-delete-profile-request', 'approve-profile-delete-request',

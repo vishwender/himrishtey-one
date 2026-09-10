@@ -13,6 +13,7 @@ class MemberRotation extends Model
     protected $fillable = [
         'member_id',
         'user_id',
+        'admin_id',
         'days',
         'time',
         'next_rotation_at',

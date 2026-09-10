@@ -36,9 +36,9 @@ $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::cl
             </h1>
 
             <p class="text-muted mb-0">
-                {{ $relationshipManagerRestricted
+                {{ $rotationsOnly ? 'Your upcoming member rotations.' : ($relationshipManagerRestricted
                     ? 'Overview of members assigned to you.'
-                    : 'Overview of the selected matrimonial site.' }}
+                    : 'Overview of the selected matrimonial site.') }}
             </p>
 
         </div>
@@ -63,6 +63,7 @@ $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::cl
         CURRENT SITE
     ================================================================= --}}
 
+    @unless($rotationsOnly)
     @unless($relationshipManagerRestricted)
 
     @if($currentSite)
@@ -310,7 +311,10 @@ $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::cl
     ROTATION NOTIFICATIONS
 ================================================================= --}}
 
+    @endunless
+
     @if(
+    $rotationsOnly ||
     $rotationTodayCount > 0 ||
     $rotationTomorrowCount > 0 ||
     $rotationDayAfterTomorrowCount > 0
@@ -346,7 +350,7 @@ $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::cl
 
                     <i class="bi bi-arrow-right me-1"></i>
 
-                    View All Rotations
+                    {{ $rotationsOnly ? 'View Rotations' : 'View All Rotations' }}
 
                 </a>
 

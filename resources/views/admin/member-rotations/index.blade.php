@@ -425,10 +425,10 @@ $canDeleteRotations = $currentAdmin
 
                         $assignedAdmin = null;
 
-                        if ($rotation->user_id) {
+                        if ($rotation->admin_id) {
 
                         $assignedAdmin =
-                        $admins[$rotation->user_id] ?? null;
+                        $admins[$rotation->admin_id] ?? null;
 
                         }
 

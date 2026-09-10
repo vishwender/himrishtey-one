@@ -76,7 +76,7 @@ class SiteController extends Controller
             : 'admin.dashboard';
 
         if ($admin->isMemberManager()) {
-            $destination = 'admin.members.index';
+            $destination = 'admin.dashboard';
         }
 
         return redirect()
