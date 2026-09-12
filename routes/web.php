@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\BlogPostController;
 use App\Http\Controllers\Admin\CastController;
 use App\Http\Controllers\Admin\CityController;
+use App\Http\Controllers\Admin\ContactMessageController;
 use App\Http\Controllers\Admin\CountryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DeleteProfileRequestController;
@@ -127,6 +128,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             | Dashboard
             |--------------------------------------------------------------------------
             */
+
+            Route::prefix('contact-messages')->name('contact-messages.')->middleware('role:super-admin')->group(function () {
+                Route::get('/', [ContactMessageController::class, 'index'])->name('index');
+                Route::get('/notifications', [ContactMessageController::class, 'notifications'])->name('notifications');
+                Route::get('/{id}', [ContactMessageController::class, 'show'])->whereNumber('id')->name('show');
+                Route::patch('/{id}/read', [ContactMessageController::class, 'read'])->whereNumber('id')->name('read');
+            });
 
             Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 

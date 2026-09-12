@@ -740,6 +740,9 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                     </div>
                 </div>
 
+                @if($currentSite && auth('admin')->user()?->hasRole('super-admin'))
+                <a href="{{ route('admin.contact-messages.index') }}" class="{{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"><i class="bi bi-envelope me-2"></i><span id="contact-unread-dot" class="me-2" hidden><span class="d-inline-block bg-danger rounded-circle" style="width: 8px; height: 8px;" aria-hidden="true"></span><span class="visually-hidden">Unread messages: </span></span>Contact Messages</a>
+                @endif
             </nav>
 
 
@@ -769,6 +772,7 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
             {{-- Topbar --}}
             <header class="topbar">
+
 
                 <div class="d-flex justify-content-between align-items-center">
 
@@ -864,6 +868,23 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                 });
             });
     </script>
+
+    @if($currentSite && auth('admin')->user()?->hasRole('super-admin'))
+    <script>
+    (() => {
+        const dot = document.getElementById('contact-unread-dot');
+        const refresh = async () => {
+            try {
+                const response = await fetch(@json(route('admin.contact-messages.notifications')), {headers: {'Accept': 'application/json'}, cache: 'no-store'});
+                if (response.ok) dot.hidden = Number((await response.json()).unread_count) <= 0;
+            } catch (_) { /* Retry on the next refresh. */ }
+        };
+        refresh();
+        setInterval(() => { if (!document.hidden) refresh(); }, 30000);
+        window.addEventListener('contact-message-read', refresh);
+    })();
+    </script>
+    @endif
 
     @stack('scripts')
 

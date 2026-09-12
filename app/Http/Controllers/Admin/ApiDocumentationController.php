@@ -250,6 +250,7 @@ class ApiDocumentationController extends Controller
     private function catalogDetails(string $method, string $uri): array
     {
         $catalog = [
+            'POST api/v1/contact-us' => ['Submit a Contact Us message.', ['name' => 'Example Visitor', 'email' => 'visitor@example.com', 'phone' => '9876543210', 'subject' => 'Membership enquiry', 'message' => 'Please share more details.'], ['Public endpoint; X-App-Code is required. Limited to 5 requests per minute. Messages are visible only to super admins for the selected site.']],
             'GET api/v1/about-us' => ['Get the configured About Us page.', []],
             'GET api/v1/privacy-policy' => ['Get the configured privacy policy.', []],
             'GET api/v1/refund-cancellation' => ['Get the configured refund and cancellation policy.', []],
