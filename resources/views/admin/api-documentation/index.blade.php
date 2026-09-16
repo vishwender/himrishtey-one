@@ -65,6 +65,15 @@
 
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
+            <h2 class="h5">How to call the API</h2>
+            <p class="mb-2">Run the cURL example under any endpoint in a terminal with cURL installed. Each example includes this server's URL and the required headers. Change <code>X-App-Code</code> to your application code.</p>
+            <p class="mb-2">For protected endpoints, first call a login endpoint and replace <code>&lt;token&gt;</code> with the returned bearer token. Replace path placeholders such as <code>{memberId}</code> with actual IDs and update the sample request values before running the command.</p>
+            <p class="mb-0">For photo uploads, replace <code>/path/to/photo.jpg</code> with a local image path. cURL sets the multipart content type automatically. Multipart updates use <code>POST</code> with <code>_method=PUT</code> so Laravel can read the uploaded file.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
             <label for="api-search" class="form-label fw-semibold">Search endpoints</label>
             <input id="api-search" class="form-control" type="search" placeholder="Search by path, method, feature, or controller…">
         </div>
@@ -98,6 +107,16 @@
                         @if($endpoint['parameters']->isNotEmpty())
                         <div class="text-muted small mt-1">Path parameters: {{ $endpoint['parameters']->join(', ') }}</div>
                         @endif
+
+                        <div class="mt-3 pt-3 border-top">
+                            <h3 class="h6">How to call this endpoint</h3>
+                            @foreach($endpoint['curl_examples'] as $method => $example)
+                            <h4 class="small text-muted">{{ $method }} cURL request</h4>
+                            <div class="api-code rounded p-3 small mb-2">
+                                <pre><code>{{ $example }}</code></pre>
+                            </div>
+                            @endforeach
+                        </div>
 
                         @if($endpoint['details'])
                         <div class="mt-3 pt-3 border-top">

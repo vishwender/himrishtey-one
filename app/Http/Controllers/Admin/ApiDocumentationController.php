@@ -34,6 +34,8 @@ class ApiDocumentationController extends Controller
         $middleware = collect($route->gatherMiddleware())->values();
         $action = $route->getActionName();
         $feature = explode('/', preg_replace('#^api/v\d+/#', '', $route->uri()))[0] ?? 'general';
+        $details = $this->endpointDetails($route->uri(), $methods->first());
+        $authenticated = $middleware->contains('auth:sanctum');
 
         return [
             'methods' => $methods,
@@ -41,11 +43,51 @@ class ApiDocumentationController extends Controller
             'name' => $route->getName(),
             'action' => $action === 'Closure' ? 'Inline handler' : class_basename($action),
             'middleware' => $middleware,
-            'authenticated' => $middleware->contains('auth:sanctum'),
+            'authenticated' => $authenticated,
             'group' => str($feature)->replace('-', ' ')->title()->toString(),
             'parameters' => $this->parameters($route->uri()),
-            'details' => $this->endpointDetails($route->uri(), $methods->first()),
+            'details' => $details,
+            'curl_examples' => $methods->mapWithKeys(fn (string $method): array => [
+                $method => $this->curlExample($route->uri(), $method, $authenticated, $details),
+            ]),
         ];
+    }
+
+    private function curlExample(string $uri, string $method, bool $authenticated, array $details): string
+    {
+        $quote = static fn (string $value): string => "'".str_replace("'", "'\"'\"'", $value)."'";
+        $multipart = ($details['request_label'] ?? '') === 'Multipart form data';
+        $spoofMethod = $multipart && in_array($method, ['PUT', 'PATCH'], true);
+        $lines = ['curl --globoff --request '.($spoofMethod ? 'POST' : $method).' '.$quote(url($uri))];
+        $lines[] = '  --header '.$quote('Accept: application/json');
+        $lines[] = '  --header '.$quote('X-App-Code: himrishtey');
+
+        if ($authenticated) {
+            $lines[] = '  --header '.$quote('Authorization: Bearer <token>');
+        }
+
+        $request = (array) $details['request'];
+
+        if ($method === 'GET' && $request !== []) {
+            $lines[] = '  --get';
+            foreach ($request as $key => $value) {
+                $lines[] = '  --data-urlencode '.$quote($key.'='.$value);
+            }
+        } elseif ($multipart) {
+            if ($spoofMethod) {
+                $lines[] = '  --form-string '.$quote('_method='.$method);
+            }
+            foreach ($request as $key => $value) {
+                $lines[] = $key === 'photo'
+                    ? '  --form '.$quote($key.'=@/path/to/photo.jpg')
+                    : '  --form-string '.$quote($key.'='.$value);
+            }
+        } elseif ($request !== []) {
+            $lines[] = '  --header '.$quote('Content-Type: application/json');
+            $lines[] = '  --data-raw '.$quote(json_encode($request, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        }
+
+        return implode(" \\\n", $lines);
     }
 
     /**
