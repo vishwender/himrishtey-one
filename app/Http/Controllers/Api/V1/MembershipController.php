@@ -13,7 +13,7 @@ use Throwable;
 
 class MembershipController extends Controller
 {
-    private const int CALLBACK_COOLDOWN_MINUTES = 10;
+    private const CALLBACK_COOLDOWN_MINUTES = 10;
 
     public function __construct(
         private ApplicationDatabaseService $databaseService

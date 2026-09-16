@@ -17,11 +17,11 @@ use Throwable;
 
 class ForgotPasswordController extends Controller
 {
-    private const int OTP_EXPIRY_MINUTES = 5;
+    private const OTP_EXPIRY_MINUTES = 5;
 
-    private const int RESET_TOKEN_EXPIRY_MINUTES = 10;
+    private const RESET_TOKEN_EXPIRY_MINUTES = 10;
 
-    private const int OTP_MAX_ATTEMPTS = 5;
+    private const OTP_MAX_ATTEMPTS = 5;
 
     public function requestOtp(
         RequestPasswordResetOtpRequest $request,
