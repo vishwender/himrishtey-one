@@ -29,6 +29,7 @@ use App\Services\MemberProfileCompletion;
 use App\Services\RelationshipManagerAccess;
 use App\Services\SiteManager;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -67,7 +68,7 @@ class MemberController extends Controller
         abort_unless($staff, 422, 'Select an active staff user.');
 
         DB::connection('site')->transaction(function () use ($validated, $staff) {
-            $members = SiteMember::query()->whereIn('id', $validated['member_ids'])
+            $members = $this->withoutDeletionRequests(SiteMember::query())->whereIn('id', $validated['member_ids'])
                 ->where(fn($query) => $query->whereNull('active')->orWhere('active', ''))
                 ->lockForUpdate()->get();
             abort_unless($members->count() === count($validated['member_ids']), 422, 'Some selected members are no longer new. Refresh the list and try again.');
@@ -84,7 +85,7 @@ class MemberController extends Controller
     {
         $newMembersOnly = $request->routeIs('admin.members.new');
         $bannedMembersOnly = $request->routeIs('admin.members.banned');
-        $query = SiteMember::query();
+        $query = $this->withoutDeletionRequests(SiteMember::query());
 
         if ($bannedMembersOnly) {
             $query->where('active', 'Banned');
@@ -1609,7 +1610,7 @@ class MemberController extends Controller
 
     public function advancedSearchResults(Request $request)
     {
-        $query = Member::query();
+        $query = $this->withoutDeletionRequests(Member::query());
 
         /*
     |--------------------------------------------------------------------------
@@ -3573,5 +3574,15 @@ class MemberController extends Controller
                 'Member rotation scheduled successfully for ' .
                     $nextRotationAt->format('d M Y h:i A')
             );
+    }
+
+    private function withoutDeletionRequests(Builder $query): Builder
+    {
+        return $query->whereNotExists(function ($requests) {
+            $requests->selectRaw('1')
+                ->from('delete_profile_request')
+                ->whereColumn('delete_profile_request.user_id', 'members.id')
+                ->whereIn('delete_profile_request.status', [0, 1]);
+        });
     }
 }

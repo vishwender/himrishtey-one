@@ -2888,15 +2888,14 @@
 
     @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
-    <button
-        type="button"
+    <button type="button"
         class="btn btn-outline-danger"
         data-bs-toggle="modal"
         data-bs-target="#deleteRequestModal"
         data-action="{{ route('admin.members.delete-request', $member->id) }}"
-        data-member-id="{{ $member->id }}"
+        data-member-name="{{ $member->full_name }}"
         data-profile-id="{{ $member->profile_id }}"
-        data-member-name="{{ $member->full_name }}">
+        >
         <i class="bi bi-trash3 me-1"></i>
         Raise Delete Request
     </button>

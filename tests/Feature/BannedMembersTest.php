@@ -29,6 +29,11 @@ class BannedMembersTest extends TestCase
             }
             $table->integer('plan_id')->nullable();
         });
+        Schema::connection('site')->create('delete_profile_request', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id');
+            $table->integer('status')->default(0);
+        });
         Schema::connection('site')->create('membership_plans', function (Blueprint $table) {
             $table->id();
             $table->string('plan_name');

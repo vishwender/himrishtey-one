@@ -37,6 +37,8 @@
 
                 <div class="modal-body">
 
+                    <div id="deleteRequestFeedback" class="alert d-none" role="status" aria-live="polite"></div>
+
                     <div class="alert alert-warning">
 
                         <i class="bi bi-exclamation-triangle me-2"></i>
@@ -54,12 +56,13 @@
 
                     <div>
 
-                        <label class="form-label fw-semibold">
+                        <label for="deleteRequestReason" class="form-label fw-semibold">
                             Reason for deletion
                             <span class="text-danger">*</span>
                         </label>
 
                         <textarea
+                            id="deleteRequestReason"
                             name="reason"
                             class="form-control"
                             rows="4"
@@ -87,6 +90,7 @@
 
                     <button
                         type="submit"
+                        disabled
                         class="btn btn-danger">
                         <i class="bi bi-send me-1"></i>
                         Raise Request

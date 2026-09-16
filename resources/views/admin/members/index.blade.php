@@ -1244,15 +1244,14 @@ $hideRelationshipManagerColumn = request()->routeIs('admin.members.index')
                                     @if(auth('admin')->user()?->canRaiseProfileDeleteRequest())
 
                                     <li>
-                                        <button
-                                            type="button"
+                                        <button type="button"
                                             class="dropdown-item text-danger"
                                             data-bs-toggle="modal"
                                             data-bs-target="#deleteRequestModal"
                                             data-action="{{ route('admin.members.delete-request', $member->id) }}"
-                                            data-member-id="{{ $member->id }}"
+                                            data-member-name="{{ $member->full_name }}"
                                             data-profile-id="{{ $member->profile_id }}"
-                                            data-member-name="{{ $member->full_name }}">
+                                            >
                                             <i class="bi bi-trash3 me-2"></i>
                                             Delete Profile
                                         </button>

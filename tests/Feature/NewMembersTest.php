@@ -25,6 +25,11 @@ class NewMembersTest extends TestCase
             }
             $table->integer('plan_id')->nullable();
         });
+        Schema::connection('site')->create('delete_profile_request', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id');
+            $table->integer('status')->default(0);
+        });
         Schema::connection('site')->create('membership_plans', function (Blueprint $table) {
             $table->id();
             $table->string('plan_name');
@@ -63,6 +68,36 @@ class NewMembersTest extends TestCase
         $this->assertSame(12, $members->total());
         $this->assertSame(10, $members->count());
         $this->assertSame(12, $members->first()->id);
+    }
+
+    public function test_member_lists_hide_pending_and_approved_deletions_but_restore_rejected_requests(): void
+    {
+        foreach (range(1, 4) as $id) {
+            DB::connection('site')->table('members')->insert([
+                'id' => $id, 'active' => '', 'relationship_manager' => 'Staff',
+            ]);
+        }
+        DB::connection('site')->table('delete_profile_request')->insert([
+            ['user_id' => 1, 'status' => 0],
+            ['user_id' => 2, 'status' => 1],
+            ['user_id' => 3, 'status' => 2],
+            ['user_id' => 1, 'status' => 2],
+        ]);
+
+        foreach (['admin.members.index', 'admin.members.new'] as $route) {
+            foreach ([[], ['relationship_manager' => 'Staff']] as $filters) {
+                $request = Request::create('/', 'GET', $filters);
+                $request->setRouteResolver(fn () => (new Route('GET', '/', []))->name($route));
+                $members = app(MemberController::class)->index($request)->getData()['members'];
+                $this->assertSame([4, 3], $members->pluck('id')->all());
+                $this->assertSame(2, $members->total());
+
+                DB::connection('site')->table('delete_profile_request')->where('user_id', 1)->update(['status' => 2]);
+                $restored = app(MemberController::class)->index($request)->getData()['members'];
+                $this->assertSame([4, 3, 1], $restored->pluck('id')->all());
+                DB::connection('site')->table('delete_profile_request')->where('user_id', 1)->update(['status' => 0]);
+            }
+        }
     }
 
     public function test_assignment_updates_both_staff_fields_and_rejects_stale_selection(): void

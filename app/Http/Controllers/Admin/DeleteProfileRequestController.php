@@ -219,6 +219,10 @@ class DeleteProfileRequestController extends Controller
             ->exists();
 
         if ($pendingRequestExists) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'A pending delete request already exists for this member.'], 409);
+            }
+
             return back()->with(
                 'error',
                 'A pending delete request already exists for this member.'
@@ -246,6 +250,10 @@ class DeleteProfileRequestController extends Controller
                 'reason' => $validated['reason'],
             ]
         );
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Profile delete request raised successfully.'], 201);
+        }
 
         return back()->with(
             'success',

@@ -128,6 +128,32 @@ class DeleteRequestSourcesTest extends TestCase
         $this->assertSame(1, $staff['totalCount']);
     }
 
+    public function test_delete_modal_submits_a_visible_pending_request_and_prevents_duplicates(): void
+    {
+        $this->seedRequests();
+        DB::connection('site')->table('delete_profile_request')->delete();
+        $admin = new Admin(['name' => 'Staff']);
+        $admin->id = 7;
+        $role = new Role(['slug' => 'super-admin']);
+        $role->setRelation('permissions', collect());
+        $admin->setRelation('roles', collect([$role]));
+        $this->actingAs($admin, 'admin')->withoutMiddleware()->withoutVite();
+        $this->mock(AdminActivityLogger::class)->shouldReceive('log')->once()->andReturnNull();
+        $submitUrl = route('admin.members.delete-request', 7);
+
+        $this->postJson($submitUrl, ['reason' => ''])->assertUnprocessable()->assertJsonValidationErrors('reason');
+        $this->assertDatabaseCount('delete_profile_request', 0, 'site');
+
+        $this->postJson($submitUrl, ['reason' => 'Please remove this profile'])
+            ->assertCreated()->assertJsonPath('message', 'Profile delete request raised successfully.');
+        $this->assertSame('Please remove this profile', $this->listing('admin.members.delete-requests.index')['requests']->first()->reason);
+
+        $this->postJson($submitUrl, ['reason' => 'Duplicate request'])
+            ->assertConflict()->assertJsonPath('message', 'A pending delete request already exists for this member.');
+        $this->assertDatabaseCount('delete_profile_request', 1, 'site');
+        $this->assertDatabaseHas('members', ['id' => 7, 'full_name' => 'Test Member'], 'site');
+    }
+
     public function test_requester_names_fall_back_to_legacy_staff_without_overwriting_current_admins(): void
     {
         $this->seedRequests();
