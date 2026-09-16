@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Services\RelationshipManagerAccess;
 use App\Support\HeightFormatter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class SiteMember extends Model
@@ -16,14 +14,6 @@ class SiteMember extends Model
     public $timestamps = false;
 
     protected $guarded = [];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope(
-            'relationship_manager_access',
-            fn (Builder $query) => app(RelationshipManagerAccess::class)->scope($query)
-        );
-    }
 
     /**
      * Format height.

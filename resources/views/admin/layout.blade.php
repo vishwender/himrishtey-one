@@ -85,17 +85,15 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                             href="{{ route('admin.members.index') }}"
                             class="{{ request()->routeIs('admin.members.index', 'admin.members.show', 'admin.members.edit') && ! request()->filled('relationship_manager') ? 'active' : '' }}">
                             <i class="bi bi-person-lines-fill me-2"></i>
-                            {{ $memberManagerRestricted ? 'Members' : 'Assigned Members' }}
+                            Members
                         </a>
 
-                        @if($memberManagerRestricted)
                         <a
                             href="{{ route('admin.members.index', ['relationship_manager' => auth('admin')->user()->name]) }}"
                             class="{{ request()->routeIs('admin.members.index') && request('relationship_manager') === auth('admin')->user()->name ? 'active' : '' }}">
                             <i class="bi bi-person-check me-2"></i>
                             Assigned Members
                         </a>
-                        @endif
 
                         <a
                             href="{{ route('admin.members.new') }}"

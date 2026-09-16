@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Models\Admin;
 use App\Models\SiteMember;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
 
 class RelationshipManagerAccess
@@ -43,28 +41,13 @@ class RelationshipManagerAccess
         ])));
     }
 
-    /**
-     * @template TBuilder of EloquentBuilder|QueryBuilder
-     *
-     * @param  TBuilder  $query
-     * @return TBuilder
-     */
-    public function scope(EloquentBuilder|QueryBuilder $query, string $column = 'relationship_manager')
-    {
-        if ($this->isRestricted()) {
-            $query->whereIn($column, $this->assignedIdentifiers());
-        }
-
-        return $query;
-    }
-
     public function canAccessMember(int $memberId): bool
     {
         if (! $this->isRestricted()) {
             return true;
         }
 
-        return $this->scope(SiteMember::withoutGlobalScopes())
+        return SiteMember::query()
             ->whereKey($memberId)
             ->exists();
     }

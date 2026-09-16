@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Site;
+use App\Services\RelationshipManagerAccess;
 use App\Services\SiteDatabaseService;
 use Closure;
 use Illuminate\Http\Request;
@@ -76,7 +77,8 @@ class SetAdminSiteConnection
         |--------------------------------------------------------------------------
         */
 
-        if ($request->user('admin')?->isMemberManager()) {
+        if ($request->user('admin')?->isMemberManager()
+            || app(RelationshipManagerAccess::class)->isRestricted()) {
             abort_unless($request->user('admin')->hasSiteAccess($site->id), 403, 'You do not have access to this site.');
         }
 

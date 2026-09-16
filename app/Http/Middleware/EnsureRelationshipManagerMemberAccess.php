@@ -43,7 +43,7 @@ class EnsureRelationshipManagerMemberAccess
         $memberId = $this->memberId($request);
 
         if ($memberId !== null && ! $this->access->canAccessMember($memberId)) {
-            abort(403, 'You can only access members assigned to you.');
+            abort(404, 'Member not found in the selected site.');
         }
 
         return $next($request);

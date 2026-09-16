@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\MemberController;
 use App\Models\Admin;
 use App\Models\Role;
 use App\Services\AdminActivityLogger;
+use App\Services\RelationshipManagerAccess;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -69,7 +70,7 @@ class BannedMembersTest extends TestCase
         $this->assertSame([5, 4, 3, 2], $this->listing(['banned' => 'no'], 'admin.members.index')->pluck('id')->all());
     }
 
-    public function test_relationship_manager_only_sees_assigned_banned_members(): void
+    public function test_relationship_manager_sees_all_members_and_can_filter_assigned_members(): void
     {
         $admin = new Admin(['name' => 'Assigned Manager']);
         $admin->setRelation('roles', collect([new Role(['slug' => 'relationship-manager'])]));
@@ -78,7 +79,9 @@ class BannedMembersTest extends TestCase
             ['id' => 1, 'active' => 'Banned', 'relationship_manager' => 'Assigned Manager'],
             ['id' => 2, 'active' => 'Banned', 'relationship_manager' => 'Other Manager'],
         ]);
-        $this->assertSame([1], $this->listing()->pluck('id')->all());
+        $this->assertSame([2, 1], $this->listing()->pluck('id')->all());
+        $this->assertSame([1], $this->listing(['relationship_manager' => 'Assigned Manager'])->pluck('id')->all());
+        $this->assertTrue(app(RelationshipManagerAccess::class)->canAccessMember(2));
     }
 
     #[DataProvider('banRoles')]
