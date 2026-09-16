@@ -1017,7 +1017,7 @@ class MemberController extends Controller
             'birth_date_time' => [
                 'required',
                 'date',
-                'before_or_equal:' . now()->subYears(18)->toDateTimeString(),
+                'before_or_equal:' . today()->subYearsNoOverflow(18)->endOfDay()->toDateTimeString(),
             ],
 
             'no_of_brothers' => ['nullable', 'integer', 'min:0', 'max:100'],
@@ -2505,7 +2505,7 @@ class MemberController extends Controller
             'birth_date_time' => [
                 'nullable',
                 'date',
-                'before_or_equal:' . now()->subYears(18)->toDateTimeString(),
+                'before_or_equal:' . today()->subYearsNoOverflow(18)->endOfDay()->toDateTimeString(),
             ],
 
             'height' => [

@@ -211,7 +211,7 @@
                             name="birth_date_time"
                             class="form-control"
                             value="{{ old('birth_date_time', $member->birth_date_time ? \Carbon\Carbon::parse($member->birth_date_time)->format('Y-m-d\TH:i') : '') }}"
-                            max="{{ now()->subYears(18)->format('Y-m-d\TH:i') }}">
+                            max="{{ today()->subYearsNoOverflow(18)->endOfDay()->format('Y-m-d\TH:i') }}">
                         <div class="form-text">The member must be at least 18 years old.</div>
 
                     </div>
@@ -235,15 +235,16 @@
 
                     <div class="col-md-4">
 
-                        <label class="form-label">
+                        <label class="form-label" for="blood_group">
                             Blood Group
                         </label>
 
-                        <input
-                            type="text"
-                            name="blood_group"
-                            class="form-control"
-                            value="{{ old('blood_group', $member->blood_group) }}">
+                        <select name="blood_group" id="blood_group" class="form-select">
+                            <option value="">Select Blood Group</option>
+                            @foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as $blood)
+                            <option value="{{ $blood }}" @selected(old('blood_group', $member->blood_group) == $blood)>{{ $blood }}</option>
+                            @endforeach
+                        </select>
 
                     </div>
 

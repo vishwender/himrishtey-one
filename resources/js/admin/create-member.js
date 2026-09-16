@@ -7,6 +7,46 @@ document.addEventListener('DOMContentLoaded', function () {
     */
 
     const form = document.getElementById('create-member-form');
+
+    for (const [inputId, previewId] of [['photo', 'photoPreview'], ['id_proof', 'idProofPreview']]) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (!input || !preview) continue;
+
+        const placeholder = preview.innerHTML;
+        let objectUrl;
+        const clearPreview = () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+            objectUrl = null;
+            preview.innerHTML = placeholder;
+            input.setCustomValidity('');
+        };
+
+        input.addEventListener('change', () => {
+            clearPreview();
+            const file = input.files?.[0];
+            if (!file) return;
+
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+                input.setCustomValidity('Choose a JPG, PNG or WEBP image no larger than 5 MB.');
+                input.reportValidity();
+                return;
+            }
+
+            const image = document.createElement('img');
+            image.alt = inputId === 'photo' ? 'Selected profile photo preview' : 'Selected ID proof preview';
+            objectUrl = URL.createObjectURL(file);
+            image.src = objectUrl;
+            image.addEventListener('error', () => {
+                if (!preview.contains(image)) return;
+                clearPreview();
+                input.setCustomValidity('This image could not be opened. Choose another image.');
+                input.reportValidity();
+            });
+            preview.replaceChildren(image);
+        });
+        form?.addEventListener('reset', clearPreview);
+    }
     const countrySelect = document.getElementById('country_living_in');
     const stateSelect = document.getElementById('state_living_in');
     const citySelect = document.getElementById('city_living_in');

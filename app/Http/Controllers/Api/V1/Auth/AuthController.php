@@ -597,7 +597,7 @@ class AuthController extends Controller
         | After INSERT, we replace it with:
         |
         | HIM28170
-        | PB367
+        | PB10367
         | DR8431
         | JR6797
         |
@@ -849,7 +849,7 @@ class AuthController extends Controller
         */
 
                 $member->profile_id =
-                    $prefix.$member->id;
+                    $prefix.($member->id + ($prefix === 'PB' ? 10000 : 0));
 
                 /*
         |--------------------------------------------------------------------------

@@ -262,6 +262,7 @@ class Member extends Authenticatable
             );
         }
 
-        return $prefix.$memberId;
+        // Gallpakki's public profile numbers start at 10001.
+        return $prefix.($memberId + ($prefix === 'PB' ? 10000 : 0));
     }
 }

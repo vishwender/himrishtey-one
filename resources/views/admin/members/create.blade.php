@@ -535,7 +535,7 @@
                             id="birth_date_time"
                             class="form-control"
                             value="{{ old('birth_date_time') }}"
-                            max="{{ now()->subYears(18)->format('Y-m-d\TH:i') }}"
+                            max="{{ today()->subYearsNoOverflow(18)->endOfDay()->format('Y-m-d\TH:i') }}"
                             required>
 
                         <div class="form-text">
