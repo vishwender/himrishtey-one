@@ -16,6 +16,74 @@ use Tests\TestCase;
 
 class DeleteRequestSourcesTest extends TestCase
 {
+    private function dashboardPendingCount(string $roleSlug = 'member-manager'): int
+    {
+        $admin = new Admin(['name' => 'Staff']);
+        $admin->id = 7;
+        $role = new Role(['slug' => $roleSlug]);
+        $role->setRelation('permissions', collect());
+        $admin->setRelation('roles', collect([$role]));
+        $this->actingAs($admin, 'admin');
+
+        if (! Schema::connection('site')->hasTable('member_rotations')) {
+            Schema::connection('site')->create('member_rotations', function (Blueprint $table) {
+                $table->id();
+                $table->integer('member_id')->nullable();
+                $table->integer('admin_id')->nullable();
+                $table->dateTime('next_rotation_at')->nullable();
+                $table->string('status')->nullable();
+            });
+        }
+
+        $service = $this->mock(\App\Services\SiteDashboardService::class);
+        $service->shouldReceive('statistics')->andReturn([]);
+
+        return app(\App\Http\Controllers\Admin\DashboardController::class)
+            ->index($service)->getData()['pendingDeleteRequestCount'];
+    }
+
+    public function test_dashboard_notification_tracks_pending_staff_requests_and_links_to_review(): void
+    {
+        $this->seedRequests();
+        $this->assertSame(2, $this->dashboardPendingCount());
+
+        // A newer decision supersedes an older pending request for this member.
+        DB::connection('site')->table('delete_profile_request')->insert([
+            'user_id' => 7, 'request_by' => 7, 'date' => '17-09-2026', 'status' => 2,
+        ]);
+        $this->assertSame(1, $this->dashboardPendingCount());
+        $html = view('admin.dashboard.delete-request-notification', ['pendingDeleteRequestCount' => 1])->render();
+        $this->assertStringContainsString('A profile deletion request is awaiting review.', $html);
+        $this->assertStringContainsString(route('admin.members.delete-requests.index', ['status' => 'pending']), $html);
+
+        DB::connection('site')->table('delete_profile_request')->where('id', 5)->update(['status' => 1]);
+        $this->assertSame(0, $this->dashboardPendingCount());
+        $this->assertSame('', trim(view('admin.dashboard.delete-request-notification', ['pendingDeleteRequestCount' => 0])->render()));
+
+        DB::connection('site')->table('delete_profile_request')->insert([
+            'user_id' => 9, 'request_by' => 7, 'date' => '17-09-2026', 'status' => 0,
+        ]);
+        $this->assertSame(1, $this->dashboardPendingCount());
+    }
+
+    public function test_dashboard_hides_delete_notifications_without_permission_and_for_another_site(): void
+    {
+        $this->seedRequests();
+        $this->assertSame(0, $this->dashboardPendingCount('staff'));
+        $this->assertSame(2, $this->dashboardPendingCount());
+
+        config(['database.connections.site.database' => ':memory:']);
+        DB::purge('site');
+        Schema::connection('site')->create('delete_profile_request', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id');
+            $table->integer('request_by')->nullable();
+            $table->string('date')->nullable();
+            $table->integer('status');
+        });
+        $this->assertSame(0, $this->dashboardPendingCount());
+    }
+
     protected function setUp(): void
     {
         parent::setUp();

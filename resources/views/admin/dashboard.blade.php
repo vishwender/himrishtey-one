@@ -59,6 +59,8 @@ $relationshipManagerRestricted = app(\App\Services\RelationshipManagerAccess::cl
     </div>
 
 
+    @include('admin.dashboard.delete-request-notification')
+
     {{-- ================================================================
         CURRENT SITE
     ================================================================= --}}

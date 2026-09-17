@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\DeleteProfileRequest;
 use App\Models\MemberRotation;
 use App\Services\RelationshipManagerAccess;
 use App\Services\SiteDashboardService;
@@ -15,6 +16,20 @@ class DashboardController extends Controller
         $admin = Auth::guard('admin')->user();
         $rotationsOnly = $admin?->isMemberManager() ?? false;
         $stats = $rotationsOnly ? [] : $dashboardService->statistics();
+
+        $pendingDeleteRequestCount = 0;
+
+        if ($admin?->hasPermission('view-delete-profile-request')) {
+            // Match Manage Members: only the latest staff request per member.
+            $latestIds = DeleteProfileRequest::query()->fromSource('staff')
+                ->selectRaw('MAX(id)')->groupBy('user_id');
+
+            $pendingDeleteRequestCount = DeleteProfileRequest::query()->fromSource('staff')
+                ->whereIn('id', $latestIds)
+                ->where('status', 0)
+                ->when(app(RelationshipManagerAccess::class)->isRestricted(), fn ($query) => $query->whereHas('member'))
+                ->count();
+        }
 
         $rotationNotifications = collect();
 
@@ -117,6 +132,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'stats',
+            'pendingDeleteRequestCount',
             'rotationsOnly',
             'rotationNotifications',
             'rotationTodayCount',
