@@ -20,9 +20,9 @@ $canViewAllRotations = $currentAdmin
 
 $canViewOwnRotations = $currentAdmin
 ? $currentAdmin->hasAnyPermission([
-    'view-own-rotations',
-    'add-rotations',
-    'edit-rotations',
+'view-own-rotations',
+'add-rotations',
+'edit-rotations',
 ])
 : false;
 
@@ -103,7 +103,7 @@ $canDeleteRotations = $currentAdmin
                 <strong>My Rotations</strong>
 
                 <div class="small text-muted">
-                    You are viewing only rotations assigned to you.
+                    You are viewing your rotations only.
                 </div>
 
             </div>
