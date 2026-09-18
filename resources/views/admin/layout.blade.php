@@ -613,14 +613,14 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                 @endif
 
-                <a
+                {{--<a
                     href="{{ route('admin.offers.index') }}"
-                    class="nav-dropdown-item {{ request()->routeIs('admin.offers.*') ? 'active' : '' }}">
+                class="nav-dropdown-item {{ request()->routeIs('admin.offers.*') ? 'active' : '' }}">
 
-                    <i class="bi bi-tags me-2"></i>
-                    Offers
+                <i class="bi bi-tags me-2"></i>
+                Offers
 
-                </a>
+                </a>--}}
 
                 <a
                     href="{{ route('admin.wallet-offers.index') }}"
@@ -646,16 +646,16 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
                 @endif
 
-                <a href="#">
+                {{--<a href="#">
                     <i class="bi bi-person-badge me-2"></i>
                     Agents
-                </a>
+                </a>--}}
 
 
-                <a href="#">
+                {{-- <a href="#">
                     <i class="bi bi-bar-chart-line me-2"></i>
                     Reports
-                </a>
+                </a>--}}
 
 
                 {{-- Content Management --}}
@@ -869,18 +869,27 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
 
     @if($currentSite && auth('admin')->user()?->hasRole('super-admin'))
     <script>
-    (() => {
-        const dot = document.getElementById('contact-unread-dot');
-        const refresh = async () => {
-            try {
-                const response = await fetch(@json(route('admin.contact-messages.notifications')), {headers: {'Accept': 'application/json'}, cache: 'no-store'});
-                if (response.ok) dot.hidden = Number((await response.json()).unread_count) <= 0;
-            } catch (_) { /* Retry on the next refresh. */ }
-        };
-        refresh();
-        setInterval(() => { if (!document.hidden) refresh(); }, 30000);
-        window.addEventListener('contact-message-read', refresh);
-    })();
+        (() => {
+            const dot = document.getElementById('contact-unread-dot');
+            const refresh = async () => {
+                try {
+                    const response = await fetch(@json(route('admin.contact-messages.notifications')), {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store'
+                    });
+                    if (response.ok) dot.hidden = Number((await response.json()).unread_count) <= 0;
+                } catch (_) {
+                    /* Retry on the next refresh. */
+                }
+            };
+            refresh();
+            setInterval(() => {
+                if (!document.hidden) refresh();
+            }, 30000);
+            window.addEventListener('contact-message-read', refresh);
+        })();
     </script>
     @endif
 
