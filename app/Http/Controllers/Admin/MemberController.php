@@ -1144,7 +1144,7 @@ class MemberController extends Controller
 
         foreach ($submittedProfileRanges as $index => $range) {
             $filledValues = collect(['range_from', 'range_to', 'price'])
-                ->filter(fn (string $field) => ($range[$field] ?? '') !== '')
+                ->filter(fn(string $field) => ($range[$field] ?? '') !== '')
                 ->count();
 
             if ($filledValues > 0 && $filledValues < 3) {
@@ -1155,14 +1155,16 @@ class MemberController extends Controller
         }
 
         $profileRanges = $submittedProfileRanges
-            ->filter(fn (array $range) => collect($range)->contains(fn ($value) => $value !== null && $value !== ''))
+            ->filter(fn(array $range) => collect($range)->contains(fn($value) => $value !== null && $value !== ''))
             ->sortBy('range_from')
             ->values();
         $previousRangeEnd = 0;
 
         foreach ($profileRanges as $range) {
-            if ((int) $range['range_from'] > (int) $range['range_to']
-                || (int) $range['range_from'] <= $previousRangeEnd) {
+            if (
+                (int) $range['range_from'] > (int) $range['range_to']
+                || (int) $range['range_from'] <= $previousRangeEnd
+            ) {
                 throw ValidationException::withMessages([
                     'profile_ranges' => 'Profile view ranges must have a valid start and end and must not overlap.',
                 ]);
@@ -1449,7 +1451,7 @@ class MemberController extends Controller
 
             if ($profileRanges->isNotEmpty()) {
                 DB::connection('site')->table('member_profile_range')->insert(
-                    $profileRanges->map(fn (array $range) => [
+                    $profileRanges->map(fn(array $range) => [
                         'member_id' => $member->id,
                         'range_from' => $range['range_from'],
                         'range_to' => $range['range_to'],
@@ -2921,7 +2923,7 @@ class MemberController extends Controller
 
         foreach ($submittedProfileRanges as $index => $range) {
             $filledValues = collect(['range_from', 'range_to', 'price'])
-                ->filter(fn (string $field) => ($range[$field] ?? '') !== '')
+                ->filter(fn(string $field) => ($range[$field] ?? '') !== '')
                 ->count();
 
             if ($filledValues > 0 && $filledValues < 3) {
@@ -2932,14 +2934,16 @@ class MemberController extends Controller
         }
 
         $profileRanges = $submittedProfileRanges
-            ->filter(fn (array $range) => collect($range)->contains(fn ($value) => $value !== null && $value !== ''))
+            ->filter(fn(array $range) => collect($range)->contains(fn($value) => $value !== null && $value !== ''))
             ->sortBy('range_from')
             ->values();
         $previousRangeEnd = 0;
 
         foreach ($profileRanges as $range) {
-            if ((int) $range['range_from'] > (int) $range['range_to']
-                || (int) $range['range_from'] <= $previousRangeEnd) {
+            if (
+                (int) $range['range_from'] > (int) $range['range_to']
+                || (int) $range['range_from'] <= $previousRangeEnd
+            ) {
                 throw ValidationException::withMessages([
                     'profile_ranges' => 'Profile view ranges must have a valid start and end and must not overlap.',
                 ]);
@@ -3016,13 +3020,13 @@ class MemberController extends Controller
             ->where('member_id', $id)
             ->orderByRaw('CAST(range_from AS UNSIGNED)')
             ->get(['range_from', 'range_to', 'price'])
-            ->map(fn (object $range) => [
+            ->map(fn(object $range) => [
                 'range_from' => (int) $range->range_from,
                 'range_to' => (int) $range->range_to,
                 'price' => number_format((float) $range->price, 2, '.', ''),
             ])->values()->all();
 
-        $newProfileRanges = $profileRanges->map(fn (array $range) => [
+        $newProfileRanges = $profileRanges->map(fn(array $range) => [
             'range_from' => (int) $range['range_from'],
             'range_to' => (int) $range['range_to'],
             'price' => number_format((float) $range['price'], 2, '.', ''),
@@ -3048,7 +3052,7 @@ class MemberController extends Controller
             $db->table('member_profile_range')->where('member_id', $id)->delete();
             if ($profileRanges->isNotEmpty()) {
                 $db->table('member_profile_range')->insert(
-                    $profileRanges->map(fn (array $range) => [
+                    $profileRanges->map(fn(array $range) => [
                         'member_id' => $id,
                         'range_from' => $range['range_from'],
                         'range_to' => $range['range_to'],
@@ -3420,7 +3424,7 @@ class MemberController extends Controller
                     'new_remarks' => $newRemarks,
                     'remark_type' => $member->active === 'Yes'
                         ? 'RM Remarks'
-                        : 'Assigned Remarks',
+                        : 'Added Remarks',
                 ]
             );
 
