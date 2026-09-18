@@ -304,7 +304,7 @@
     {{-- Basic Information --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
 
             <h5 class="mb-0">
                 <i class="bi bi-person me-2"></i>
@@ -443,7 +443,7 @@
     {{-- About Me --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
             <h5 class="mb-0">
                 <i class="bi bi-chat-heart me-2"></i>
                 About Me
@@ -474,7 +474,7 @@
     {{-- Education & Career --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
 
             <h5 class="mb-0">
                 <i class="bi bi-mortarboard me-2"></i>
@@ -631,7 +631,7 @@
     {{-- Location --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
 
             <h5 class="mb-0">
                 <i class="bi bi-geo-alt me-2"></i>
@@ -717,7 +717,7 @@
     {{-- Family Information --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
             <h5 class="mb-0">
                 <i class="bi bi-house-heart me-2"></i>
                 Family Information
@@ -804,7 +804,7 @@
     {{-- Lifestyle --}}
     <div class="card border-0 shadow-sm mb-4 member-profile-section">
 
-        <div class="card-header">
+        <div class="card-header bg-white py-3">
             <h5 class="mb-0">
                 <i class="bi bi-person-lines-fill me-2"></i>
                 Lifestyle & Health
@@ -2793,7 +2793,7 @@
 
     {{-- Activate / Deactivate --}}
     @php
-        $memberIsActive = strtolower(trim((string) $member->active)) === 'yes';
+    $memberIsActive = strtolower(trim((string) $member->active)) === 'yes';
     @endphp
     @if(auth('admin')->user()?->hasAnyPermission(['manage-member-status', 'edit-member', 'edit-members']))
     @if($member->active === 'Banned')
@@ -2894,8 +2894,7 @@
         data-bs-target="#deleteRequestModal"
         data-action="{{ route('admin.members.delete-request', $member->id) }}"
         data-member-name="{{ $member->full_name }}"
-        data-profile-id="{{ $member->profile_id }}"
-        >
+        data-profile-id="{{ $member->profile_id }}">
         <i class="bi bi-trash3 me-1"></i>
         Raise Delete Request
     </button>
