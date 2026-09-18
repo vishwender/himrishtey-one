@@ -755,7 +755,7 @@ $contentManagerRestricted = auth('admin')->user()?->hasRole('content-manager')
                     <button
                         type="submit"
                         class="btn btn-link text-danger text-decoration-none px-3">
-                        Logout
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
                     </button>
 
                 </form>
